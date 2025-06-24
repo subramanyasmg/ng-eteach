@@ -1,10 +1,27 @@
 <div class="bg-card flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
     <!-- Header -->
     <div
-        class="relative flex flex-0 flex-col border-b px-6 py-8 sm:flex-row sm:items-center sm:justify-between md:px-8">
-        <!-- Title -->
-        <div class="text-4xl font-extrabold tracking-tight">
-            Manage Curriculum
+        class="relative flex flex-0 flex-col border-b px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Breadcrumbs -->
+            <div class="flex flex-wrap items-center font-medium">
+                <div>
+                    <a [routerLink]="'/dashboard'"  class="whitespace-nowrap text-primary-500"
+                        >Home</a
+                    >
+                </div>
+                <div class="ml-1 flex items-center whitespace-nowrap">
+                    <mat-icon
+                        class="text-secondary icon-size-5"
+                        [svgIcon]="'heroicons_mini:chevron-right'"
+                    ></mat-icon>
+                    <span class="text-secondary ml-1">Curriculum</span>
+                </div>
+            </div>
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                Manage Curriculum
+            </div>
         </div>
         <!-- Actions -->
         <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
@@ -78,9 +95,9 @@
             </div>
             }
             @else {
-            <div class="border-t p-8 text-center text-4xl tracking-tight sm:p-16">
+
                 <ng-container *ngTemplateOutlet="noData"></ng-container>
-            </div>
+
             }
             }
             @else {
@@ -104,4 +121,82 @@
         </div>
 
     </div>
+</ng-template>
+
+<ng-template #EntityDialog let-data="data">
+    <div class="flex max-h-160 flex-auto flex-col overflow-hidden">
+        <!-- Header -->
+        <div class="flex h-14 flex-0 items-center justify-between bg-primary pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
+            <div class="text-lg font-medium">{{ mode === 1 ? 'Add New Curriculum' : 'Update Curriculum'}}</div>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Card form -->
+    <form class="flex w-full flex-0 flex-col items-start overflow-y-auto max-h-96 space-y-3 p-4 mt-3"
+        [formGroup]="entityForm">
+
+        <div class="flex flex-col md:flex-row lg:flex-row xl:flex-row gap-4 w-full">
+            <mat-form-field class="w-full"  floatLabel="always">
+                <mat-label>Curriculum Name</mat-label>
+                <input matInput [formControlName]="'name'" [placeholder]="'e.g. CBSE'" required maxlength="200" />
+                @if (entityForm.get('name').hasError('required')) {
+                <mat-error>Curriculum Name is required </mat-error>
+                }
+            </mat-form-field>
+            <mat-form-field class="w-full"  floatLabel="always">
+                <mat-label>Publisher Name</mat-label>
+                <input matInput [formControlName]="'publisherName'" placeholder="e.g. John Smith" required
+                    maxlength="200" />
+                @if (entityForm.get('publisherName').hasError('required')) {
+                <mat-error>Publisher Name is required </mat-error>
+                }
+            </mat-form-field>
+
+        </div>
+
+        <div class="flex flex-col md:flex-row lg:flex-row xl:flex-row gap-4 w-full">
+            <mat-form-field class="w-full"  floatLabel="always">
+                <mat-label>Publisher Email</mat-label>
+                <input matInput [formControlName]="'publisherEmail'" placeholder="e.g. john@company.com" type="email"
+                    required maxlength="200" />
+                @if (entityForm.get('publisherEmail').hasError('required')) {
+                <mat-error>Publisher Email is required </mat-error>
+                }
+                @if (entityForm.get('publisherEmail').hasError('email')) {
+                <mat-error>Publisher Email is invalid </mat-error>
+                }
+            </mat-form-field>
+            <mat-form-field class="w-full"  floatLabel="always">
+                <mat-label>Phone</mat-label>
+                <input matInput [formControlName]="'phone'" placeholder="e.g. +91 9876543210" required minlength="10"
+                    maxlength="15" />
+                @if (entityForm.get('phone').hasError('required')) {
+                <mat-error>Phone is required </mat-error>
+                }
+            </mat-form-field>
+
+        </div>
+
+
+        <input matInput [formControlName]="'id'" [hidden]="true" />
+    </form>
+
+    <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
+
+        <button mat-button (click)="matDialogRef.close()">Cancel</button>
+        <button class="ml-3 px-6" mat-flat-button [color]="'primary'"
+            (click)="mode === 1 ? addEntity(): updateEntity()"
+            [disabled]="entityForm.invalid || entityForm.disabled">
+            @if (!entityForm.disabled) {
+            <span> Save </span>
+            }
+            @if (entityForm.disabled) {
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            }
+        </button>
+    </div>
+
 </ng-template>

@@ -1,8 +1,8 @@
 export interface ICurriculum {
-    id: string;
+    id?: string;
     name: string;
     publisherName: string;
     publisherEmail: string;
     phone: string;
-    createdOn: string;
+    createdOn?: string;
 }
