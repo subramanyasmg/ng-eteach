@@ -11,7 +11,7 @@
             <!-- Search -->
             <mat-form-field class="fuse-mat-dense fuse-mat-rounded min-w-64" [subscriptSizing]="'dynamic'">
                 <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
-                <input matInput [(ngModel)]="query" [autocomplete]="'off'" [placeholder]="'Search'" />
+                <input matInput [(ngModel)]="query" [autocomplete]="'off'" [placeholder]="'Search by name'" />
             </mat-form-field>
             <!-- Add product button -->
             <button class="ml-4" mat-flat-button [color]="'primary'" (click)="openDialog(1)"
@@ -30,91 +30,60 @@
             @if (list$ | async; as list) {
             @if (list.length > 0) {
             <div class="grid">
+                <!-- Header -->
                 <div class="list-grid text-secondary sticky top-0 z-10 grid gap-4 bg-gray-50 px-6 py-4 text-md font-semibold shadow dark:bg-black dark:bg-opacity-5 md:px-8"
                     matSort matSortDisableClear>
                     <div [mat-sort-header]="'name'">Name</div>
-                    <div>Created On</div>
-                    <div>Publisher Name</div>
-                    <div>Publisher Email</div>
-                    <div>Phone</div>
+                    <div [mat-sort-header]="'createdOn'">Created On</div>
+                    <div [mat-sort-header]="'publisherName'">Publisher Name</div>
+                    <div [mat-sort-header]="'publisherEmail'">Publisher Email</div>
+                    <div [mat-sort-header]="'phone'">Phone</div>
                     <div class="hidden sm:block">Actions</div>
                 </div>
 
-                <!-- Rows -->
-                @if (list$ | async | SearchFilter:query:'title'| sort: _sort?.active:_sort?.direction; as list
-                ) {
-
-                <div *ngIf="list.length > 0; else noRecordFound">
-                    @for (
-                    item of list;
-                    track trackByFn($index, item)
-                    ) {
-                    <div class="list-grid grid items-center gap-4 border-b px-6 py-3 md:px-8"
-                        [ngClass]="item.disabled == 1 ? 'bg-red-50': ''">
-
-                        <!-- Name -->
-                        <div class="truncate" [title]="item.name">
-                            {{ item.name }}
-                        </div>
-
-                        <div class="flex flex-row items-center">
-                            {{ item.createdOn }}
-                        </div>
-
-                        <div class="flex flex-row items-center">
-                            {{ item.publisherName }}
-                        </div>
-
-                        <div class="flex flex-row items-center">
-                            {{ item.publisherEmail }}
-                        </div>
-
-                        <div class="flex flex-row items-center">
-                            {{ item.phone }}
-                        </div>
+                <!-- Filtered + Sorted Rows -->
+                @if (list | SearchFilter:query:'name'; as filteredList) {
+                <div *ngIf="filteredList.length > 0; else noRecordFound">
+                    @for (item of filteredList; track trackByFn($index, item)) {
+                    <div class="list-grid grid items-center gap-4 border-b px-6 py-3 md:px-8">
+                        <div class="truncate" [title]="item.name">{{ item.name }}</div>
+                        <div [title]="item.createdOn">{{ item.createdOn }}</div>
+                        <div [title]="item.publisherName">{{ item.publisherName }}</div>
+                        <div [title]="item.publisherEmail">{{ item.publisherEmail }}</div>
+                        <div [title]="item.phone">{{ item.phone }}</div>
 
                         <div class="flex gap-2">
-
                             <button class="h-7 min-h-7 min-w-10 px-2 leading-6 border-none" mat-stroked-button
-                                [matTooltip]="'Update'" [disabled]="entityForm.disabled"
-                                (click)="openDialog(2, item)">
+                                [matTooltip]="'Update'" [disabled]="entityForm.disabled" (click)="openDialog(2, item)">
                                 <mat-icon class="icon-size-6 text-primary-500"
                                     [svgIcon]="'heroicons_solid:pencil-square'"></mat-icon>
                             </button>
 
                             <button class="h-7 min-h-7 min-w-10 px-2 leading-6 border-none" mat-stroked-button
                                 [matTooltip]="'Delete'" (click)="deleteItem(item)">
-                                <mat-icon  class="icon-size-6 text-red-500"
+                                <mat-icon class="icon-size-6 text-red-500"
                                     [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                             </button>
                         </div>
                     </div>
-
                     }
                 </div>
+
                 <ng-template #noRecordFound>
-                    <div class="border-t p-8 text-center text-2xl tracking-tight">No records found for the term <span
-                            class="font-semibold ">"{{query }}"</span></div>
+                    <div class="border-t p-8 text-center text-2xl tracking-tight">
+                        No records found for the term <span class="font-semibold">"{{ query }}"</span>
+                    </div>
                 </ng-template>
-
                 }
-
             </div>
-            <!-- <mat-paginator
-                class="z-10 border-b bg-gray-50 dark:bg-transparent sm:absolute sm:inset-x-0 sm:bottom-0 sm:border-b-0 sm:border-t"
-                [length]="pagination.length"
-                [pageIndex]="pagination.page"
-                [pageSize]="pagination.size"
-                [pageSizeOptions]="[5, 10, 25, 100]"
-                [showFirstLastButtons]="true"
-            ></mat-paginator> -->
             }
             @else {
             <div class="border-t p-8 text-center text-4xl tracking-tight sm:p-16">
                 <ng-container *ngTemplateOutlet="noData"></ng-container>
             </div>
             }
-            }@else {
+            }
+            @else {
             <ng-container *ngTemplateOutlet="noData"></ng-container>
             }
         </div>

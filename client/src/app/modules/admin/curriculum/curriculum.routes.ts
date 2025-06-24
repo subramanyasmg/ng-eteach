@@ -1,9 +1,7 @@
-import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { CurriculumComponent } from './curriculum.component';
 import { GradesComponent } from '../grades/grades.component';
 import { CurriculumListComponent } from './curriculum-list/curriculum-list.component';
-import { CurriculumService } from './curriculum-list/curriculum.service';
 
 export default [
     {
@@ -12,10 +10,7 @@ export default [
         children: [
             {
                 path: '',
-                component: CurriculumListComponent,
-                resolve: {
-                    curriculum: () => inject(CurriculumService).getAll(),
-                },
+                component: CurriculumListComponent
             },
             {
                 path: ':id/grades',
