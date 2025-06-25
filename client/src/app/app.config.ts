@@ -21,6 +21,8 @@ import { provideState, provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { curriculumReducer } from './state/curriculum/curriculum.reducer';
 import { CurriculumEffects } from './state/curriculum/curriculum.effects';
+import { gradeReducer } from './state/grades/grades.reducer';
+import { GradesEffects } from './state/grades/grades.effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -128,5 +130,7 @@ export const appConfig: ApplicationConfig = {
         }),
         provideState('curriculum', curriculumReducer),
         provideEffects(CurriculumEffects),
+        provideState('grades', gradeReducer),
+        provideEffects(GradesEffects),
     ],
 };

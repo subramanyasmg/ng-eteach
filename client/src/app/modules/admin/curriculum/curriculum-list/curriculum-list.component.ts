@@ -77,6 +77,8 @@ export class CurriculumListComponent
     implements OnInit, AfterViewInit, OnDestroy
 {
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
 
     dataSource = new MatTableDataSource<ICurriculum>();
     displayedColumns: string[] = [
@@ -87,10 +89,6 @@ export class CurriculumListComponent
         'phone',
         'actions',
     ];
-
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
-    @ViewChild(MatSort) sort!: MatSort;
-
     mode = null;
     query = '';
     list$: Observable<ICurriculum[]> = this.store.select(selectAllCurriculums);
