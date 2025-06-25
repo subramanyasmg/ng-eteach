@@ -1,22 +1,20 @@
 import { Routes } from '@angular/router';
-import { CurriculumComponent } from './curriculum.component';
-import { GradesComponent } from '../grades/grades.component';
+import { GradesListComponent } from '../grades/grades.component';
 import { CurriculumListComponent } from './curriculum-list/curriculum-list.component';
+import { CurriculumComponent } from './curriculum.component';
 
 export default [
     {
         path: '',
         component: CurriculumComponent,
-        data: { breadcrumb: 'Curriculum' },
         children: [
             {
                 path: '',
-                component: CurriculumListComponent,
-                data: { breadcrumb: 'Manage Curriculum' }
+                component: CurriculumListComponent
             },
             {
                 path: ':id/grades',
-                component: GradesComponent
+                component: GradesListComponent
             },
         ],
     },
