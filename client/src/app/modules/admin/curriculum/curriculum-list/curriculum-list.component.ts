@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
+    AfterViewInit,
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
@@ -40,6 +42,7 @@ import {
 } from 'app/state/curriculum/curriculum.selectors';
 import { filter, Observable, Subject, take, tap } from 'rxjs';
 import { ICurriculum } from '../curriculum.types';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -64,11 +67,14 @@ import { ICurriculum } from '../curriculum.types';
         ReactiveFormsModule,
         PipesModule,
         MatSortModule,
+        MatSelectModule
     ],
     templateUrl: './curriculum-list.component.html',
     styleUrl: './curriculum-list.component.scss',
 })
-export class CurriculumListComponent implements OnInit, OnDestroy {
+export class CurriculumListComponent
+    implements OnInit, AfterViewInit, OnDestroy
+{
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
 
     dataSource = new MatTableDataSource<ICurriculum>();
@@ -98,7 +104,8 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
         private _formBuilder: UntypedFormBuilder,
         private _snackBar: SnackBarService,
         private store: Store,
-        private actions$: Actions
+        private actions$: Actions,
+        private _cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
@@ -134,6 +141,12 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
         });
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
+        this._cdr.detectChanges();
     }
 
     ngOnDestroy(): void {

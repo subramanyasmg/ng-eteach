@@ -13,14 +13,25 @@
         <!-- Actions -->
         <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
             <!-- Search -->
-            <mat-form-field class="fuse-mat-dense fuse-mat-rounded min-w-64" [subscriptSizing]="'dynamic'">
+            <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
                 <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
                 <input matInput [(ngModel)]="query" (ngModelChange)="applyFilter()" [autocomplete]="'off'"
                     [placeholder]="'Search'" />
             </mat-form-field>
-            <!-- Add button -->
-            <button class="ml-4" mat-flat-button [color]="'primary'" (click)="openDialog(1)"
-                [disabled]="entityForm.disabled || entityForm.disabled">
+
+            <mat-form-field class="ml-4" [subscriptSizing]="'dynamic'">
+                <mat-select [value]="'week'">
+                    <mat-option value="week">This Week</mat-option>
+                    <mat-option value="month">This Month</mat-option>
+                    <mat-option value="custom">Custom</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <button class="ml-4 bg-white rounded-md" mat-stroked-button>
+                <mat-icon [svgIcon]="'mat_outline:file_download'"></mat-icon>
+            </button>
+
+            <button class="ml-4 rounded-md" mat-flat-button [color]="'primary'" (click)="openDialog(1)">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
             </button>
         </div>
