@@ -44,7 +44,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
         children: [
             {
                 id: 'curriculum',
-                title: 'Curriculum',
+                title: 'Manage Curriculum',
                 type: 'basic',
                icon : 'heroicons_outline:book-open',
                 link: '/curriculum',

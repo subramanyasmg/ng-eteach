@@ -1,5 +1,6 @@
-import { AsyncPipe, CommonModule, NgTemplateOutlet } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
+    AfterViewInit,
     ChangeDetectorRef,
     Component,
     OnDestroy,
@@ -20,10 +21,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -39,7 +42,7 @@ import {
 } from 'app/state/curriculum/curriculum.selectors';
 import { filter, Observable, Subject, take, tap } from 'rxjs';
 import { ICurriculum } from '../curriculum.types';
-import { CurriculumService } from './curriculum.service';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -52,24 +55,40 @@ import { CurriculumService } from './curriculum.service';
         FormsModule,
         ReactiveFormsModule,
         MatButtonModule,
-        NgTemplateOutlet,
         MatPaginatorModule,
         MatRippleModule,
         MatProgressSpinnerModule,
-        AsyncPipe,
         MatSnackBarModule,
         MatTooltipModule,
         MatTabsModule,
+        MatTableModule,
         CommonModule,
         RouterModule,
         ReactiveFormsModule,
         PipesModule,
+        MatSortModule,
+        MatSelectModule
     ],
     templateUrl: './curriculum-list.component.html',
     styleUrl: './curriculum-list.component.scss',
 })
-export class CurriculumListComponent implements OnInit, OnDestroy {
+export class CurriculumListComponent
+    implements OnInit, AfterViewInit, OnDestroy
+{
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
+
+    dataSource = new MatTableDataSource<ICurriculum>();
+    displayedColumns: string[] = [
+        'name',
+        'createdOn',
+        'publisherName',
+        'publisherEmail',
+        'phone',
+        'actions',
+    ];
+
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
 
     mode = null;
     query = '';
@@ -80,14 +99,13 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
 
     constructor(
         private route: ActivatedRoute,
-        private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
         private _matDialog: MatDialog,
         private _formBuilder: UntypedFormBuilder,
         private _snackBar: SnackBarService,
         private store: Store,
         private actions$: Actions,
-        private _curriculumService: CurriculumService
+        private _cdr: ChangeDetectorRef
     ) {}
 
     ngOnInit(): void {
@@ -96,7 +114,15 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
             name: ['', [Validators.required]],
             publisherName: ['', [Validators.required]],
             publisherEmail: ['', [Validators.required, Validators.email]],
-            phone: ['', [Validators.required]],
+            phone: [
+                '',
+                [
+                    Validators.required,
+                    Validators.minLength(10),
+                    Validators.maxLength(15),
+                    Validators.pattern(/^\+?[0-9]{10,15}$/),
+                ],
+            ],
         });
         this.store
             .select(selectCurriculumsLoaded)
@@ -109,6 +135,18 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
             });
 
         this.handleAPIResponse();
+
+        this.list$.subscribe((data) => {
+            this.dataSource = new MatTableDataSource(data); // reassign!
+            this.dataSource.sort = this.sort;
+            this.dataSource.paginator = this.paginator;
+        });
+    }
+
+    ngAfterViewInit(): void {
+        this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
+        this._cdr.detectChanges();
     }
 
     ngOnDestroy(): void {
@@ -121,16 +159,9 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
         return item.id || index;
     }
 
-    addNewCurriculum() {
-        // const newCurriculum = {
-        //     id: Date.now().toString(),
-        //     name: 'New Curriculum',
-        //     createdOn: new Date().toLocaleDateString(),
-        //     publisherName: 'Kishan Gandhi',
-        //     publisherEmail: 'kishan@example.com',
-        //     phone: '+91 98765 43210',
-        // };
-        // this.store.dispatch(addCurriculum({ curriculum: newCurriculum }));
+    applyFilter(): void {
+        const filterValue = this.query?.trim().toLowerCase() || '';
+        this.dataSource.filter = filterValue;
     }
 
     openDialog(mode, selectedItem = null) {
@@ -174,7 +205,9 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
             publisherEmail: formValues.publisherEmail,
             phone: formValues.phone,
         };
-        this.store.dispatch(CurriculumActions.addCurriculum({ curriculum: requestObj }));
+        this.store.dispatch(
+            CurriculumActions.addCurriculum({ curriculum: requestObj })
+        );
     }
 
     updateEntity() {
@@ -193,7 +226,9 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
             publisherEmail: formValues.publisherEmail,
             phone: formValues.phone,
         };
-        this.store.dispatch(CurriculumActions.updateCurriculum({ curriculum: requestObj }));
+        this.store.dispatch(
+            CurriculumActions.updateCurriculum({ curriculum: requestObj })
+        );
     }
 
     deleteItem(item: ICurriculum): void {
@@ -213,58 +248,78 @@ export class CurriculumListComponent implements OnInit, OnDestroy {
         confirmation.afterClosed().subscribe((result) => {
             // If the confirm button pressed...
             if (result === 'confirmed') {
-                this.store.dispatch(CurriculumActions.deleteCurriculum({ id: item.id }));
+                this.store.dispatch(
+                    CurriculumActions.deleteCurriculum({ id: item.id })
+                );
             }
         });
     }
 
-   handleAPIResponse() {
-    this.actions$
-        .pipe(
-        ofType(
-            CurriculumActions.addCurriculumSuccess,
-            CurriculumActions.addCurriculumFailure,
-            CurriculumActions.updateCurriculumSuccess,
-            CurriculumActions.updateCurriculumFailure,
-            CurriculumActions.deleteCurriculumSuccess,
-            CurriculumActions.deleteCurriculumFailure
-        ),
-        tap((action: any) => {
-            // Close dialog on add/update success/failure
-            if (
-            action.type === CurriculumActions.addCurriculumSuccess.type ||
-            action.type === CurriculumActions.addCurriculumFailure.type ||
-            action.type === CurriculumActions.updateCurriculumSuccess.type ||
-            action.type === CurriculumActions.updateCurriculumFailure.type
-            ) {
-            this.matDialogRef?.close(true);
-            }
+    handleAPIResponse() {
+        this.actions$
+            .pipe(
+                ofType(
+                    CurriculumActions.addCurriculumSuccess,
+                    CurriculumActions.addCurriculumFailure,
+                    CurriculumActions.updateCurriculumSuccess,
+                    CurriculumActions.updateCurriculumFailure,
+                    CurriculumActions.deleteCurriculumSuccess,
+                    CurriculumActions.deleteCurriculumFailure
+                ),
+                tap((action: any) => {
+                    // Close dialog on add/update success/failure
+                    if (
+                        action.type ===
+                            CurriculumActions.addCurriculumSuccess.type ||
+                        action.type ===
+                            CurriculumActions.addCurriculumFailure.type ||
+                        action.type ===
+                            CurriculumActions.updateCurriculumSuccess.type ||
+                        action.type ===
+                            CurriculumActions.updateCurriculumFailure.type
+                    ) {
+                        this.matDialogRef?.close(true);
+                    }
 
-            // Handle success
-            if (action.type === CurriculumActions.addCurriculumSuccess.type) {
-            this._snackBar.showSuccess(
-                `Curriculum "${action.curriculum.name}" added successfully!`
-            );
-            } else if (action.type === CurriculumActions.updateCurriculumSuccess.type) {
-            this._snackBar.showSuccess(
-                `Curriculum "${action.curriculum.name}" updated successfully!`
-            );
-            } else if (action.type === CurriculumActions.deleteCurriculumSuccess.type) {
-            this._snackBar.showSuccess(`Curriculum deleted successfully!`);
-            }
+                    // Handle success
+                    if (
+                        action.type ===
+                        CurriculumActions.addCurriculumSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            `Curriculum "${action.curriculum.name}" added successfully!`
+                        );
+                    } else if (
+                        action.type ===
+                        CurriculumActions.updateCurriculumSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            `Curriculum "${action.curriculum.name}" updated successfully!`
+                        );
+                    } else if (
+                        action.type ===
+                        CurriculumActions.deleteCurriculumSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            `Curriculum deleted successfully!`
+                        );
+                    }
 
-            // Handle failure
-            else if (
-            action.type === CurriculumActions.addCurriculumFailure.type ||
-            action.type === CurriculumActions.updateCurriculumFailure.type ||
-            action.type === CurriculumActions.deleteCurriculumFailure.type
-            ) {
-            this._snackBar.showError(
-                `Error: ${action.error?.message || 'Something went wrong.'}`
-            );
-            }
-        })
-        )
-        .subscribe();
+                    // Handle failure
+                    else if (
+                        action.type ===
+                            CurriculumActions.addCurriculumFailure.type ||
+                        action.type ===
+                            CurriculumActions.updateCurriculumFailure.type ||
+                        action.type ===
+                            CurriculumActions.deleteCurriculumFailure.type
+                    ) {
+                        this._snackBar.showError(
+                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                        );
+                    }
+                })
+            )
+            .subscribe();
     }
 }

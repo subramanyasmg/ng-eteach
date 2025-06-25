@@ -5,5 +5,6 @@ export default [
     {
         path     : '',
         component: ExampleComponent,
+        data: { breadcrumb: 'Home' }
     },
 ] as Routes;
