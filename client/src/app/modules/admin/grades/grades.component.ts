@@ -116,7 +116,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.titleService.setBreadcrumb([
                     { label: 'Curriculum', url: '/curriculum' },
                     { label: 'Manage Curriculum', url: '/curriculum' },
-                    { label: `Grades for ${curriculum.name}`, url: '' },
+                    { label: curriculum.name, url: '' },
                 ]);
             });
 
