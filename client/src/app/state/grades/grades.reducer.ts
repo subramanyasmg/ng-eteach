@@ -3,13 +3,13 @@ import * as GradeActions from './grades.actions';
 import { IGrades } from 'app/modules/admin/grades/grades.types';
 
 export interface GradeState {
-  grades: IGrades[];
+  gradesByCurriculum: { [curriculumId: string]: IGrades[] };
   loaded: boolean;
   error: any;
 }
 
 export const initialState: GradeState = {
-  grades: [],
+  gradesByCurriculum: {},
   loaded: false,
   error: null,
 };
@@ -17,23 +17,43 @@ export const initialState: GradeState = {
 export const gradeReducer = createReducer(
   initialState,
   on(GradeActions.loadGrades, state => ({ ...state, loaded: false, error: null })),
-  on(GradeActions.loadGradesSuccess, (state, { grades }) => ({
+  on(GradeActions.loadGradesSuccess, (state, { curriculumId, grades }) => ({
     ...state,
-    grades,
+    gradesByCurriculum: {
+        ...state.gradesByCurriculum,
+        [curriculumId]: grades,
+    },
     loaded: true,
     error: null,
   })),
   on(GradeActions.loadGradesFailure, (state, { error }) => ({ ...state, error, loaded: false })),
-  on(GradeActions.addGradeSuccess, (state, { grade }) => ({
+  on(GradeActions.addGradeSuccess, (state, { curriculumId, grade }) => ({
     ...state,
-    grades: [...state.grades, grade],
+    gradesByCurriculum: {
+    ...state.gradesByCurriculum,
+    [curriculumId]: [
+      ...(state.gradesByCurriculum[curriculumId] || []),
+      grade,
+    ]
+  }
   })),
-  on(GradeActions.updateGradeSuccess, (state, { grade }) => ({
-    ...state,
-    grades: state.grades.map(c => c.id === grade.id ? grade : c),
-  })),
-  on(GradeActions.deleteGradeSuccess, (state, { id }) => ({
-    ...state,
-    grades: state.grades.filter(c => c.id !== id),
-  }))
+  on(GradeActions.updateGradeSuccess, (state, { curriculumId, grade }) => ({
+  ...state,
+  gradesByCurriculum: {
+    ...state.gradesByCurriculum,
+    [curriculumId]: state.gradesByCurriculum[curriculumId]?.map(g =>
+      g.id === grade.id ? grade : g
+    ) || []
+  }
+})),
+
+on(GradeActions.deleteGradeSuccess, (state, { curriculumId, gradeId }) => ({
+  ...state,
+  gradesByCurriculum: {
+    ...state.gradesByCurriculum,
+    [curriculumId]: state.gradesByCurriculum[curriculumId]?.filter(g =>
+      g.id !== gradeId
+    ) || []
+  }
+}))
 );

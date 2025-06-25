@@ -3,9 +3,9 @@ import { GradeState } from './grades.reducer';
 
 export const selectGradeState = createFeatureSelector<GradeState>('grades');
 
-export const selectAllGrades = createSelector(
+export const selectGradesByCurriculumId  = (curriculumId: string) => createSelector(
   selectGradeState,
-  (state) => state.grades
+  (state) => state.gradesByCurriculum[curriculumId] || []
 );
 
 export const selectGradesLoaded = createSelector(

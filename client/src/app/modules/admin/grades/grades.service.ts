@@ -43,8 +43,8 @@ export class GradesService {
         return this._items.asObservable();
     }
 
-    getAll() {
-        return this._httpClient.get(this.apiUrl).pipe(
+    getAll(curriculumId: string) {
+        return this._httpClient.get(this.apiUrl + '/' + curriculumId ).pipe(
             tap((response: any) => {
                 if (response?.status) {
                     this._items.next(response.data as IGrades[]);

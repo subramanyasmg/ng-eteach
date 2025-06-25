@@ -12,9 +12,9 @@ export class GradesEffects {
   loadGrades$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GradeActions.loadGrades),
-      mergeMap(() =>
-        this.service.getAll().pipe(
-          map(response => GradeActions.loadGradesSuccess({ grades: response.data })),
+      mergeMap(({ curriculumId }) =>
+        this.service.getAll(curriculumId).pipe(
+          map(response => GradeActions.loadGradesSuccess({ curriculumId, grades: response.data })),
           catchError(error => of(GradeActions.loadGradesFailure({ error })))
         )
       )
@@ -24,9 +24,9 @@ export class GradesEffects {
   addGrade$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GradeActions.addGrade),
-      mergeMap(({ grade }) =>
+      mergeMap(({ curriculumId, grade }) =>
         this.service.create(grade).pipe(
-          map(response => GradeActions.addGradeSuccess({ grade: response.data })),
+          map(response => GradeActions.addGradeSuccess({ curriculumId, grade: response.data })),
           catchError(error => of(GradeActions.addGradeFailure({ error })))
         )
       )
@@ -36,9 +36,9 @@ export class GradesEffects {
   updateGrade$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GradeActions.updateGrade),
-      mergeMap(({ grade }) =>
+      mergeMap(({ curriculumId, grade }) =>
         this.service.update(grade.id,grade).pipe(
-          map(response => GradeActions.updateGradeSuccess({ grade: response.data })),
+          map(response => GradeActions.updateGradeSuccess({ curriculumId, grade: response.data })),
           catchError(error => of(GradeActions.updateGradeFailure({ error })))
         )
       )
@@ -48,9 +48,9 @@ export class GradesEffects {
   deleteGrade$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GradeActions.deleteGrade),
-      mergeMap(({ id }) =>
-        this.service.delete(id).pipe(
-          map(() => GradeActions.deleteGradeSuccess({ id })),
+      mergeMap(({ curriculumId, gradeId }) =>
+        this.service.delete(gradeId).pipe(
+          map(() => GradeActions.deleteGradeSuccess({ curriculumId, gradeId })),
           catchError(error => of(GradeActions.deleteGradeFailure({ error })))
         )
       )

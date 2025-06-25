@@ -41,7 +41,7 @@ import { IGrades } from './grades.types';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Actions, ofType } from '@ngrx/effects';
 import * as GradeActions from 'app/state/grades/grades.actions';
-import { selectAllGrades, selectGradesLoaded } from 'app/state/grades/grades.selectors';
+import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades/grades.selectors';
 
 @Component({
     selector: 'app-grades',
@@ -85,9 +85,10 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
     mode = null;
     query = '';
-    list$: Observable<IGrades[]> = this.store.select(selectAllGrades);
+    list$: Observable<IGrades[]>;
     entityForm: UntypedFormGroup;
     matDialogRef = null;
+    curriculumId;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -103,12 +104,12 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        const id = this.route.snapshot.paramMap.get('id');
+        this.curriculumId = this.route.snapshot.paramMap.get('id');
 
         this.store
             .select(selectAllCurriculums)
             .pipe(
-                map((curriculums) => curriculums.find((c) => c.id === id)),
+                map((curriculums) => curriculums.find((c) => c.id === this.curriculumId)),
                 filter(Boolean),
                 take(1)
             )
@@ -124,6 +125,9 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             id: [''],
             name: ['', [Validators.required]],
         });
+
+        this.list$ = this.store.select(selectGradesByCurriculumId(this.curriculumId));
+
         this.store
             .select(selectGradesLoaded)
             .pipe(
@@ -131,7 +135,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
                 filter((loaded) => !loaded)
             )
             .subscribe(() => {
-                this.store.dispatch(GradeActions.loadGrades());
+                this.store.dispatch(GradeActions.loadGrades({ curriculumId: this.curriculumId }));
             });
 
         this.handleAPIResponse();
@@ -200,7 +204,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             name: formValues.name
         };
         this.store.dispatch(
-            GradeActions.addGrade({ grade: requestObj })
+            GradeActions.addGrade({ curriculumId: this.curriculumId, grade: requestObj })
         );
     }
 
@@ -218,7 +222,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             name: formValues.name
         };
         this.store.dispatch(
-            GradeActions.updateGrade({ grade: requestObj })
+            GradeActions.updateGrade({ curriculumId: this.curriculumId, grade: requestObj })
         );
     }
 
@@ -240,7 +244,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             // If the confirm button pressed...
             if (result === 'confirmed') {
                 this.store.dispatch(
-                    GradeActions.deleteGrade({ id: item.id })
+                    GradeActions.deleteGrade({ curriculumId: this.curriculumId, gradeId: item.id })
                 );
             }
         });
@@ -314,3 +318,4 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             .subscribe();
     }
 }
+
