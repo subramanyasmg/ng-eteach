@@ -7,10 +7,12 @@ export default [
     {
         path: '',
         component: CurriculumComponent,
+        data: { breadcrumb: 'Curriculum' },
         children: [
             {
                 path: '',
-                component: CurriculumListComponent
+                component: CurriculumListComponent,
+                data: { breadcrumb: 'Manage Curriculum' }
             },
             {
                 path: ':id/grades',
