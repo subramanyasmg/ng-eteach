@@ -17,9 +17,14 @@ import { provideIcons } from 'app/core/icons/icons.provider';
 import { MockApiService } from 'app/mock-api';
 import { firstValueFrom } from 'rxjs';
 import { TranslocoHttpLoader } from './core/transloco/transloco.http-loader';
+import { provideState, provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { curriculumReducer } from './state/curriculum/curriculum.reducer';
+import { CurriculumEffects } from './state/curriculum/curriculum.effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
+        provideStore(),
         provideAnimations(),
         provideHttpClient(),
         provideRouter(
@@ -121,5 +126,7 @@ export const appConfig: ApplicationConfig = {
                 ],
             },
         }),
+        provideState('curriculum', curriculumReducer),
+        provideEffects(CurriculumEffects),
     ],
 };

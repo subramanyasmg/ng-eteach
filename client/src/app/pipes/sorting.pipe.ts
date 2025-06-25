@@ -1,0 +1,24 @@
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'sort',
+  pure: true,
+  standalone: false
+})
+export class SortPipe implements PipeTransform {
+  transform(list: any[], column: string, order: string = 'asc'): any[] {
+    if (!Array.isArray(list) || !column) return list;
+
+    const sortedArray = [...list].sort((a, b) => {
+      if (a[column] > b[column]) {
+        return order === 'asc' ? 1 : -1;
+      }
+      if (a[column] < b[column]) {
+        return order === 'asc' ? -1 : 1;
+      }
+      return 0;
+    });
+
+    return sortedArray;
+  }
+}
