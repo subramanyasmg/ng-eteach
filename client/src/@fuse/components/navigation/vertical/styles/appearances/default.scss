@@ -152,7 +152,7 @@ fuse-vertical-navigation {
 
             /* Group */
             > fuse-vertical-navigation-group-item {
-                margin-top: 15px;
+                margin-top: 10px;
             }
         }
 
@@ -221,11 +221,12 @@ fuse-vertical-navigation {
                 align-items: center;
                 justify-content: flex-start;
                 padding: 10px 16px;
-                font-size: 13px;
+                font-size: 16px;
                 font-weight: 500;
-                line-height: 20px;
+                line-height: 15px;
                 text-decoration: none;
-                border-radius: 6px;
+                border-radius: 8px;
+                color: #020817;
 
                 /* Disabled state */
                 &.fuse-vertical-navigation-item-disabled {
@@ -396,7 +397,8 @@ fuse-vertical-navigation {
                         font-size: 12px;
                         font-weight: 600;
                         letter-spacing: 0.05em;
-                        text-transform: uppercase;
+                        text-transform: capitalize;
+                        color: #000;
                     }
                 }
             }
@@ -459,13 +461,13 @@ fuse-vertical-navigation-group-item {
             }
 
             .fuse-vertical-navigation-item-title-wrapper {
-                .fuse-vertical-navigation-item-title {
-                    @apply text-current opacity-80;
-                }
+                // .fuse-vertical-navigation-item-title {
+                //     @apply text-current opacity-80;
+                // }
 
-                .fuse-vertical-navigation-item-subtitle {
-                    @apply text-current opacity-50;
-                }
+                // .fuse-vertical-navigation-item-subtitle {
+                //     @apply text-current opacity-50;
+                // }
             }
         }
     }
