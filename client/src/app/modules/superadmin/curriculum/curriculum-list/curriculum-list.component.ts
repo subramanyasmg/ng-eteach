@@ -29,7 +29,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -97,7 +97,6 @@ export class CurriculumListComponent
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
-        private route: ActivatedRoute,
         private _fuseConfirmationService: FuseConfirmationService,
         private _matDialog: MatDialog,
         private _formBuilder: UntypedFormBuilder,
