@@ -23,6 +23,8 @@ import { curriculumReducer } from './state/curriculum/curriculum.reducer';
 import { CurriculumEffects } from './state/curriculum/curriculum.effects';
 import { gradeReducer } from './state/grades/grades.reducer';
 import { GradesEffects } from './state/grades/grades.effects';
+import { subjectsReducer } from './state/subjects/subjects.reducer';
+import { SubjectsEffects } from './state/subjects/subjects.effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -132,5 +134,7 @@ export const appConfig: ApplicationConfig = {
         provideEffects(CurriculumEffects),
         provideState('grades', gradeReducer),
         provideEffects(GradesEffects),
+        provideState('subjects', subjectsReducer),
+        provideEffects(SubjectsEffects),
     ],
 };
