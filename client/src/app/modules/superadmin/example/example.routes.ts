@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { ExampleComponent } from 'app/modules/admin/example/example.component';
+import { ExampleComponent } from 'app/modules/superadmin/example/example.component';
 
 export default [
     {

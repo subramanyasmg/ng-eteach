@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { ISubjects } from 'app/modules/admin/subjects/subject.types';
+import { ISubjects } from 'app/modules/superadmin/subjects/subject.types';
 import * as SubjectActions from './subjects.actions';
 
 export interface SubjectState {
