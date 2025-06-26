@@ -25,7 +25,7 @@ export class GradesEffects {
     this.actions$.pipe(
       ofType(GradeActions.addGrade),
       mergeMap(({ curriculumId, grade }) =>
-        this.service.create(grade).pipe(
+        this.service.create(curriculumId, grade).pipe(
           map(response => GradeActions.addGradeSuccess({ curriculumId, grade: response.data })),
           catchError(error => of(GradeActions.addGradeFailure({ error })))
         )

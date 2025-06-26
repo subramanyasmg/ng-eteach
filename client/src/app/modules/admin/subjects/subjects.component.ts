@@ -31,20 +31,29 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
-import { filter, map, Observable, Subject, take, tap } from 'rxjs';
-import { IGrades } from './grades.types';
-import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Actions, ofType } from '@ngrx/effects';
-import * as GradeActions from 'app/state/grades/grades.actions';
-import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades/grades.selectors';
+import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
+import * as SubjectActions from 'app/state/subjects/subjects.actions';
+import {
+    combineLatest,
+    filter,
+    map,
+    Observable,
+    Subject,
+    take,
+    tap,
+} from 'rxjs';
+import { ISubjects } from './subject.types';
+import { selectSubjectsByGradeId, selectSubjectsLoaded } from 'app/state/subjects/subjects.selectors';
 
 @Component({
-    selector: 'app-grades',
+    selector: 'app-subjects',
     standalone: true,
     imports: [
         MatProgressBarModule,
@@ -68,15 +77,15 @@ import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades
         MatSelectModule,
         RouterModule
     ],
-    templateUrl: './grades.component.html',
-    styleUrl: './grades.component.scss',
+    templateUrl: './subjects.component.html',
+    styleUrl: './subjects.component.scss',
 })
-export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
 
-    dataSource = new MatTableDataSource<IGrades>();
+    dataSource = new MatTableDataSource<ISubjects>();
     displayedColumns: string[] = [
         'name',
         'createdOn',
@@ -86,10 +95,11 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
     mode = null;
     query = '';
-    list$: Observable<IGrades[]>;
+    list$: Observable<ISubjects[]>;
     entityForm: UntypedFormGroup;
     matDialogRef = null;
     curriculumId;
+    gradeId;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -99,26 +109,39 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         private _formBuilder: UntypedFormBuilder,
         private _snackBar: SnackBarService,
         private _matDialog: MatDialog,
-         private actions$: Actions,
+        private actions$: Actions,
         private _cdr: ChangeDetectorRef,
         private titleService: BreadcrumbService
     ) {}
 
     ngOnInit(): void {
-        this.curriculumId = this.route.snapshot.paramMap.get('id');
+        this.curriculumId = this.route.snapshot.paramMap.get('cid');
+        this.gradeId = this.route.snapshot.paramMap.get('gid');
 
-        this.store
-            .select(selectAllCurriculums)
+        combineLatest([
+            this.store.select(selectAllCurriculums),
+            this.store.select(selectGradesByCurriculumId(this.curriculumId)),
+        ])
             .pipe(
-                map((curriculums) => curriculums.find((c) => c.id === this.curriculumId)),
-                filter(Boolean),
-                take(1)
+                take(1),
+                map(([curriculums, grades]) => {
+                    const curriculum = curriculums.find(
+                        (c) => c.id === this.curriculumId
+                    );
+                    const grade = grades?.find((g) => g.id === this.gradeId);
+                    return { curriculum, grade };
+                }),
+                filter(({ curriculum, grade }) => !!curriculum && !!grade)
             )
-            .subscribe((curriculum) => {
+            .subscribe(({ curriculum, grade }) => {
                 this.titleService.setBreadcrumb([
                     { label: 'Curriculum', url: '/curriculum' },
                     { label: 'Manage Curriculum', url: '/curriculum' },
-                    { label: curriculum.name, url: '' },
+                    {
+                        label: curriculum.name,
+                        url: `/curriculum/${this.curriculumId}/grades`,
+                    },
+                    { label: grade.name, url: '' },
                 ]);
             });
 
@@ -127,16 +150,16 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             name: ['', [Validators.required]],
         });
 
-        this.list$ = this.store.select(selectGradesByCurriculumId(this.curriculumId));
+        this.list$ = this.store.select(selectSubjectsByGradeId(this.gradeId));
 
         this.store
-            .select(selectGradesLoaded)
+            .select(selectSubjectsLoaded)
             .pipe(
                 take(1),
                 filter((loaded) => !loaded)
             )
             .subscribe(() => {
-                this.store.dispatch(GradeActions.loadGrades({ curriculumId: this.curriculumId }));
+                this.store.dispatch(SubjectActions.loadSubjects({ gradeId: this.gradeId }));
             });
 
         this.handleAPIResponse();
@@ -185,7 +208,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    patchFormValues(data: IGrades) {
+    patchFormValues(data: ISubjects) {
         this.entityForm.patchValue({
             id: data.id,
             name: data.name,
@@ -201,11 +224,14 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         // Disable the form
         this.entityForm.disable();
         const formValues = this.entityForm.value;
-        const requestObj: IGrades = {
-            name: formValues.name
+        const requestObj: ISubjects = {
+            name: formValues.name,
         };
         this.store.dispatch(
-            GradeActions.addGrade({ curriculumId: this.curriculumId, grade: requestObj })
+            SubjectActions.addSubject({
+                gradeId: this.gradeId,
+                subject: requestObj,
+            })
         );
     }
 
@@ -218,16 +244,19 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         // Disable the form
         this.entityForm.disable();
         const formValues = this.entityForm.value;
-        const requestObj: IGrades = {
+        const requestObj: ISubjects = {
             id: formValues.id,
-            name: formValues.name
+            name: formValues.name,
         };
         this.store.dispatch(
-            GradeActions.updateGrade({ curriculumId: this.curriculumId, grade: requestObj })
+            SubjectActions.updateSubject({
+                gradeId: this.gradeId,
+                subject: requestObj,
+            })
         );
     }
 
-    deleteItem(item: IGrades): void {
+    deleteItem(item: ISubjects): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
             title: 'Are you sure you want to delete?',
@@ -245,7 +274,10 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             // If the confirm button pressed...
             if (result === 'confirmed') {
                 this.store.dispatch(
-                    GradeActions.deleteGrade({ curriculumId: this.curriculumId, gradeId: item.id })
+                    SubjectActions.deleteSubject({
+                        gradeId: this.gradeId,
+                        subjectId: item.id,
+                    })
                 );
             }
         });
@@ -255,60 +287,50 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.actions$
             .pipe(
                 ofType(
-                    GradeActions.addGradeSuccess,
-                    GradeActions.addGradeFailure,
-                    GradeActions.updateGradeSuccess,
-                    GradeActions.updateGradeFailure,
-                    GradeActions.deleteGradeSuccess,
-                    GradeActions.deleteGradeFailure
+                    SubjectActions.addSubjectSuccess,
+                    SubjectActions.addSubjectFailure,
+                    SubjectActions.updateSubjectSuccess,
+                    SubjectActions.updateSubjectFailure,
+                    SubjectActions.deleteSubjectSuccess,
+                    SubjectActions.deleteSubjectFailure
                 ),
                 tap((action: any) => {
                     // Close dialog on add/update success/failure
                     if (
+                        action.type === SubjectActions.addSubjectSuccess.type ||
+                        action.type === SubjectActions.addSubjectFailure.type ||
                         action.type ===
-                            GradeActions.addGradeSuccess.type ||
-                        action.type ===
-                            GradeActions.addGradeFailure.type ||
-                        action.type ===
-                            GradeActions.updateGradeSuccess.type ||
-                        action.type ===
-                            GradeActions.updateGradeFailure.type
+                            SubjectActions.updateSubjectSuccess.type ||
+                        action.type === SubjectActions.updateSubjectFailure.type
                     ) {
                         this.matDialogRef?.close(true);
                     }
 
                     // Handle success
-                    if (
-                        action.type ===
-                        GradeActions.addGradeSuccess.type
-                    ) {
+                    if (action.type === SubjectActions.addSubjectSuccess.type) {
                         this._snackBar.showSuccess(
-                            `Grade "${action.grade.name}" added successfully!`
+                            `Subject "${action.subject.name}" added successfully!`
                         );
                     } else if (
-                        action.type ===
-                        GradeActions.updateGradeSuccess.type
+                        action.type === SubjectActions.updateSubjectSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Grade "${action.grade.name}" updated successfully!`
+                            `Subject "${action.subject.name}" updated successfully!`
                         );
                     } else if (
-                        action.type ===
-                        GradeActions.deleteGradeSuccess.type
+                        action.type === SubjectActions.deleteSubjectSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Grade deleted successfully!`
+                            `Subject deleted successfully!`
                         );
                     }
 
                     // Handle failure
                     else if (
+                        action.type === SubjectActions.addSubjectFailure.type ||
                         action.type ===
-                            GradeActions.addGradeFailure.type ||
-                        action.type ===
-                            GradeActions.updateGradeFailure.type ||
-                        action.type ===
-                            GradeActions.deleteGradeFailure.type
+                            SubjectActions.updateSubjectFailure.type ||
+                        action.type === SubjectActions.deleteSubjectFailure.type
                     ) {
                         this._snackBar.showError(
                             `Error: ${action.error?.message || 'Something went wrong.'}`
@@ -319,4 +341,3 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             .subscribe();
     }
 }
-

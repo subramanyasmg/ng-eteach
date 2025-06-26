@@ -1,8 +1,8 @@
-export interface IGrades {
+export interface ISubjects {
     id?: string;
-    curriculumId?:string;
+    gradeId?: string;
     name: string;
     modifiedOn?: string;
-    noOfsubjects?: string;
+    noOfChapters?: string;
     createdOn?: string;
 }
