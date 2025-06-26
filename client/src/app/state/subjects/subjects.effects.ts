@@ -22,16 +22,20 @@ export class SubjectsEffects {
   );
 
   addSubject$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(SubjectActions.addSubject),
-      mergeMap(({ gradeId, subject }) =>
-        this.service.create(gradeId, subject).pipe(
-          map(response => SubjectActions.addSubjectSuccess({ gradeId, subject: response.data })),
-          catchError(error => of(SubjectActions.addSubjectFailure({ error })))
+  this.actions$.pipe(
+    ofType(SubjectActions.addSubject),
+    mergeMap(({ gradeId, subject }) =>
+      this.service.create(gradeId, subject).pipe(
+        map((response) =>
+          SubjectActions.addSubjectSuccess({ gradeId, subjects: response.data })
+        ),
+        catchError((error) =>
+          of(SubjectActions.addSubjectFailure({ error }))
         )
       )
     )
-  );
+  )
+);
 
   updateGrade$ = createEffect(() =>
     this.actions$.pipe(

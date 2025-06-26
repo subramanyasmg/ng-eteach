@@ -1,3 +1,4 @@
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
@@ -16,6 +17,7 @@ import {
     Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
 import { MatRippleModule } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -41,6 +43,10 @@ import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors'
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import * as SubjectActions from 'app/state/subjects/subjects.actions';
 import {
+    selectSubjectsByGradeId,
+    selectSubjectsLoaded,
+} from 'app/state/subjects/subjects.selectors';
+import {
     combineLatest,
     filter,
     map,
@@ -50,7 +56,6 @@ import {
     tap,
 } from 'rxjs';
 import { ISubjects } from './subject.types';
-import { selectSubjectsByGradeId, selectSubjectsLoaded } from 'app/state/subjects/subjects.selectors';
 
 @Component({
     selector: 'app-subjects',
@@ -75,7 +80,8 @@ import { selectSubjectsByGradeId, selectSubjectsLoaded } from 'app/state/subject
         PipesModule,
         MatSortModule,
         MatSelectModule,
-        RouterModule
+        RouterModule,
+        MatChipsModule,
     ],
     templateUrl: './subjects.component.html',
     styleUrl: './subjects.component.scss',
@@ -101,6 +107,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     curriculumId;
     gradeId;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    separatorKeysCodes: number[] = [ENTER, COMMA];
 
     constructor(
         private route: ActivatedRoute,
@@ -147,7 +154,8 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.entityForm = this._formBuilder.group({
             id: [''],
-            name: ['', [Validators.required]],
+            name: [''],
+            subjects: [[]],
         });
 
         this.list$ = this.store.select(selectSubjectsByGradeId(this.gradeId));
@@ -159,7 +167,9 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                 filter((loaded) => !loaded)
             )
             .subscribe(() => {
-                this.store.dispatch(SubjectActions.loadSubjects({ gradeId: this.gradeId }));
+                this.store.dispatch(
+                    SubjectActions.loadSubjects({ gradeId: this.gradeId })
+                );
             });
 
         this.handleAPIResponse();
@@ -169,6 +179,41 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
         });
+    }
+
+    get subjects() {
+        return this.entityForm.get('subjects');
+    }
+
+    addSubject(event: MatChipInputEvent): void {
+        const input = event.input;
+        const value = event.value?.trim();
+
+        if (value) {
+            const currentSubjects = this.subjects.value || [];
+
+            // Check for duplicates (case-insensitive)
+            const isDuplicate = currentSubjects.some(
+                (subject) => subject.toLowerCase() === value.toLowerCase()
+            );
+
+            if (!isDuplicate) {
+                this.subjects.setValue([...currentSubjects, value]);
+            } else {
+                this._snackBar.showError(value + ' is already added');
+            }
+        }
+
+        // Clear the input
+        if (input) {
+            input.value = '';
+        }
+    }
+
+    removeSubject(index: number): void {
+        const updated = [...this.subjects.value];
+        updated.splice(index, 1);
+        this.subjects.setValue(updated);
     }
 
     ngAfterViewInit(): void {
@@ -196,7 +241,12 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mode = mode;
 
         if (this.mode === 2) {
+            this.entityForm.get('name')?.setValidators([Validators.required]);
+            this.entityForm.get('subjects')?.clearValidators();
             this.patchFormValues(selectedItem);
+        } else {
+            this.entityForm.get('subjects')?.setValidators([Validators.required]);
+            this.entityForm.get('name')?.clearValidators();
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',
@@ -204,7 +254,9 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.matDialogRef.afterClosed().subscribe((result) => {
             this.entityForm.enable();
-            this.entityForm.reset();
+            this.entityForm.reset({
+                subjects: [],
+            });
         });
     }
 
@@ -225,7 +277,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.entityForm.disable();
         const formValues = this.entityForm.value;
         const requestObj: ISubjects = {
-            name: formValues.name,
+            name: formValues.subjects.join(','),
         };
         this.store.dispatch(
             SubjectActions.addSubject({
@@ -309,7 +361,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                     // Handle success
                     if (action.type === SubjectActions.addSubjectSuccess.type) {
                         this._snackBar.showSuccess(
-                            `Subject "${action.subject.name}" added successfully!`
+                            `Subject has been added successfully!`
                         );
                     } else if (
                         action.type === SubjectActions.updateSubjectSuccess.type

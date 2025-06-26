@@ -83,16 +83,25 @@ export class SubjectsService {
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
+                // Split the name string into array of trimmed names
+                const subjectNames = request.name
+                    .split(',')
+                    .map((n) => n.trim())
+                    .filter((n) => n); // remove empty strings
+
+                // Build subject objects
+                const newSubjects: ISubjects[] = subjectNames.map((name) => ({
+                    id: Date.now().toString() + Math.random().toString(36).slice(2, 6), // ensure unique ID
+                    name,
+                    gradeId,
+                    createdOn: new Date().toLocaleDateString(),
+                    modifiedOn: new Date().toLocaleDateString(),
+                    noOfChapters: request.noOfChapters,
+                }));
+
                 const mockResponse = {
                     status: true,
-                    data: {
-                        id: Date.now().toString(),
-                        name: request.name,
-                        gradeId,
-                        createdOn: new Date().toLocaleDateString(),
-                        modifiedOn: new Date().toLocaleDateString(),
-                        noOfChapters: request.noOfChapters,
-                    } as ISubjects,
+                    data: newSubjects,
                 };
 
                 return of(mockResponse).pipe(
@@ -108,10 +117,9 @@ export class SubjectsService {
                         }
 
                         this._items.next([
-                            response.data as ISubjects,
+                            ...newSubjects,
                             ...items,
                         ]);
-
                         return of(response);
                     })
                 );

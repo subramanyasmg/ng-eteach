@@ -6,7 +6,7 @@ export const loadSubjectsSuccess = createAction('[Subject] Load Subjects Success
 export const loadSubjectsFailure = createAction('[Subject] Load Subjects Failure', props<{ error: any }>());
 
 export const addSubject = createAction('[Subject] Add Subject', props<{ gradeId: string, subject: ISubjects }>());
-export const addSubjectSuccess = createAction('[Subject] Add Subject Success', props<{ gradeId: string, subject: ISubjects }>());
+export const addSubjectSuccess = createAction('[Subject] Add Subject Success', props<{ gradeId: string, subjects: ISubjects[] }>());
 export const addSubjectFailure = createAction('[Subject] Add Subject Failure', props<{ error: any }>());
 
 export const updateSubject = createAction('[Subject] Update Subject', props<{ gradeId: string, subject: ISubjects }>());
