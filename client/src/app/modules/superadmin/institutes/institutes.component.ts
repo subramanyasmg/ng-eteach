@@ -16,7 +16,11 @@ import {
     Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatRippleModule } from '@angular/material/core';
+import {
+    MatRippleModule,
+    provideNativeDateAdapter,
+} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,18 +34,21 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Actions } from '@ngrx/effects';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
-import { filter, Observable, Subject, take } from 'rxjs';
-import { IInstitutes } from './institutes.types';
-import { selectAllCurriculums, selectCurriculumsLoaded } from 'app/state/curriculum/curriculum.selectors';
-import { ICurriculum } from '../curriculum/curriculum.types';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
-import {provideNativeDateAdapter} from '@angular/material/core';
+import * as InstituteActions from 'app/state/institute/institute.actions';
+import {
+    selectAllCurriculums,
+    selectCurriculumsLoaded,
+} from 'app/state/curriculum/curriculum.selectors';
+import { selectAllInstitutes } from 'app/state/institute/institute.selectors';
+import { filter, Observable, Subject, take, tap } from 'rxjs';
+import { ICurriculum } from '../curriculum/curriculum.types';
+import { IInstitutes } from './institutes.types';
 
 @Component({
     selector: 'app-institutes',
@@ -68,7 +75,7 @@ import {provideNativeDateAdapter} from '@angular/material/core';
         MatTooltipModule,
         MatDatepickerModule,
     ],
-     providers: [provideNativeDateAdapter()],
+    providers: [provideNativeDateAdapter()],
     templateUrl: './institutes.component.html',
     styleUrl: './institutes.component.scss',
 })
@@ -81,14 +88,16 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns: string[] = [
         'name',
         'createdOn',
-        'publisherName',
-        'publisherEmail',
-        'phone',
+        'expiresOn',
+        'noOfLicense',
+        'subdomain',
         'actions',
     ];
     mode = null;
     query = '';
-    curriculumList$: Observable<ICurriculum[]> = this.store.select(selectAllCurriculums);
+    curriculumList$: Observable<ICurriculum[]> =
+        this.store.select(selectAllCurriculums);
+    list$: Observable<IInstitutes[]> = this.store.select(selectAllInstitutes);
     entityForm: UntypedFormGroup;
     matDialogRef = null;
     today: Date = new Date();
@@ -135,13 +144,13 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.store.dispatch(CurriculumActions.loadCurriculums());
             });
 
-        // this.handleAPIResponse();
+        this.handleAPIResponse();
 
-        // this.list$.subscribe((data) => {
-        //     this.dataSource = new MatTableDataSource(data); // reassign!
-        //     this.dataSource.sort = this.sort;
-        //     this.dataSource.paginator = this.paginator;
-        // });
+        this.list$.subscribe((data) => {
+            this.dataSource = new MatTableDataSource(data); // reassign!
+            this.dataSource.sort = this.sort;
+            this.dataSource.paginator = this.paginator;
+        });
     }
 
     ngAfterViewInit(): void {
@@ -189,5 +198,123 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         //     publisherEmail: data.publisherEmail,
         //     phone: data.phone,
         // });
+    }
+
+    addEntity() {
+        // Return if the form is invalid
+        if (this.entityForm.invalid) {
+            return;
+        }
+
+        // Disable the form
+        this.entityForm.disable();
+        const formValues = this.entityForm.value;
+        const requestObj: IInstitutes = {
+            name: formValues.name,
+            noOfLicense: formValues.noOfLicense,
+            instituteAddress: formValues.instituteAddress,
+            adminName: formValues.adminName,
+            adminEmail: formValues.adminEmail,
+            subdomain: formValues.subdomain,
+            expiresOn: formValues.expiresOn,
+            status: formValues.status,
+            curriculum: formValues.curriculum,
+            accountType: formValues.accountType,
+        };
+        this.store.dispatch(
+            InstituteActions.addInstitute({ institute: requestObj })
+        );
+    }
+
+    deleteItem(item: IInstitutes): void {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title: 'Are you sure you want to delete?',
+            message:
+                'Taking this action will permanently delete this entry. Are you sure about taking this action?',
+            actions: {
+                confirm: {
+                    label: 'Delete Permanently',
+                },
+            },
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            if (result === 'confirmed') {
+                this.store.dispatch(
+                    InstituteActions.deleteInstitute({ id: item.id })
+                );
+            }
+        });
+    }
+
+    handleAPIResponse() {
+        this.actions$
+            .pipe(
+                ofType(
+                    InstituteActions.addInstituteSuccess,
+                    InstituteActions.addInstituteFailure,
+                    InstituteActions.updateInstituteSuccess,
+                    InstituteActions.updateInstituteFailure,
+                    InstituteActions.deleteInstituteSuccess,
+                    InstituteActions.deleteInstituteFailure
+                ),
+                tap((action: any) => {
+                    // Close dialog on add/update success/failure
+                    if (
+                        action.type ===
+                            InstituteActions.addInstituteSuccess.type ||
+                        action.type ===
+                            InstituteActions.addInstituteFailure.type ||
+                        action.type ===
+                            InstituteActions.updateInstituteSuccess.type ||
+                        action.type ===
+                            InstituteActions.updateInstituteFailure.type
+                    ) {
+                        this.matDialogRef?.close(true);
+                    }
+
+                    // Handle success
+                    if (
+                        action.type ===
+                        InstituteActions.addInstituteSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            `Institute "${action.institute.name}" added successfully!`
+                        );
+                    } else if (
+                        action.type ===
+                        InstituteActions.updateInstituteSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            `Institute "${action.institute.name}" updated successfully!`
+                        );
+                    } else if (
+                        action.type ===
+                        InstituteActions.deleteInstituteSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            `Institute deleted successfully!`
+                        );
+                    }
+
+                    // Handle failure
+                    else if (
+                        action.type ===
+                            InstituteActions.addInstituteFailure.type ||
+                        action.type ===
+                            InstituteActions.updateInstituteFailure.type ||
+                        action.type ===
+                            InstituteActions.deleteInstituteFailure.type
+                    ) {
+                        this._snackBar.showError(
+                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                        );
+                    }
+                })
+            )
+            .subscribe();
     }
 }

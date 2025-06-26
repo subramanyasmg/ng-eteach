@@ -25,6 +25,8 @@ import { gradeReducer } from './state/grades/grades.reducer';
 import { GradesEffects } from './state/grades/grades.effects';
 import { subjectsReducer } from './state/subjects/subjects.reducer';
 import { SubjectsEffects } from './state/subjects/subjects.effects';
+import { instituteReducer } from './state/institute/institute.reducer';
+import { InstituteEffects } from './state/institute/institute.effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -136,5 +138,7 @@ export const appConfig: ApplicationConfig = {
         provideEffects(GradesEffects),
         provideState('subjects', subjectsReducer),
         provideEffects(SubjectsEffects),
+        provideState('institute', instituteReducer),
+        provideEffects(InstituteEffects),
     ],
 };
