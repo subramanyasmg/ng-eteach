@@ -91,6 +91,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     curriculumList$: Observable<ICurriculum[]> = this.store.select(selectAllCurriculums);
     entityForm: UntypedFormGroup;
     matDialogRef = null;
+    today: Date = new Date();
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
