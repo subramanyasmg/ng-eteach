@@ -1,1 +1,172 @@
-<p>grades works!</p>
+<div class="bg-gray-100 flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
+    <!-- Header -->
+    <div class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                Grades
+            </div>
+            <div class="text-xl text-secondary">
+                Add grade information under this curriculum
+            </div>
+        </div>
+        <!-- Actions -->
+        <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [(ngModel)]="query" (ngModelChange)="applyFilter()" [autocomplete]="'off'"
+                    [placeholder]="'Search'" />
+            </mat-form-field>
+
+            <mat-form-field class="ml-4" [subscriptSizing]="'dynamic'">
+                <mat-select [value]="'week'">
+                    <mat-option value="week">This Week</mat-option>
+                    <mat-option value="month">This Month</mat-option>
+                    <mat-option value="custom">Custom</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <button class="ml-4 bg-white rounded-md" mat-stroked-button>
+                <mat-icon [svgIcon]="'mat_outline:file_download'"></mat-icon>
+            </button>
+
+            <button class="ml-4 rounded-md" mat-flat-button [color]="'primary'" (click)="openDialog(1)">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-auto overflow-hidden">
+
+        <div class="flex flex-auto flex-col overflow-hidden sm:overflow-y-auto">
+
+
+            <div class="p-4 overflow-x-auto">
+                <table *ngIf="dataSource?.data?.length > 0 else noData" mat-table [dataSource]="dataSource" matSort
+                    class="w-full rounded-lg border border-gray-300 overflow-hidden shadow-sm">
+
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                        <td mat-cell *matCellDef="let element"><a routerLink="{{ element.id + '/subjects' }}">{{ element.name }}</a></td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="createdOn">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created On</th>
+                        <td mat-cell *matCellDef="let element">{{ element.createdOn }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="modifiedOn">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Modified On</th>
+                        <td mat-cell *matCellDef="let element">{{ element.modifiedOn }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="noOfSubjects">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Number of Subjects</th>
+                        <td mat-cell *matCellDef="let element">{{ element.noOfSubjects ?? '-' }}</td>
+                    </ng-container>
+
+
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <td mat-cell *matCellDef="let element">
+                            <div class="flex gap-2">
+                                <button class="h-7 min-h-7 min-w-10 px-2 leading-6 border-none" mat-stroked-button
+                                    [matTooltip]="'Update'" [disabled]="entityForm.disabled"
+                                    (click)="openDialog(2, element)">
+                                    <mat-icon class="icon-size-6 text-primary-500"
+                                        [svgIcon]="'heroicons_solid:pencil-square'"></mat-icon>
+                                </button>
+
+                                <button class="h-7 min-h-7 min-w-10 px-2 leading-6 border-none" mat-stroked-button
+                                    [matTooltip]="'Delete'" (click)="deleteItem(element)">
+                                    <mat-icon class="icon-size-6 text-red-500"
+                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Header & Row Declarations -->
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+                    <!-- No Records Message -->
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                            <div class="p-6 text-center text-xl tracking-tight">
+                                No records found for the term <span class="font-semibold">"{{ query }}"</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <mat-paginator *ngIf="dataSource?.data?.length > 0" class="z-10 border-b mt-5 bg-white rounded-md"
+                    [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons>
+                </mat-paginator>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #noData>
+    <div class=" p-8 text-center text-4xl tracking-tight sm:p-16">
+        <div class="w-full flex justify-center">
+            <img src="images/no-data.png" alt="No data" class="w-90" />
+        </div>
+        <div class="mt-5 text-center text-4xl font-extrabold">
+            No Data Available!
+        </div>
+        <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
+           It looks like you haven’t added any grade information under this curriculum. Add grade information by clicking the (+) button on the to right
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #EntityDialog let-data="data">
+    <div class="flex max-h-160 flex-auto flex-col overflow-hidden">
+        <!-- Header -->
+        <div
+            class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
+            <div class="text-lg font-medium">{{ mode === 1 ? 'Add New Grade' : 'Update Grade'}}</div>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Card form -->
+    <form class="flex w-full flex-0 flex-col items-start overflow-y-auto max-h-96 space-y-3 p-4 mt-3"
+        [formGroup]="entityForm">
+
+        <div class="flex w-full">
+            <mat-form-field class="w-full" floatLabel="always">
+                <mat-label>Grade Name</mat-label>
+                <input matInput [formControlName]="'name'" [placeholder]="'e.g. Grade 1'" required maxlength="200" />
+                @if (entityForm.get('name').hasError('required')) {
+                <mat-error>Grade Name is required </mat-error>
+                }
+            </mat-form-field>
+        </div>
+        <input matInput [formControlName]="'id'" [hidden]="true" />
+    </form>
+
+    <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
+
+        <button mat-button (click)="matDialogRef.close()">Cancel</button>
+        <button class="ml-3 px-6" mat-flat-button [color]="'primary'" (click)="mode === 1 ? addEntity(): updateEntity()"
+            [disabled]="entityForm.invalid || entityForm.disabled">
+            @if (!entityForm.disabled) {
+            <span> Save </span>
+            }
+            @if (entityForm.disabled) {
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            }
+        </button>
+    </div>
+
+</ng-template>

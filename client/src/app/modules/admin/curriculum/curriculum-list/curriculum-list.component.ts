@@ -43,6 +43,7 @@ import {
 import { filter, Observable, Subject, take, tap } from 'rxjs';
 import { ICurriculum } from '../curriculum.types';
 import { MatSelectModule } from '@angular/material/select';
+import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -76,6 +77,8 @@ export class CurriculumListComponent
     implements OnInit, AfterViewInit, OnDestroy
 {
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
 
     dataSource = new MatTableDataSource<ICurriculum>();
     displayedColumns: string[] = [
@@ -86,10 +89,6 @@ export class CurriculumListComponent
         'phone',
         'actions',
     ];
-
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
-    @ViewChild(MatSort) sort!: MatSort;
-
     mode = null;
     query = '';
     list$: Observable<ICurriculum[]> = this.store.select(selectAllCurriculums);
@@ -105,8 +104,14 @@ export class CurriculumListComponent
         private _snackBar: SnackBarService,
         private store: Store,
         private actions$: Actions,
-        private _cdr: ChangeDetectorRef
-    ) {}
+        private _cdr: ChangeDetectorRef,
+         private titleService: BreadcrumbService
+    ) {
+        this.titleService.setBreadcrumb([
+            { label: 'Curriculum', url: '/curriculum' },
+            { label: 'Manage Curriculum', url: '' }
+        ]);
+    }
 
     ngOnInit(): void {
         this.entityForm = this._formBuilder.group({
