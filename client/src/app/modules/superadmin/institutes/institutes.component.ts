@@ -16,7 +16,11 @@ import {
     Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatRippleModule } from '@angular/material/core';
+import {
+    MatRippleModule,
+    provideNativeDateAdapter,
+} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,29 +28,30 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
-import { PipesModule } from 'app/pipes/pipes.module';
+import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
+import * as InstituteActions from 'app/state/institute/institute.actions';
 import {
     selectAllCurriculums,
     selectCurriculumsLoaded,
 } from 'app/state/curriculum/curriculum.selectors';
+import { selectAllInstitutes } from 'app/state/institute/institute.selectors';
 import { filter, Observable, Subject, take, tap } from 'rxjs';
-import { ICurriculum } from '../curriculum.types';
-import { MatSelectModule } from '@angular/material/select';
-import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { ICurriculum } from '../curriculum/curriculum.types';
+import { IInstitutes } from './institutes.types';
 
 @Component({
-    selector: 'app-curriculum-list',
+    selector: 'app-institutes',
     standalone: true,
     imports: [
         MatProgressBarModule,
@@ -64,40 +69,41 @@ import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.servi
         MatTabsModule,
         MatTableModule,
         CommonModule,
-        RouterModule,
         ReactiveFormsModule,
-        PipesModule,
         MatSortModule,
-        MatSelectModule
+        MatSelectModule,
+        MatTooltipModule,
+        MatDatepickerModule,
     ],
-    templateUrl: './curriculum-list.component.html',
-    styleUrl: './curriculum-list.component.scss',
+    providers: [provideNativeDateAdapter()],
+    templateUrl: './institutes.component.html',
+    styleUrl: './institutes.component.scss',
 })
-export class CurriculumListComponent
-    implements OnInit, AfterViewInit, OnDestroy
-{
+export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
 
-    dataSource = new MatTableDataSource<ICurriculum>();
+    dataSource = new MatTableDataSource<IInstitutes>();
     displayedColumns: string[] = [
         'name',
         'createdOn',
-        'publisherName',
-        'publisherEmail',
-        'phone',
+        'expiresOn',
+        'noOfLicense',
+        'subdomain',
         'actions',
     ];
     mode = null;
     query = '';
-    list$: Observable<ICurriculum[]> = this.store.select(selectAllCurriculums);
+    curriculumList$: Observable<ICurriculum[]> =
+        this.store.select(selectAllCurriculums);
+    list$: Observable<IInstitutes[]> = this.store.select(selectAllInstitutes);
     entityForm: UntypedFormGroup;
     matDialogRef = null;
+    today: Date = new Date();
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
-        private route: ActivatedRoute,
         private _fuseConfirmationService: FuseConfirmationService,
         private _matDialog: MatDialog,
         private _formBuilder: UntypedFormBuilder,
@@ -105,11 +111,11 @@ export class CurriculumListComponent
         private store: Store,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
-         private titleService: BreadcrumbService
+        private titleService: BreadcrumbService
     ) {
         this.titleService.setBreadcrumb([
-            { label: 'Curriculum', url: '/curriculum' },
-            { label: 'Manage Curriculum', url: '' }
+            { label: 'Users', url: '/institute' },
+            { label: 'Manage Institutes', url: '' },
         ]);
     }
 
@@ -117,18 +123,17 @@ export class CurriculumListComponent
         this.entityForm = this._formBuilder.group({
             id: [''],
             name: ['', [Validators.required]],
-            publisherName: ['', [Validators.required]],
-            publisherEmail: ['', [Validators.required, Validators.email]],
-            phone: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(10),
-                    Validators.maxLength(15),
-                    Validators.pattern(/^\+?[0-9]{10,15}$/),
-                ],
-            ],
+            noOfLicense: ['', [Validators.required]],
+            instituteAddress: ['', [Validators.required]],
+            adminName: ['', [Validators.required]],
+            adminEmail: ['', [Validators.required, Validators.email]],
+            subdomain: ['', [Validators.required]],
+            expiresOn: ['', [Validators.required]],
+            status: ['', [Validators.required]],
+            curriculum: ['', [Validators.required]],
+            accountType: ['', [Validators.required]],
         });
+
         this.store
             .select(selectCurriculumsLoaded)
             .pipe(
@@ -176,7 +181,7 @@ export class CurriculumListComponent
             this.patchFormValues(selectedItem);
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
-            width: '500px',
+            width: '600px',
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {
@@ -185,13 +190,19 @@ export class CurriculumListComponent
         });
     }
 
-    patchFormValues(data: ICurriculum) {
+    patchFormValues(data: IInstitutes) {
         this.entityForm.patchValue({
             id: data.id,
             name: data.name,
-            publisherName: data.publisherName,
-            publisherEmail: data.publisherEmail,
-            phone: data.phone,
+            noOfLicense: data.noOfLicense,
+            adminName: data.adminName,
+            instituteAddress: data.instituteAddress,
+            adminEmail: data.adminEmail,
+            subdomain: data.subdomain,
+            expiresOn: data.expiresOn,
+            status: data.status,
+            curriculum: data.curriculum,
+            accountType: data.accountType
         });
     }
 
@@ -204,14 +215,20 @@ export class CurriculumListComponent
         // Disable the form
         this.entityForm.disable();
         const formValues = this.entityForm.value;
-        const requestObj: ICurriculum = {
+        const requestObj: IInstitutes = {
             name: formValues.name,
-            publisherName: formValues.publisherName,
-            publisherEmail: formValues.publisherEmail,
-            phone: formValues.phone,
+            noOfLicense: formValues.noOfLicense,
+            instituteAddress: formValues.instituteAddress,
+            adminName: formValues.adminName,
+            adminEmail: formValues.adminEmail,
+            subdomain: formValues.subdomain,
+            expiresOn: formValues.expiresOn,
+            status: formValues.status,
+            curriculum: formValues.curriculum,
+            accountType: formValues.accountType,
         };
         this.store.dispatch(
-            CurriculumActions.addCurriculum({ curriculum: requestObj })
+            InstituteActions.addInstitute({ institute: requestObj })
         );
     }
 
@@ -224,19 +241,25 @@ export class CurriculumListComponent
         // Disable the form
         this.entityForm.disable();
         const formValues = this.entityForm.value;
-        const requestObj: ICurriculum = {
+        const requestObj: IInstitutes = {
             id: formValues.id,
             name: formValues.name,
-            publisherName: formValues.publisherName,
-            publisherEmail: formValues.publisherEmail,
-            phone: formValues.phone,
+            noOfLicense: formValues.noOfLicense,
+            instituteAddress: formValues.instituteAddress,
+            adminName: formValues.adminName,
+            adminEmail: formValues.adminEmail,
+            subdomain: formValues.subdomain,
+            expiresOn: formValues.expiresOn,
+            status: formValues.status,
+            curriculum: formValues.curriculum,
+            accountType: formValues.accountType,
         };
         this.store.dispatch(
-            CurriculumActions.updateCurriculum({ curriculum: requestObj })
+            InstituteActions.updateInstitute({ institute: requestObj })
         );
     }
 
-    deleteItem(item: ICurriculum): void {
+    deleteItem(item: IInstitutes): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
             title: 'Are you sure you want to delete?',
@@ -254,7 +277,7 @@ export class CurriculumListComponent
             // If the confirm button pressed...
             if (result === 'confirmed') {
                 this.store.dispatch(
-                    CurriculumActions.deleteCurriculum({ id: item.id })
+                    InstituteActions.deleteInstitute({ id: item.id })
                 );
             }
         });
@@ -264,24 +287,24 @@ export class CurriculumListComponent
         this.actions$
             .pipe(
                 ofType(
-                    CurriculumActions.addCurriculumSuccess,
-                    CurriculumActions.addCurriculumFailure,
-                    CurriculumActions.updateCurriculumSuccess,
-                    CurriculumActions.updateCurriculumFailure,
-                    CurriculumActions.deleteCurriculumSuccess,
-                    CurriculumActions.deleteCurriculumFailure
+                    InstituteActions.addInstituteSuccess,
+                    InstituteActions.addInstituteFailure,
+                    InstituteActions.updateInstituteSuccess,
+                    InstituteActions.updateInstituteFailure,
+                    InstituteActions.deleteInstituteSuccess,
+                    InstituteActions.deleteInstituteFailure
                 ),
                 tap((action: any) => {
                     // Close dialog on add/update success/failure
                     if (
                         action.type ===
-                            CurriculumActions.addCurriculumSuccess.type ||
+                            InstituteActions.addInstituteSuccess.type ||
                         action.type ===
-                            CurriculumActions.addCurriculumFailure.type ||
+                            InstituteActions.addInstituteFailure.type ||
                         action.type ===
-                            CurriculumActions.updateCurriculumSuccess.type ||
+                            InstituteActions.updateInstituteSuccess.type ||
                         action.type ===
-                            CurriculumActions.updateCurriculumFailure.type
+                            InstituteActions.updateInstituteFailure.type
                     ) {
                         this.matDialogRef?.close(true);
                     }
@@ -289,35 +312,35 @@ export class CurriculumListComponent
                     // Handle success
                     if (
                         action.type ===
-                        CurriculumActions.addCurriculumSuccess.type
+                        InstituteActions.addInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Curriculum "${action.curriculum.name}" added successfully!`
+                            `Institute "${action.institute.name}" added successfully!`
                         );
                     } else if (
                         action.type ===
-                        CurriculumActions.updateCurriculumSuccess.type
+                        InstituteActions.updateInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Curriculum "${action.curriculum.name}" updated successfully!`
+                            `Institute "${action.institute.name}" updated successfully!`
                         );
                     } else if (
                         action.type ===
-                        CurriculumActions.deleteCurriculumSuccess.type
+                        InstituteActions.deleteInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Curriculum deleted successfully!`
+                            `Institute deleted successfully!`
                         );
                     }
 
                     // Handle failure
                     else if (
                         action.type ===
-                            CurriculumActions.addCurriculumFailure.type ||
+                            InstituteActions.addInstituteFailure.type ||
                         action.type ===
-                            CurriculumActions.updateCurriculumFailure.type ||
+                            InstituteActions.updateInstituteFailure.type ||
                         action.type ===
-                            CurriculumActions.deleteCurriculumFailure.type
+                            InstituteActions.deleteInstituteFailure.type
                     ) {
                         this._snackBar.showError(
                             `Error: ${action.error?.message || 'Something went wrong.'}`

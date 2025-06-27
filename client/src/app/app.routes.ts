@@ -62,8 +62,9 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'dashboard', loadChildren: () => import('app/modules/admin/example/example.routes')},
-            {path: 'curriculum', loadChildren: () => import('app/modules/admin/curriculum/curriculum.routes')},
+            {path: 'dashboard', loadChildren: () => import('app/modules/superadmin/example/example.routes')},
+            {path: 'curriculum', loadChildren: () => import('app/modules/superadmin/curriculum/curriculum.routes')},
+            {path: 'institute', loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
         ]
     }
 ];

@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as GradeActions from './grades.actions';
-import { GradesService } from 'app/modules/admin/grades/grades.service';
+import { GradesService } from 'app/modules/superadmin/grades/grades.service';
 
 @Injectable()
 export class GradesEffects {
