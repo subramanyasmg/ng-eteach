@@ -89,7 +89,7 @@ export class InstituteService {
                         id: Date.now().toString(),
                         name: request.name,
                         createdOn: new Date().toLocaleDateString(),
-                        expiresOn: new Date().toLocaleDateString(),
+                        expiresOn: request.expiresOn,
                         noOfLicense: request.noOfLicense,
                         subdomain: request.subdomain,
                         instituteAddress: request.instituteAddress,

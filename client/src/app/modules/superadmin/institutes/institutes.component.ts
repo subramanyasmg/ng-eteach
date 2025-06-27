@@ -191,13 +191,19 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     patchFormValues(data: IInstitutes) {
-        // this.entityForm.patchValue({
-        //     id: data.id,
-        //     name: data.name,
-        //     publisherName: data.publisherName,
-        //     publisherEmail: data.publisherEmail,
-        //     phone: data.phone,
-        // });
+        this.entityForm.patchValue({
+            id: data.id,
+            name: data.name,
+            noOfLicense: data.noOfLicense,
+            adminName: data.adminName,
+            instituteAddress: data.instituteAddress,
+            adminEmail: data.adminEmail,
+            subdomain: data.subdomain,
+            expiresOn: data.expiresOn,
+            status: data.status,
+            curriculum: data.curriculum,
+            accountType: data.accountType
+        });
     }
 
     addEntity() {
@@ -223,6 +229,33 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         };
         this.store.dispatch(
             InstituteActions.addInstitute({ institute: requestObj })
+        );
+    }
+
+    updateEntity() {
+        // Return if the form is invalid
+        if (this.entityForm.invalid) {
+            return;
+        }
+
+        // Disable the form
+        this.entityForm.disable();
+        const formValues = this.entityForm.value;
+        const requestObj: IInstitutes = {
+            id: formValues.id,
+            name: formValues.name,
+            noOfLicense: formValues.noOfLicense,
+            instituteAddress: formValues.instituteAddress,
+            adminName: formValues.adminName,
+            adminEmail: formValues.adminEmail,
+            subdomain: formValues.subdomain,
+            expiresOn: formValues.expiresOn,
+            status: formValues.status,
+            curriculum: formValues.curriculum,
+            accountType: formValues.accountType,
+        };
+        this.store.dispatch(
+            InstituteActions.updateInstitute({ institute: requestObj })
         );
     }
 

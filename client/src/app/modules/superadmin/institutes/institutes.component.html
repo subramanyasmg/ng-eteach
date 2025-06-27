@@ -49,7 +49,12 @@
 
                     <ng-container matColumnDef="name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.name }}
+                            <span class="inline-block ml-2 h-2 w-2 rounded-full" [ngClass]="{
+                                'bg-green-500': element.status === 'active',
+                                'bg-red-500': element.status === 'trial'
+                            }"></span>
+                        </td>
                     </ng-container>
 
                     <ng-container matColumnDef="createdOn">
@@ -59,7 +64,7 @@
 
                     <ng-container matColumnDef="expiresOn">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>Expires On</th>
-                        <td mat-cell *matCellDef="let element">{{ element.expiresOn }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.expiresOn | date }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="noOfLicense">
@@ -225,7 +230,7 @@
                 <input matInput [formControlName]="'expiresOn'" [min]="today" [matDatepicker]="picker1" />
                 <mat-hint>MM/DD/YYYY</mat-hint>
                 <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
-                <mat-datepicker #picker1 ></mat-datepicker>
+                <mat-datepicker #picker1></mat-datepicker>
                 @if (entityForm.get('expiresOn').hasError('required')) {
                 <mat-error>Expiry Date is required </mat-error>
                 }
