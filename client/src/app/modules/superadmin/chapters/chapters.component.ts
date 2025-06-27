@@ -16,9 +16,9 @@ import {
     Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatRippleModule } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -33,14 +33,26 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Actions } from '@ngrx/effects';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import * as ChapterActions from 'app/state/chapters/chapters.actions';
+import { selectChaptersBySubjectId } from 'app/state/chapters/chapters.selectors';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
-import { combineLatest, filter, map, Subject, take } from 'rxjs';
+import {
+    combineLatest,
+    filter,
+    map,
+    Observable,
+    Subject,
+    take,
+    tap,
+} from 'rxjs';
+import { IChapters } from './chapters.types';
+import { PipesModule } from 'app/pipes/pipes.module';
 
 @Component({
     selector: 'app-chapters',
@@ -64,7 +76,9 @@ import { combineLatest, filter, map, Subject, take } from 'rxjs';
         ReactiveFormsModule,
         MatSortModule,
         MatSelectModule,
-        MatChipsModule,
+        MatIconModule,
+        PipesModule,
+        MatExpansionModule,
     ],
     templateUrl: './chapters.component.html',
     styleUrl: './chapters.component.scss',
@@ -79,6 +93,7 @@ export class ChaptersListComponent implements OnInit {
     subjectName = '';
     matDialogRef = null;
     entityForm: UntypedFormGroup;
+    chapters$: Observable<IChapters[]>;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -140,6 +155,11 @@ export class ChaptersListComponent implements OnInit {
         this.entityForm = this._formBuilder.group({
             chapters: this._formBuilder.array([this.createChapter()]),
         });
+
+        this.handleAPIResponse();
+        this.chapters$ = this.store.select(
+            selectChaptersBySubjectId(this.subjectId)
+        );
     }
 
     get chapters(): FormArray {
@@ -169,6 +189,19 @@ export class ChaptersListComponent implements OnInit {
         }
 
         console.log(this.entityForm.value);
+
+        // Disable the form
+        this.entityForm.disable();
+        const formValues = this.entityForm.value;
+        const requestObj: IChapters = {
+            name: formValues.chapters.map((c) => c.name).join(',')
+        };
+        this.store.dispatch(
+            ChapterActions.addChapter({
+                subjectId: this.subjectId,
+                chapters: requestObj,
+            })
+        );
     }
 
     applyFilter(): void {
@@ -176,16 +209,84 @@ export class ChaptersListComponent implements OnInit {
         // this.dataSource.filter = filterValue;
     }
 
+    /**
+     * Track by function for ngFor loops
+     *
+     * @param index
+     * @param item
+     */
+    trackByFn(index: number, item: any): any {
+        return item.id || index;
+    }
+
     openDialog() {
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',
         });
 
-         this.matDialogRef.afterClosed().subscribe((result) => {
+        this.matDialogRef.afterClosed().subscribe((result) => {
             this.entityForm.enable();
             this.entityForm.reset();
             this.chapters.clear(); // clear all form array items
             this.chapters.push(this.createChapter()); // add one blank row
         });
+    }
+
+    handleAPIResponse() {
+        this.actions$
+            .pipe(
+                ofType(
+                    ChapterActions.addChapterSuccess,
+                    ChapterActions.addChapterFailure,
+                    ChapterActions.updateChapterSuccess,
+                    ChapterActions.updateChapterFailure,
+                    ChapterActions.deleteChapterSuccess,
+                    ChapterActions.deleteChapterFailure
+                ),
+                tap((action: any) => {
+                    // Close dialog on add/update success/failure
+                    if (
+                        action.type === ChapterActions.addChapterSuccess.type ||
+                        action.type === ChapterActions.addChapterFailure.type ||
+                        action.type ===
+                            ChapterActions.updateChapterSuccess.type ||
+                        action.type === ChapterActions.updateChapterFailure.type
+                    ) {
+                        this.matDialogRef?.close(true);
+                    }
+
+                    // Handle success
+                    if (action.type === ChapterActions.addChapterSuccess.type) {
+                        this._snackBar.showSuccess(
+                            `Chapter has been added successfully!`
+                        );
+                    } else if (
+                        action.type === ChapterActions.updateChapterSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            `Chapter "${action.subject.name}" updated successfully!`
+                        );
+                    } else if (
+                        action.type === ChapterActions.deleteChapterSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            `Chapter deleted successfully!`
+                        );
+                    }
+
+                    // Handle failure
+                    else if (
+                        action.type === ChapterActions.addChapterFailure.type ||
+                        action.type ===
+                            ChapterActions.updateChapterFailure.type ||
+                        action.type === ChapterActions.deleteChapterFailure.type
+                    ) {
+                        this._snackBar.showError(
+                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                        );
+                    }
+                })
+            )
+            .subscribe();
     }
 }

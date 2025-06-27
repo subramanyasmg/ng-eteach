@@ -3,7 +3,7 @@ import { ChapterState } from './chapters.reducer';
 
 export const selectChapterState = createFeatureSelector<ChapterState>('chapters');
 
-export const selectChaptersByGradeId  = (subjectId: string) => createSelector(
+export const selectChaptersBySubjectId  = (subjectId: string) => createSelector(
   selectChapterState,
   (state) => state.chaptersBySubject[subjectId] || []
 );

@@ -25,6 +25,23 @@
             </button>
         </div>
     </div>
+    <div class="flex flex-auto overflow-hidden">
+
+        <div class="flex p-5 flex-auto flex-col gap-3 overflow-hidden sm:overflow-y-auto">
+            <ng-container *ngIf="chapters$ | async | SearchFilter:query:'name' as chapters">
+                <ng-container *ngIf="chapters.length > 0; else noData">
+                    <mat-expansion-panel class="rounded-md" *ngFor="let chapter of chapters; trackBy: trackByFn">
+                        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                            <mat-panel-title>{{ chapter.name }}</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        {{ 'test' }}
+                    </mat-expansion-panel>
+                </ng-container>
+            </ng-container>
+
+        </div>
+    </div>
+
 </div>
 
 <ng-template #noData>
@@ -36,7 +53,7 @@
             No Data Available!
         </div>
         <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
-            It looks like you haven’t added any subject information under this grade. <br> Add subject information by
+            It looks like you haven’t added any chapter information under this subject. <br> Add chapter information by
             clicking the (+) button on the to right
         </div>
 
@@ -62,19 +79,18 @@
         <div formArrayName="chapters" class="space-y-4 p-4 w-full">
             <div *ngFor="let chapter of chapters.controls; let i = index" [formGroupName]="i"
                 class="flex gap-2 items-end">
-                <mat-form-field  class="flex-1" [subscriptSizing]="'dynamic'">
+                <mat-form-field class="flex-1" [subscriptSizing]="'dynamic'">
                     <mat-label>Chapter name</mat-label>
                     <input matInput required maxlength="200" formControlName="name" />
                 </mat-form-field>
 
-                <button [matTooltip]="'Delete Chapter'" mat-icon-button color="warn" type="button" *ngIf="chapters.length > 1"
-                    (click)="removeChapter(i)" aria-label="Remove chapter">
-                    <mat-icon class="icon-size-6 text-red-500"
-                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                <button [matTooltip]="'Delete Chapter'" mat-icon-button color="warn" type="button"
+                    *ngIf="chapters.length > 1" (click)="removeChapter(i)" aria-label="Remove chapter">
+                    <mat-icon class="icon-size-6 text-red-500" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                 </button>
 
-                <button [matTooltip]="'Add New Chapter'" class=" rounded-md" mat-flat-button [color]="'primary'" type="button" *ngIf="i === chapters.length - 1"
-                    (click)="addChapter()" aria-label="Add chapter">
+                <button [matTooltip]="'Add New Chapter'" class=" rounded-md" mat-flat-button [color]="'primary'"
+                    type="button" *ngIf="i === chapters.length - 1" (click)="addChapter()" aria-label="Add chapter">
                     <mat-icon>add</mat-icon>
                 </button>
             </div>
