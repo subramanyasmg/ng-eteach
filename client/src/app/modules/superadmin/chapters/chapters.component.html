@@ -1,0 +1,99 @@
+<div class="bg-gray-100 flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
+    <!-- Header -->
+    <div class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ subjectName }}
+            </div>
+            <div class="text-xl text-secondary">
+                Add chapters under this subject
+            </div>
+        </div>
+        <!-- Actions -->
+        <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [(ngModel)]="query" (ngModelChange)="applyFilter()" [autocomplete]="'off'"
+                    [placeholder]="'Search'" />
+            </mat-form-field>
+
+
+            <button class="ml-4 rounded-md" mat-flat-button [color]="'primary'" (click)="openDialog()">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            </button>
+        </div>
+    </div>
+</div>
+
+<ng-template #noData>
+    <div class="p-8 text-center text-4xl tracking-tight">
+        <div class="w-full flex justify-center">
+            <img src="images/no-data.png" alt="No data" class="w-90" />
+        </div>
+        <div class="mt-5 text-center text-4xl font-extrabold">
+            No Data Available!
+        </div>
+        <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
+            It looks like you haven’t added any subject information under this grade. <br> Add subject information by
+            clicking the (+) button on the to right
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #EntityDialog let-data="data">
+    <div class="flex max-h-160 flex-auto flex-col overflow-hidden">
+        <!-- Header -->
+        <div
+            class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
+            <div class="text-lg font-medium">Add Chapters</div>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Card form -->
+    <form class="flex w-full flex-0 flex-col items-start overflow-y-auto max-h-96 space-y-3 p-4 mt-3"
+        [formGroup]="entityForm">
+
+        <div formArrayName="chapters" class="space-y-4 p-4 w-full">
+            <div *ngFor="let chapter of chapters.controls; let i = index" [formGroupName]="i"
+                class="flex gap-2 items-end">
+                <mat-form-field  class="flex-1" [subscriptSizing]="'dynamic'">
+                    <mat-label>Chapter name</mat-label>
+                    <input matInput required maxlength="200" formControlName="name" />
+                </mat-form-field>
+
+                <button [matTooltip]="'Delete Chapter'" mat-icon-button color="warn" type="button" *ngIf="chapters.length > 1"
+                    (click)="removeChapter(i)" aria-label="Remove chapter">
+                    <mat-icon class="icon-size-6 text-red-500"
+                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                </button>
+
+                <button [matTooltip]="'Add New Chapter'" class=" rounded-md" mat-flat-button [color]="'primary'" type="button" *ngIf="i === chapters.length - 1"
+                    (click)="addChapter()" aria-label="Add chapter">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+        </div>
+
+    </form>
+
+    <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
+
+        <button mat-button (click)="matDialogRef.close()">Cancel</button>
+        <button class="ml-3 px-6" mat-flat-button [color]="'primary'" (click)="addEntity()"
+            [disabled]="entityForm.invalid || entityForm.disabled">
+            @if (!entityForm.disabled) {
+            <span> Save </span>
+            }
+            @if (entityForm.disabled) {
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            }
+        </button>
+    </div>
+
+</ng-template>
