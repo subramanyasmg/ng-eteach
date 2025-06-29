@@ -159,9 +159,15 @@ export class ChaptersListComponent implements OnInit {
                 this.chapterList = data.map((chapter) => ({
                     ...chapter,
                     editMode: false,
-                    lessonPlan: chapter.lessonPlan ?? this.defaultPhases(), // ensure phases exist
+                    lessonPlan: this.clonePhases(
+                        chapter.lessonPlan ?? this.defaultPhases()
+                    ),
                 }));
             });
+    }
+
+    clonePhases(phases: any[]): any[] {
+        return phases.map((phase) => ({ ...phase }));
     }
 
     defaultPhases() {
@@ -229,6 +235,15 @@ export class ChaptersListComponent implements OnInit {
             ChapterActions.updateChapter({
                 subjectId: this.subjectId,
                 chapter: requestObj,
+            })
+        );
+    }
+
+    updateChapterPhase(chapter: IChapters) {
+        this.store.dispatch(
+            ChapterActions.updateChapter({
+                subjectId: this.subjectId,
+                chapter,
             })
         );
     }
