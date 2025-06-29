@@ -12,7 +12,7 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { IGrades } from './grades.types';
+import { IGrades } from '../modules/superadmin/grades/grades.types';
 
 @Injectable({ providedIn: 'root' })
 export class GradesService {

@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as SubjectActions from './subjects.actions';
-import { SubjectsService } from 'app/modules/superadmin/subjects/subjects.service';
+import { SubjectsService } from 'app/services/subjects.service';
 
 @Injectable()
 export class SubjectsEffects {

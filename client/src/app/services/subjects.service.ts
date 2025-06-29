@@ -12,17 +12,17 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { IChapters } from './chapters.types';
+import { ISubjects } from '../modules/superadmin/subjects/subject.types';
 
 @Injectable({ providedIn: 'root' })
-export class ChaptersService {
-    private _items: BehaviorSubject<IChapters[] | null> = new BehaviorSubject(
+export class SubjectsService {
+    private _items: BehaviorSubject<ISubjects[] | null> = new BehaviorSubject(
         null
     );
-    private _item: BehaviorSubject<IChapters | null> = new BehaviorSubject(
+    private _item: BehaviorSubject<ISubjects | null> = new BehaviorSubject(
         null
     );
-    private apiUrl = '/api/a/chapters';
+    private apiUrl = '/api/a/subjects';
 
     /**
      * Constructor
@@ -32,22 +32,22 @@ export class ChaptersService {
     /**
      * Getter for single item
      */
-    get item$(): Observable<IChapters> {
+    get item$(): Observable<ISubjects> {
         return this._item.asObservable();
     }
 
     /**
      * Getter for all items
      */
-    get items$(): Observable<IChapters[]> {
+    get items$(): Observable<ISubjects[]> {
         return this._items.asObservable();
     }
 
-    getAll(subjectId: string) {
-        return this._httpClient.get(this.apiUrl + '/' + subjectId).pipe(
+    getAll(gradeId: string) {
+        return this._httpClient.get(this.apiUrl + '/' + gradeId ).pipe(
             tap((response: any) => {
                 if (response?.status) {
-                    this._items.next(response.data as IChapters[]);
+                    this._items.next(response.data as ISubjects[]);
                 } else {
                     this._items.next([]);
                 }
@@ -66,7 +66,7 @@ export class ChaptersService {
     //                     }
 
     //                     this._items.next([
-    //                         response.data as IChapters,
+    //                         response.data as ISubjects,
     //                         ...item,
     //                     ]);
 
@@ -77,30 +77,31 @@ export class ChaptersService {
     //     );
     // }
 
-    create(subjectId, request): Observable<any> {
+    create(gradeId, request): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
                 // Split the name string into array of trimmed names
-                const chapterNames = request.name
+                const subjectNames = request.name
                     .split(',')
                     .map((n) => n.trim())
                     .filter((n) => n); // remove empty strings
 
-                // Build chapters objects
-                const newChapters: IChapters[] = chapterNames.map((name) => ({
-                    id:
-                        Date.now().toString() +
-                        Math.random().toString(36).slice(2, 6), // ensure unique ID
+                // Build subject objects
+                const newSubjects: ISubjects[] = subjectNames.map((name) => ({
+                    id: Date.now().toString() + Math.random().toString(36).slice(2, 6), // ensure unique ID
                     name,
-                    subjectId
+                    gradeId,
+                    createdOn: new Date().toLocaleDateString(),
+                    modifiedOn: new Date().toLocaleDateString(),
+                    noOfChapters: request.noOfChapters,
                 }));
 
                 const mockResponse = {
                     status: true,
-                    data: newChapters,
+                    data: newSubjects,
                 };
 
                 return of(mockResponse).pipe(
@@ -115,7 +116,10 @@ export class ChaptersService {
                             );
                         }
 
-                        this._items.next([...newChapters, ...items]);
+                        this._items.next([
+                            ...newSubjects,
+                            ...items,
+                        ]);
                         return of(response);
                     })
                 );
@@ -123,7 +127,7 @@ export class ChaptersService {
         );
     }
 
-    // update(id, data): Observable<IChapters> {
+    // update(id, data): Observable<ISubjects> {
     //     return this.items$.pipe(
     //         take(1),
     //         switchMap((item) =>
@@ -148,7 +152,7 @@ export class ChaptersService {
     //     );
     // }
 
-    update(id: string, updatedData: IChapters): Observable<any> {
+    update(id: string, updatedData: ISubjects): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
@@ -163,7 +167,7 @@ export class ChaptersService {
                 }
 
                 // Create updated item
-                const updatedItem: IChapters = {
+                const updatedItem: ISubjects = {
                     ...items[index],
                     ...updatedData,
                 };
