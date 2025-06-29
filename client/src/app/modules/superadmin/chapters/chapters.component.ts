@@ -1,3 +1,4 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import {
     ChangeDetectorRef,
@@ -72,6 +73,7 @@ import { IChapters } from './chapters.types';
         PipesModule,
         MatTabsModule,
         MatExpansionModule,
+        DragDropModule,
     ],
     templateUrl: './chapters.component.html',
     styleUrl: './chapters.component.scss',
@@ -155,10 +157,11 @@ export class ChaptersListComponent implements OnInit {
         this.store
             .select(selectChaptersBySubjectId(this.subjectId))
             .subscribe((data) => {
-                console.log(data);
                 this.chapterList = data.map((chapter) => ({
                     ...chapter,
                     editMode: false,
+                    textBook: [],
+                    referenceMaterials: [],
                     lessonPlan: this.clonePhases(
                         chapter.lessonPlan ?? this.defaultPhases()
                     ),
@@ -206,8 +209,6 @@ export class ChaptersListComponent implements OnInit {
             return;
         }
 
-        console.log(this.entityForm.value);
-
         // Disable the form
         this.entityForm.disable();
         const formValues = this.entityForm.value;
@@ -247,6 +248,35 @@ export class ChaptersListComponent implements OnInit {
             })
         );
     }
+
+    onFileDrop(chapter: IChapters, event: DragEvent, type) {
+        event.preventDefault();
+        const files = Array.from(event.dataTransfer?.files || []);
+        this.addFiles(chapter, files, type);
+    }
+
+    onDragOver(chapter: IChapters, event: DragEvent, type) {
+        event.preventDefault();
+    }
+
+    onDragLeave(chapter: IChapters, event: DragEvent, type) {
+        event.preventDefault();
+    }
+
+    onFileSelected(chapter: IChapters, event: Event, type) {
+        const input = event.target as HTMLInputElement;
+        const files = Array.from(input.files || []);
+        this.addFiles(chapter, files, type);
+    }
+
+    addFiles(chapter: IChapters, files: File[], type) {
+        type === 1 ? chapter.textBook = [...files] : chapter.referenceMaterials.push(...files)
+    }
+
+    removeFile(chapter:IChapters, index: number, type) {
+        type == 1?  chapter.textBook.splice(index, 1) :  chapter.referenceMaterials.splice(index, 1)
+    }
+
 
     /**
      * Track by function for ngFor loops
