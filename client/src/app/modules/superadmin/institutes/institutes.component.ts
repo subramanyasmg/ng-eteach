@@ -47,8 +47,8 @@ import {
 } from 'app/state/curriculum/curriculum.selectors';
 import { selectAllInstitutes } from 'app/state/institute/institute.selectors';
 import { filter, Observable, Subject, take, tap } from 'rxjs';
-import { ICurriculum } from '../../modules/superadmin/curriculum/curriculum.types';
-import { IInstitutes } from './institutes.types';
+import { ICurriculum } from '../../../models/curriculum.types';
+import { IInstitutes } from '../../../models/institutes.types';
 
 @Component({
     selector: 'app-institutes',

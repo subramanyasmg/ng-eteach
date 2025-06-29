@@ -12,7 +12,7 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { ICurriculum } from '../modules/superadmin/curriculum/curriculum.types';
+import { ICurriculum } from '../models/curriculum.types';
 
 @Injectable({ providedIn: 'root' })
 export class CurriculumService {

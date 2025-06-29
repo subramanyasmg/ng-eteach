@@ -64,7 +64,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'dashboard', loadChildren: () => import('app/modules/superadmin/example/example.routes')},
             {path: 'curriculum', loadChildren: () => import('app/modules/superadmin/curriculum/curriculum.routes')},
-            {path: 'institute', loadChildren: () => import('app/services/institutes/institutes.routes')},
+            {path: 'institute', loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
         ]
     }
 ];

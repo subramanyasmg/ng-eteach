@@ -12,7 +12,7 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { IInstitutes } from './institutes.types';
+import { IInstitutes } from '../models/institutes.types';
 
 @Injectable({ providedIn: 'root' })
 export class InstituteService {

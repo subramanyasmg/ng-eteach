@@ -12,7 +12,7 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { IChapters } from '../modules/superadmin/chapters/chapters.types';
+import { IChapters } from '../models/chapters.types';
 
 @Injectable({ providedIn: 'root' })
 export class ChaptersService {

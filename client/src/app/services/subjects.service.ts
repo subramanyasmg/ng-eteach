@@ -12,7 +12,7 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { ISubjects } from '../modules/superadmin/subjects/subject.types';
+import { ISubjects } from '../models/subject.types';
 
 @Injectable({ providedIn: 'root' })
 export class SubjectsService {

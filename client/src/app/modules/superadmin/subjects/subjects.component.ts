@@ -55,7 +55,7 @@ import {
     take,
     tap,
 } from 'rxjs';
-import { ISubjects } from './subject.types';
+import { ISubjects } from '../../../models/subject.types';
 
 @Component({
     selector: 'app-subjects',

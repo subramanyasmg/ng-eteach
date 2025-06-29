@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import * as CurriculumActions from './curriculum.actions';
-import { ICurriculum } from 'app/modules/superadmin/curriculum/curriculum.types';
+import { ICurriculum } from 'app/models/curriculum.types';
 
 export interface CurriculumState {
   curriculums: ICurriculum[];

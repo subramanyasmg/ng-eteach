@@ -41,7 +41,7 @@ import {
     selectCurriculumsLoaded,
 } from 'app/state/curriculum/curriculum.selectors';
 import { filter, Observable, Subject, take, tap } from 'rxjs';
-import { ICurriculum } from '../curriculum.types';
+import { ICurriculum } from '../../../../models/curriculum.types';
 import { MatSelectModule } from '@angular/material/select';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 

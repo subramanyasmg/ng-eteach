@@ -45,7 +45,7 @@ import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors'
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
 import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
-import { IChapters } from './chapters.types';
+import { IChapters } from '../../../models/chapters.types';
 
 @Component({
     selector: 'app-chapters',

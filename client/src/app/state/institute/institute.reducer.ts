@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import * as InstituteActions from './institute.actions';
-import { IInstitutes } from 'app/services/institutes/institutes.types';
+import { IInstitutes } from 'app/models/institutes.types';
 
 export interface InstituteState {
   institutes: IInstitutes[];

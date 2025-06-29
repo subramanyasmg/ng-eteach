@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import * as ChapterActions from './chapters.actions';
-import { IChapters } from 'app/modules/superadmin/chapters/chapters.types';
+import { IChapters } from 'app/models/chapters.types';
 
 export interface ChapterState {
     chaptersBySubject: { [subjectId: string]: IChapters[] };

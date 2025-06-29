@@ -37,7 +37,7 @@ import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.servi
 import { PipesModule } from 'app/pipes/pipes.module';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
 import { filter, map, Observable, Subject, take, tap } from 'rxjs';
-import { IGrades } from './grades.types';
+import { IGrades } from '../../../models/grades.types';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Actions, ofType } from '@ngrx/effects';
 import * as GradeActions from 'app/state/grades/grades.actions';

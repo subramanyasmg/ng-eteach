@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { IGrades } from 'app/modules/superadmin/grades/grades.types';
+import { IGrades } from 'app/models/grades.types';
 
 export const loadGrades = createAction('[Grade] Load Grades', props<{curriculumId: string}>());
 export const loadGradesSuccess = createAction('[Grade] Load Grades Success', props<{ curriculumId: string, grades: IGrades[] }>());
