@@ -5,4 +5,5 @@ export interface IChapters {
     lessonPlan?: any;
     textBook?: any;
     referenceMaterials?: any;
+    editMode?: boolean
 }

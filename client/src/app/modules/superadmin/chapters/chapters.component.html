@@ -15,7 +15,7 @@
             <!-- Search -->
             <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
                 <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
-                <input matInput [(ngModel)]="query" (ngModelChange)="applyFilter()" [autocomplete]="'off'"
+                <input matInput [(ngModel)]="query" [autocomplete]="'off'"
                     [placeholder]="'Search'" />
             </mat-form-field>
 
@@ -28,14 +28,124 @@
     <div class="flex flex-auto overflow-hidden">
 
         <div class="flex p-5 flex-auto flex-col gap-3 overflow-hidden sm:overflow-y-auto">
-            <ng-container *ngIf="chapters$ | async | SearchFilter:query:'name' as chapters">
-                <ng-container *ngIf="chapters.length > 0; else noData">
-                    <mat-expansion-panel class="rounded-md" *ngFor="let chapter of chapters; trackBy: trackByFn">
+            <ng-container *ngIf="chapterList | SearchFilter:query:'name'">
+                <ng-container *ngIf="chapterList.length > 0; else noData">
+                    <!-- <mat-expansion-panel class="rounded-md" *ngFor="let chapter of chapters; trackBy: trackByFn">
                         <mat-expansion-panel-header [collapsedHeight]="'56px'">
                             <mat-panel-title>{{ chapter.name }}</mat-panel-title>
                         </mat-expansion-panel-header>
                         {{ 'test' }}
-                    </mat-expansion-panel>
+                    </mat-expansion-panel> -->
+                    <mat-accordion>
+                        <mat-expansion-panel *ngFor="let chapter of chapterList; let i = index; trackBy: trackByFn"
+                            class="rounded-xl mb-4">
+                            <mat-expansion-panel-header [collapsedHeight]="'75px'" class="p-6 items-center">
+                                <div class="w-full flex flex-col mr-5" *ngIf="!chapter.editMode">
+                                    <div class="text-sm text-gray-500">Chapter {{ i + 1 }}</div>
+                                    <div class="flex items-center gap-2 justify-between w-full">
+                                        <div class="flex items-center gap-2 text-2xl font-semibold">
+                                            {{ chapter.name }}
+                                        </div>
+                                        <div class="flex items-center gap-2 ml-3 mr-auto">
+                                            <button matTooltip="Edit Chapter Name"
+                                                class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-stroked-button
+                                                (click)="toggleEditChapter(chapter); $event.stopPropagation()">
+                                                <mat-icon class="icon-size-5" [svgIcon]="'mat_outline:edit'"></mat-icon>
+                                            </button>
+                                            <button matTooltip="Delete Chapter"
+                                                class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-stroked-button
+                                                (click)="deleteItem(chapter); $event.stopPropagation()">
+                                                <mat-icon class="icon-size-5"
+                                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="w-full flex flex-col mr-5" *ngIf="chapter.editMode">
+                                    <div class="flex items-center gap-2 justify-between w-full">
+                                        <mat-form-field class="w-full" [subscriptSizing]="'dynamic'">
+                                            <input required autofocus [ngModel]="chapter.name" (ngModelChange)="noChapterNameModelChange($event, chapter)"
+                                             (keydown)="$event.stopPropagation()"
+                                            (click)="$event.stopPropagation()" matInput
+                                                placeholder="Enter Chapter Name" />
+                                                 <mat-error>Chapter name cannot be empty</mat-error>
+                                        </mat-form-field>
+                                        <div class="flex items-center gap-2 ml-3 mr-auto">
+                                            <button matTooltip="Cancel"
+                                                class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-stroked-button
+                                                (click)="toggleEditChapter(chapter);$event.stopPropagation()">
+                                                <mat-icon class="icon-size-5"
+                                                    [svgIcon]="'mat_outline:close'"></mat-icon>
+                                            </button>
+                                            <button [disabled]="newChapterName.trim().length === 0" matTooltip="Save" class="max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-flat-button [color]="'primary'"
+                                                (click)="updateChapterName(chapter); $event.stopPropagation()">
+                                                <mat-icon class="icon-size-5"
+                                                    [svgIcon]="'mat_outline:check'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel-header>
+
+                            <!-- Inside Expansion Panel -->
+                            <div class="bg-white rounded-md">
+                                <mat-tab-group>
+                                    <mat-tab label="Lesson plan">
+                                        <div class="mt-4 p-2">
+                                            <div class="text-2xl font-semibold mb-4">Lesson Plan</div>
+                                            <mat-accordion class="space-y-4"> <!-- multi -->
+                                                <mat-expansion-panel *ngFor="let phase of chapter.lessonPlan">
+                                                    <mat-expansion-panel-header>
+                                                        <mat-panel-title class="text-2xl">{{ phase.label
+                                                            }}</mat-panel-title>
+                                                    </mat-expansion-panel-header>
+                                                    <div class="p-2 flex flex-col gap-2">
+                                                        <mat-form-field class="w-full">
+                                                            <textarea matInput required [(ngModel)]="phase.content"
+                                                                placeholder="Enter content for {{ phase.label }}"
+                                                                rows="3"></textarea>
+                                                            <mat-error>
+                                                                Content is required
+                                                            </mat-error>
+                                                        </mat-form-field>
+                                                        <button [disabled]="phase?.content?.trim().length === 0" matTooltip="Save"
+                                                            class="rounded-md w-fit self-end" mat-flat-button [color]="'primary'"
+                                                            (click)="updateChapterPhase(chapter)">
+                                                            <mat-icon class="icon-size-5"
+                                                                [svgIcon]="'mat_outline:check'"></mat-icon>
+                                                        </button>
+                                                    </div>
+                                                </mat-expansion-panel>
+                                            </mat-accordion>
+                                        </div>
+                                    </mat-tab>
+
+                                    <mat-tab label="Text book">
+                                        <div class="mt-4 border p-4 rounded-md flex justify-between items-center">
+                                            <div class="font-semibold">Text book content</div>
+                                            <button mat-icon-button>
+                                                <mat-icon>upload</mat-icon>
+                                            </button>
+                                        </div>
+                                    </mat-tab>
+
+                                    <mat-tab label="Reference materials">
+                                        <div class="mt-4 border p-4 rounded-md flex justify-between items-center">
+                                            <div class="font-semibold">Reference materials content</div>
+                                            <button mat-icon-button>
+                                                <mat-icon>upload</mat-icon>
+                                            </button>
+                                        </div>
+                                    </mat-tab>
+                                </mat-tab-group>
+                            </div>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+
                 </ng-container>
             </ng-container>
 

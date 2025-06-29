@@ -23,3 +23,7 @@ mat-snack-bar-container {
     padding: 0 !important;
     overflow: hidden !important;
 }
+
+.mat-expansion-panel-header.mat-expanded {
+    height: 75px !important;
+}

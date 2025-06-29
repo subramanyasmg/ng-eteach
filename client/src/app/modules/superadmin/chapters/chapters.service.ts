@@ -44,7 +44,7 @@ export class ChaptersService {
     }
 
     getAll(subjectId: string) {
-        return this._httpClient.get(this.apiUrl + '/' + subjectId ).pipe(
+        return this._httpClient.get(this.apiUrl + '/' + subjectId).pipe(
             tap((response: any) => {
                 if (response?.status) {
                     this._items.next(response.data as IChapters[]);
@@ -91,7 +91,9 @@ export class ChaptersService {
 
                 // Build chapters objects
                 const newChapters: IChapters[] = chapterNames.map((name) => ({
-                    id: Date.now().toString() + Math.random().toString(36).slice(2, 6), // ensure unique ID
+                    id:
+                        Date.now().toString() +
+                        Math.random().toString(36).slice(2, 6), // ensure unique ID
                     name,
                     subjectId
                 }));
@@ -113,10 +115,7 @@ export class ChaptersService {
                             );
                         }
 
-                        this._items.next([
-                            ...newChapters,
-                            ...items,
-                        ]);
+                        this._items.next([...newChapters, ...items]);
                         return of(response);
                     })
                 );

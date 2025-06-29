@@ -37,22 +37,14 @@ import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { PipesModule } from 'app/pipes/pipes.module';
 import * as ChapterActions from 'app/state/chapters/chapters.actions';
 import { selectChaptersBySubjectId } from 'app/state/chapters/chapters.selectors';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
-import {
-    combineLatest,
-    filter,
-    map,
-    Observable,
-    Subject,
-    take,
-    tap,
-} from 'rxjs';
+import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
 import { IChapters } from './chapters.types';
-import { PipesModule } from 'app/pipes/pipes.module';
 
 @Component({
     selector: 'app-chapters',
@@ -78,6 +70,7 @@ import { PipesModule } from 'app/pipes/pipes.module';
         MatSelectModule,
         MatIconModule,
         PipesModule,
+        MatTabsModule,
         MatExpansionModule,
     ],
     templateUrl: './chapters.component.html',
@@ -94,7 +87,8 @@ export class ChaptersListComponent implements OnInit {
     matDialogRef = null;
     entityForm: UntypedFormGroup;
     chapters$: Observable<IChapters[]>;
-    private _unsubscribeAll: Subject<any> = new Subject<any>();
+    chapterList: IChapters[];
+    newChapterName: string = '';
 
     constructor(
         private route: ActivatedRoute,
@@ -157,9 +151,27 @@ export class ChaptersListComponent implements OnInit {
         });
 
         this.handleAPIResponse();
-        this.chapters$ = this.store.select(
-            selectChaptersBySubjectId(this.subjectId)
-        );
+
+        this.store
+            .select(selectChaptersBySubjectId(this.subjectId))
+            .subscribe((data) => {
+                console.log(data);
+                this.chapterList = data.map((chapter) => ({
+                    ...chapter,
+                    editMode: false,
+                    lessonPlan: chapter.lessonPlan ?? this.defaultPhases(), // ensure phases exist
+                }));
+            });
+    }
+
+    defaultPhases() {
+        return [
+            { label: 'Phase 1: Engage', content: '' },
+            { label: 'Phase 2: Explore', content: '' },
+            { label: 'Phase 3: Explain', content: '' },
+            { label: 'Phase 4: Elaborate', content: '' },
+            { label: 'Phase 5: Evaluate', content: '' },
+        ];
     }
 
     get chapters(): FormArray {
@@ -194,7 +206,7 @@ export class ChaptersListComponent implements OnInit {
         this.entityForm.disable();
         const formValues = this.entityForm.value;
         const requestObj: IChapters = {
-            name: formValues.chapters.map((c) => c.name).join(',')
+            name: formValues.chapters.map((c) => c.name).join(','),
         };
         this.store.dispatch(
             ChapterActions.addChapter({
@@ -204,9 +216,21 @@ export class ChaptersListComponent implements OnInit {
         );
     }
 
-    applyFilter(): void {
-        const filterValue = this.query?.trim().toLowerCase() || '';
-        // this.dataSource.filter = filterValue;
+    noChapterNameModelChange(event, chapter: IChapters) {
+        this.newChapterName = event.trim();
+    }
+
+    updateChapterName(chapter: IChapters) {
+        const requestObj: IChapters = {
+            id: chapter.id,
+            name: this.newChapterName,
+        };
+        this.store.dispatch(
+            ChapterActions.updateChapter({
+                subjectId: this.subjectId,
+                chapter: requestObj,
+            })
+        );
     }
 
     /**
@@ -229,6 +253,42 @@ export class ChaptersListComponent implements OnInit {
             this.entityForm.reset();
             this.chapters.clear(); // clear all form array items
             this.chapters.push(this.createChapter()); // add one blank row
+        });
+    }
+
+    toggleEditChapter(chapter: IChapters) {
+        chapter.editMode = !chapter.editMode;
+        if (chapter.editMode) {
+            this.newChapterName = chapter.name;
+        } else {
+            this.newChapterName = '';
+        }
+    }
+
+    deleteItem(item: IChapters): void {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title: 'Are you sure you want to delete?',
+            message:
+                'Taking this action will permanently delete this entry. Are you sure about taking this action?',
+            actions: {
+                confirm: {
+                    label: 'Delete Permanently',
+                },
+            },
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            if (result === 'confirmed') {
+                this.store.dispatch(
+                    ChapterActions.deleteChapter({
+                        subjectId: this.subjectId,
+                        chapterId: item.id,
+                    })
+                );
+            }
         });
     }
 
@@ -264,7 +324,7 @@ export class ChaptersListComponent implements OnInit {
                         action.type === ChapterActions.updateChapterSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Chapter "${action.subject.name}" updated successfully!`
+                            `Chapter updated successfully!`
                         );
                     } else if (
                         action.type === ChapterActions.deleteChapterSuccess.type
