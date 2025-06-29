@@ -27,6 +27,8 @@ import { subjectsReducer } from './state/subjects/subjects.reducer';
 import { SubjectsEffects } from './state/subjects/subjects.effects';
 import { instituteReducer } from './state/institute/institute.reducer';
 import { InstituteEffects } from './state/institute/institute.effects';
+import { chaptersReducer } from './state/chapters/chapters.reducer';
+import { ChaptersEffects } from './state/chapters/chapters.effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -140,5 +142,7 @@ export const appConfig: ApplicationConfig = {
         provideEffects(SubjectsEffects),
         provideState('institute', instituteReducer),
         provideEffects(InstituteEffects),
+         provideState('chapters', chaptersReducer),
+        provideEffects(ChaptersEffects),
     ],
 };

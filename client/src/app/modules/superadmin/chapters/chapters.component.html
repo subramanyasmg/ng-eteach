@@ -1,0 +1,315 @@
+<div class="bg-gray-100 flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
+    <!-- Header -->
+    <div class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ subjectName }}
+            </div>
+            <div class="text-xl text-secondary">
+                Add chapters under this subject
+            </div>
+        </div>
+        <!-- Actions -->
+        <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [(ngModel)]="query" [autocomplete]="'off'" [placeholder]="'Search'" />
+            </mat-form-field>
+
+
+            <button class="ml-4 rounded-md" mat-flat-button [color]="'primary'" (click)="openDialog()">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            </button>
+        </div>
+    </div>
+    <div class="flex flex-auto overflow-hidden">
+
+        <div class="flex p-5 flex-auto flex-col gap-3 overflow-hidden sm:overflow-y-auto">
+            <ng-container *ngIf="chapterList | SearchFilter:query:'name'">
+                <ng-container *ngIf="chapterList.length > 0; else noData">
+                    <!-- <mat-expansion-panel class="rounded-md" *ngFor="let chapter of chapters; trackBy: trackByFn">
+                        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                            <mat-panel-title>{{ chapter.name }}</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        {{ 'test' }}
+                    </mat-expansion-panel> -->
+                    <mat-accordion>
+                        <mat-expansion-panel *ngFor="let chapter of chapterList; let i = index; trackBy: trackByFn"
+                            class="rounded-xl mb-4">
+                            <mat-expansion-panel-header [collapsedHeight]="'75px'" class="p-6 items-center">
+                                <div class="w-full flex flex-col mr-5" *ngIf="!chapter.editMode">
+                                    <div class="text-sm text-gray-500">Chapter {{ i + 1 }}</div>
+                                    <div class="flex items-center gap-2 justify-between w-full">
+                                        <div class="flex items-center gap-2 text-2xl font-semibold">
+                                            {{ chapter.name }}
+                                        </div>
+                                        <div class="flex items-center gap-2 ml-3 mr-auto">
+                                            <button matTooltip="Edit Chapter Name"
+                                                class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-stroked-button
+                                                (click)="toggleEditChapter(chapter); $event.stopPropagation()">
+                                                <mat-icon class="icon-size-5" [svgIcon]="'mat_outline:edit'"></mat-icon>
+                                            </button>
+                                            <button matTooltip="Delete Chapter"
+                                                class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-stroked-button
+                                                (click)="deleteItem(chapter); $event.stopPropagation()">
+                                                <mat-icon class="icon-size-5"
+                                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="w-full flex flex-col mr-5" *ngIf="chapter.editMode">
+                                    <div class="flex items-center gap-2 justify-between w-full">
+                                        <mat-form-field class="w-full" [subscriptSizing]="'dynamic'">
+                                            <input required autofocus [ngModel]="chapter.name"
+                                                (ngModelChange)="noChapterNameModelChange($event, chapter)"
+                                                (keydown)="$event.stopPropagation()" (click)="$event.stopPropagation()"
+                                                matInput placeholder="Enter Chapter Name" />
+                                            <mat-error>Chapter name cannot be empty</mat-error>
+                                        </mat-form-field>
+                                        <div class="flex items-center gap-2 ml-3 mr-auto">
+                                            <button matTooltip="Cancel"
+                                                class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-stroked-button
+                                                (click)="toggleEditChapter(chapter);$event.stopPropagation()">
+                                                <mat-icon class="icon-size-5"
+                                                    [svgIcon]="'mat_outline:close'"></mat-icon>
+                                            </button>
+                                            <button [disabled]="newChapterName.trim().length === 0" matTooltip="Save"
+                                                class="max-w-[20px] min-w-[20px] rounded-md" mat-flat-button
+                                                [color]="'primary'"
+                                                (click)="updateChapterName(chapter); $event.stopPropagation()">
+                                                <mat-icon class="icon-size-5"
+                                                    [svgIcon]="'mat_outline:check'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel-header>
+
+                            <!-- Inside Expansion Panel -->
+                            <div class="bg-white rounded-md">
+                                <mat-tab-group>
+                                    <mat-tab label="Lesson plan">
+                                        <div class="mt-4 p-4 rounded-md border">
+                                            <div class="text-2xl font-semibold mb-4">Lesson Plan</div>
+                                            <mat-accordion class="space-y-4"> <!-- multi -->
+                                                <mat-expansion-panel *ngFor="let phase of chapter.lessonPlan">
+                                                    <mat-expansion-panel-header>
+                                                        <mat-panel-title class="text-2xl">{{ phase.label
+                                                            }}</mat-panel-title>
+                                                    </mat-expansion-panel-header>
+                                                    <div class="p-2 flex flex-col gap-2">
+                                                        <mat-form-field class="w-full">
+                                                            <textarea matInput required [(ngModel)]="phase.content"
+                                                                placeholder="Enter content for {{ phase.label }}"
+                                                                rows="3"></textarea>
+                                                            <mat-error>
+                                                                Content is required
+                                                            </mat-error>
+                                                        </mat-form-field>
+                                                        <button [disabled]="phase?.content?.trim().length === 0"
+                                                            matTooltip="Save" class="rounded-md w-fit self-end"
+                                                            mat-flat-button [color]="'primary'"
+                                                            (click)="updateChapterPhase(chapter)">
+                                                            <mat-icon class="icon-size-5"
+                                                                [svgIcon]="'mat_outline:check'"></mat-icon>
+                                                        </button>
+                                                    </div>
+                                                </mat-expansion-panel>
+                                            </mat-accordion>
+                                        </div>
+                                    </mat-tab>
+
+                                    <mat-tab label="Text book">
+                                        <div class="mt-4 border p-4 rounded-md flex flex-col gap-2">
+                                            <div class="text-2xl mb-4 font-semibold">Text book content</div>
+                                            <!-- <button mat-icon-button>
+                                                <mat-icon>upload</mat-icon>
+                                            </button> -->
+                                            <div class="w-full border-2 border-dashed border-blue-500 rounded-lg p-5 text-center cursor-pointer transition hover:bg-blue-50"
+                                                (drop)="onFileDrop(chapter, $event, 1)"
+                                                (dragover)="onDragOver(chapter,$event, 1)"
+                                                (dragleave)="onDragLeave(chapter,$event, 1)"
+                                                (click)="fileInput1.click()">
+                                                <!-- Cloud Upload Icon -->
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <mat-icon class="icon-size-10 text-gray-400"
+                                                        svgIcon="mat_outline:cloud_upload"></mat-icon>
+                                                    <div class="mt-3 text-base text-gray-700 font-medium">Drag & drop to
+                                                        upload</div>
+                                                    <div class="text-sm text-blue-500 font-medium">or browse</div>
+                                                </div>
+                                                <input type="file" #fileInput1 hidden
+                                                    (change)="onFileSelected(chapter,$event, 1)"
+                                                    accept="application/pdf" />
+                                            </div>
+
+                                            <!-- Uploaded Files Preview -->
+                                            <div class="mt-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                                <div *ngFor="let file of chapter.textBook; let i = index"
+                                                    class="bg-gray-100 p-4 rounded-lg flex flex-col items-start gap-2 relative">
+                                                    <div class="w-full flex justify-between items-center">
+                                                        <div class="text-lg text-gray-600 font-semibold"> {{
+                                                            file.name.split('.').pop()?.toUpperCase() }}</div>
+                                                        <div>
+                                                            <button mat-icon-button color="primary"
+                                                                matTooltip="Preview File"
+                                                                class="bg-white rounded-full shadow-sm">
+                                                                <mat-icon
+                                                                    [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                                            </button>
+                                                            <button mat-icon-button color="warn"
+                                                                (click)="removeFile(chapter, i, 1)"
+                                                                matTooltip="Delete File"
+                                                                class="bg-white rounded-full shadow-sm ml-2">
+                                                                <mat-icon
+                                                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-sm text-gray-800 break-words truncate">{{ file.name }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </mat-tab>
+
+                                    <mat-tab label="Reference materials">
+                                        <div class="mt-4 border p-4 rounded-md flex flex-col gap-2">
+                                            <div class="text-2xl mb-4 font-semibold">Reference Materials</div>
+                                            <!-- <button mat-icon-button>
+                                                <mat-icon>upload</mat-icon>
+                                            </button> -->
+                                            <div class="w-full border-2 border-dashed border-blue-500 rounded-lg p-5 text-center cursor-pointer transition hover:bg-blue-50"
+                                                (drop)="onFileDrop(chapter, $event, 2)"
+                                                (dragover)="onDragOver(chapter,$event, 2)"
+                                                (dragleave)="onDragLeave(chapter,$event, 2)"
+                                                (click)="fileInput2.click()">
+                                                <!-- Cloud Upload Icon -->
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <mat-icon class="icon-size-10 text-gray-400"
+                                                        svgIcon="mat_outline:cloud_upload"></mat-icon>
+                                                    <div class="mt-3 text-base text-gray-700 font-medium">Drag & drop to
+                                                        upload</div>
+                                                    <div class="text-sm text-blue-500 font-medium">or browse</div>
+                                                </div>
+                                                <input type="file" #fileInput2 hidden multiple
+                                                    (change)="onFileSelected(chapter,$event, 2)"
+                                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.odt,.jpg,.jpeg,.png,.gif,.svg,.webp,.mp4,.mkv,.mp3,.wav,.avi,.mov,.wmv,.flv" />
+                                            </div>
+
+                                            <!-- Uploaded Files Preview -->
+                                            <div class="mt-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                                <div *ngFor="let file of chapter.referenceMaterials; let i = index"
+                                                    class="bg-gray-100 p-4 rounded-lg flex flex-col items-start gap-2 relative">
+                                                    <div class="w-full flex justify-between items-center">
+                                                        <div class="text-lg text-gray-600 font-semibold"> {{
+                                                            file.name.split('.').pop()?.toUpperCase() }}</div>
+                                                        <div>
+                                                            <button mat-icon-button color="primary"
+                                                                matTooltip="Preview File"
+                                                                class="bg-white rounded-full shadow-sm">
+                                                                <mat-icon
+                                                                    [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                                            </button>
+                                                            <button mat-icon-button color="warn"
+                                                                (click)="removeFile(chapter, i, 2)"
+                                                                matTooltip="Delete File"
+                                                                class="bg-white rounded-full shadow-sm ml-2">
+                                                                <mat-icon
+                                                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                            </button>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="text-sm text-gray-800 break-words truncate">{{ file.name }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </mat-tab>
+                                </mat-tab-group>
+                            </div>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+
+                </ng-container>
+            </ng-container>
+
+        </div>
+    </div>
+
+</div>
+
+<ng-template #noData>
+    <div class="p-8 text-center text-4xl tracking-tight">
+        <div class="w-full flex justify-center">
+            <img src="images/no-data.png" alt="No data" class="w-90" />
+        </div>
+        <div class="mt-5 text-center text-4xl font-extrabold">
+            No Data Available!
+        </div>
+        <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
+            It looks like you haven’t added any chapter information under this subject. <br> Add chapter information by
+            clicking the (+) button on the to right
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #EntityDialog let-data="data">
+    <div class="flex max-h-160 flex-auto flex-col overflow-hidden">
+        <!-- Header -->
+        <div
+            class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
+            <div class="text-lg font-medium">Add Chapters</div>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Card form -->
+    <form class="flex w-full flex-0 flex-col items-start overflow-y-auto max-h-96 space-y-3 p-4 mt-3"
+        [formGroup]="entityForm">
+
+        <div formArrayName="chapters" class="space-y-4 p-4 w-full">
+            <div *ngFor="let chapter of chapters.controls; let i = index" [formGroupName]="i"
+                class="flex gap-2 items-end">
+                <mat-form-field class="flex-1" [subscriptSizing]="'dynamic'">
+                    <mat-label>Chapter name</mat-label>
+                    <input matInput required maxlength="200" formControlName="name" />
+                </mat-form-field>
+
+                <button [matTooltip]="'Delete Chapter'" mat-icon-button color="warn" type="button"
+                    *ngIf="chapters.length > 1" (click)="removeChapter(i)" aria-label="Remove chapter">
+                    <mat-icon class="icon-size-6 text-red-500" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                </button>
+
+                <button [matTooltip]="'Add New Chapter'" class=" rounded-md" mat-flat-button [color]="'primary'"
+                    type="button" *ngIf="i === chapters.length - 1" (click)="addChapter()" aria-label="Add chapter">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+        </div>
+
+    </form>
+
+    <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
+
+        <button mat-button (click)="matDialogRef.close()">Cancel</button>
+        <button class="ml-3 px-6" mat-flat-button [color]="'primary'" (click)="addEntity()"
+            [disabled]="entityForm.invalid || entityForm.disabled">
+            @if (!entityForm.disabled) {
+            <span> Save </span>
+            }
+            @if (entityForm.disabled) {
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            }
+        </button>
+    </div>
+
+</ng-template>
