@@ -62,5 +62,29 @@
         "success_add": "Institute added successfully!",
         "success_update": "Institute updated successfully!",
         "success_delete": "Institute deleted successfully!"
+    },
+    "curriculum": {
+        "page_subtext": "Manage curriculum information",
+        "header_name": "Name",
+        "header_created_on": "Created On",
+        "header_publisher_name": "Publisher Name",
+        "header_publisher_email": "Publisher Email",
+        "header_phone": "Phone",
+        "empty_state_line1": "It looks like you haven’t added any curriculums to start with.",
+        "empty_state_line2": "Add curriculum information by clicking the (+) button on the top right.",
+        "button_add_curriculum": "Add New Curriculum",
+        "button_update_curriculum": "Update Curriculum",
+        "label_curriculum_name": "Curriculum Name",
+        "error_curriculum_name_required": "Curriculum Name is required",
+        "label_publisher_name": "Publisher Name",
+        "error_publisher_name_required": "Publisher Name is required",
+        "label_publisher_email": "Publisher Email",
+        "error_publisher_email_required": "Publisher Email is required",
+        "error_publisher_email_invalid": "Publisher Email is invalid",
+        "error_phone_required": "Phone is required",
+        "error_phone_invalid": "Invalid phone number",
+        "success_add": "Curriculum added successfully!",
+        "success_update": "Curriculum updated successfully!",
+        "success_delete": "Curriculum deleted successfully!"
     }
 }
