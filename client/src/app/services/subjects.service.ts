@@ -12,17 +12,17 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { ICurriculum } from '../curriculum.types';
+import { ISubjects } from '../models/subject.types';
 
 @Injectable({ providedIn: 'root' })
-export class CurriculumService {
-    private _items: BehaviorSubject<ICurriculum[] | null> = new BehaviorSubject(
+export class SubjectsService {
+    private _items: BehaviorSubject<ISubjects[] | null> = new BehaviorSubject(
         null
     );
-    private _item: BehaviorSubject<ICurriculum | null> = new BehaviorSubject(
+    private _item: BehaviorSubject<ISubjects | null> = new BehaviorSubject(
         null
     );
-    private apiUrl = '/api/a/curriculum';
+    private apiUrl = '/api/a/subjects';
 
     /**
      * Constructor
@@ -32,22 +32,22 @@ export class CurriculumService {
     /**
      * Getter for single item
      */
-    get item$(): Observable<ICurriculum> {
+    get item$(): Observable<ISubjects> {
         return this._item.asObservable();
     }
 
     /**
      * Getter for all items
      */
-    get items$(): Observable<ICurriculum[]> {
+    get items$(): Observable<ISubjects[]> {
         return this._items.asObservable();
     }
 
-    getAll() {
-        return this._httpClient.get(this.apiUrl).pipe(
+    getAll(gradeId: string) {
+        return this._httpClient.get(this.apiUrl + '/' + gradeId ).pipe(
             tap((response: any) => {
                 if (response?.status) {
-                    this._items.next(response.data as ICurriculum[]);
+                    this._items.next(response.data as ISubjects[]);
                 } else {
                     this._items.next([]);
                 }
@@ -66,7 +66,7 @@ export class CurriculumService {
     //                     }
 
     //                     this._items.next([
-    //                         response.data as ICurriculum,
+    //                         response.data as ISubjects,
     //                         ...item,
     //                     ]);
 
@@ -77,22 +77,31 @@ export class CurriculumService {
     //     );
     // }
 
-    create(request): Observable<any> {
+    create(gradeId, request): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
+                // Split the name string into array of trimmed names
+                const subjectNames = request.name
+                    .split(',')
+                    .map((n) => n.trim())
+                    .filter((n) => n); // remove empty strings
+
+                // Build subject objects
+                const newSubjects: ISubjects[] = subjectNames.map((name) => ({
+                    id: Date.now().toString() + Math.random().toString(36).slice(2, 6), // ensure unique ID
+                    name,
+                    gradeId,
+                    createdOn: new Date().toLocaleDateString(),
+                    modifiedOn: new Date().toLocaleDateString(),
+                    noOfChapters: request.noOfChapters,
+                }));
+
                 const mockResponse = {
                     status: true,
-                    data: {
-                        id: Date.now().toString(),
-                        name: request.name,
-                        createdOn: new Date().toLocaleDateString(),
-                        publisherName: request.publisherName,
-                        publisherEmail: request.publisherEmail,
-                        phone: request.phone,
-                    },
+                    data: newSubjects,
                 };
 
                 return of(mockResponse).pipe(
@@ -108,10 +117,9 @@ export class CurriculumService {
                         }
 
                         this._items.next([
-                            response.data as ICurriculum,
+                            ...newSubjects,
                             ...items,
                         ]);
-
                         return of(response);
                     })
                 );
@@ -119,7 +127,7 @@ export class CurriculumService {
         );
     }
 
-    // update(id, data): Observable<ICurriculum> {
+    // update(id, data): Observable<ISubjects> {
     //     return this.items$.pipe(
     //         take(1),
     //         switchMap((item) =>
@@ -144,7 +152,7 @@ export class CurriculumService {
     //     );
     // }
 
-    update(id: string, updatedData: ICurriculum): Observable<any> {
+    update(id: string, updatedData: ISubjects): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
@@ -159,7 +167,7 @@ export class CurriculumService {
                 }
 
                 // Create updated item
-                const updatedItem: ICurriculum = {
+                const updatedItem: ISubjects = {
                     ...items[index],
                     ...updatedData,
                 };

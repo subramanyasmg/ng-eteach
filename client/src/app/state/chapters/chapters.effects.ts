@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as ChapterActions from './chapters.actions';
-import { ChaptersService } from 'app/modules/superadmin/chapters/chapters.service';
+import { ChaptersService } from 'app/services/chapters.service';
 
 @Injectable()
 export class ChaptersEffects {

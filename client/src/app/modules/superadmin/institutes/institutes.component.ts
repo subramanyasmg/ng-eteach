@@ -47,8 +47,9 @@ import {
 } from 'app/state/curriculum/curriculum.selectors';
 import { selectAllInstitutes } from 'app/state/institute/institute.selectors';
 import { filter, Observable, Subject, take, tap } from 'rxjs';
-import { ICurriculum } from '../curriculum/curriculum.types';
-import { IInstitutes } from './institutes.types';
+import { ICurriculum } from '../../../models/curriculum.types';
+import { IInstitutes } from '../../../models/institutes.types';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-institutes',
@@ -74,6 +75,7 @@ import { IInstitutes } from './institutes.types';
         MatSelectModule,
         MatTooltipModule,
         MatDatepickerModule,
+        TranslocoModule
     ],
     providers: [provideNativeDateAdapter()],
     templateUrl: './institutes.component.html',
@@ -111,11 +113,12 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         private store: Store,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
-        private titleService: BreadcrumbService
+        private titleService: BreadcrumbService,
+        private translocoService: TranslocoService
     ) {
         this.titleService.setBreadcrumb([
-            { label: 'Users', url: '/institute' },
-            { label: 'Manage Institutes', url: '' },
+            { label: this.translocoService.translate('navigation.users'), url: '/institute' },
+            { label: this.translocoService.translate('navigation.manageInstitute'), url: '' },
         ]);
     }
 
@@ -262,12 +265,11 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     deleteItem(item: IInstitutes): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: 'Are you sure you want to delete?',
-            message:
-                'Taking this action will permanently delete this entry. Are you sure about taking this action?',
+            title: this.translocoService.translate('common.deleteConfirmationTitle'),
+            message:this.translocoService.translate('common.deleteConfirmationMessage'),
             actions: {
                 confirm: {
-                    label: 'Delete Permanently',
+                    label: this.translocoService.translate('common.deletePermanently'),
                 },
             },
         });
@@ -315,21 +317,21 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
                         InstituteActions.addInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Institute "${action.institute.name}" added successfully!`
+                            this.translocoService.translate('institute.success_add')
                         );
                     } else if (
                         action.type ===
                         InstituteActions.updateInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Institute "${action.institute.name}" updated successfully!`
+                            this.translocoService.translate('institute.success_update')
                         );
                     } else if (
                         action.type ===
                         InstituteActions.deleteInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Institute deleted successfully!`
+                             this.translocoService.translate('institute.success_delete')
                         );
                     }
 

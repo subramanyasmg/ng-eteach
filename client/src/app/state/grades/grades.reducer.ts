@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import * as GradeActions from './grades.actions';
-import { IGrades } from 'app/modules/superadmin/grades/grades.types';
+import { IGrades } from 'app/models/grades.types';
 
 export interface GradeState {
   gradesByCurriculum: { [curriculumId: string]: IGrades[] };

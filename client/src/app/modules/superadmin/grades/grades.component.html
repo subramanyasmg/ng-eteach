@@ -4,7 +4,7 @@
         <div class="min-w-0 flex-1">
             <!-- Title -->
             <div class="text-4xl font-extrabold tracking-tight">
-                Grades
+                {{ 'navigation.grades' | transloco }}
             </div>
             <div class="text-xl text-secondary">
                 Add grade information under this curriculum
@@ -16,7 +16,7 @@
             <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
                 <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
                 <input matInput [(ngModel)]="query" (ngModelChange)="applyFilter()" [autocomplete]="'off'"
-                    [placeholder]="'Search'" />
+                    [placeholder]="'common.search' | transloco" />
             </mat-form-field>
 
             <mat-form-field class="ml-4" [subscriptSizing]="'dynamic'">
@@ -48,40 +48,40 @@
                     class="w-full rounded-lg border border-gray-300 overflow-hidden shadow-sm">
 
                     <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_name' | transloco }}</th>
                         <td mat-cell *matCellDef="let element"><a class="text-primary" [routerLink]="element.id + '/subjects'">{{ element.name }}</a></td>
                     </ng-container>
 
                     <ng-container matColumnDef="createdOn">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Created On</th>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_created_on' | transloco }}</th>
                         <td mat-cell *matCellDef="let element">{{ element.createdOn }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="modifiedOn">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Modified On</th>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_modified_on' | transloco }}</th>
                         <td mat-cell *matCellDef="let element">{{ element.modifiedOn }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="noOfSubjects">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Number of Subjects</th>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_subject_count' | transloco }}</th>
                         <td mat-cell *matCellDef="let element">{{ element.noOfSubjects ?? '-' }}</td>
                     </ng-container>
 
 
                     <!-- Actions Column -->
                     <ng-container matColumnDef="actions">
-                        <th mat-header-cell *matHeaderCellDef>Actions</th>
+                        <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | transloco }} </th>
                         <td mat-cell *matCellDef="let element">
                             <div class="flex gap-2">
                                 <button class="h-7 min-h-7 min-w-10 px-2 leading-6 border-none" mat-stroked-button
-                                    [matTooltip]="'Update'" [disabled]="entityForm.disabled"
+                                    [matTooltip]="'common.update' | transloco" [disabled]="entityForm.disabled"
                                     (click)="openDialog(2, element)">
                                     <mat-icon class="icon-size-6 text-primary-500"
                                         [svgIcon]="'heroicons_solid:pencil-square'"></mat-icon>
                                 </button>
 
                                 <button class="h-7 min-h-7 min-w-10 px-2 leading-6 border-none" mat-stroked-button
-                                    [matTooltip]="'Delete'" (click)="deleteItem(element)">
+                                    [matTooltip]="'common.delete' | transloco" (click)="deleteItem(element)">
                                     <mat-icon class="icon-size-6 text-red-500"
                                         [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                 </button>
@@ -97,7 +97,7 @@
                     <tr class="mat-row" *matNoDataRow>
                         <td class="mat-cell" [attr.colspan]="displayedColumns.length">
                             <div class="p-6 text-center text-xl tracking-tight">
-                                No records found for the term <span class="font-semibold">"{{ query }}"</span>
+                                {{ 'common.noRecordsFound' | transloco }} <span class="font-semibold">"{{ query }}"</span>
                             </div>
                         </td>
                     </tr>
@@ -118,10 +118,10 @@
             <img src="images/no-data.png" alt="No data" class="w-90" />
         </div>
         <div class="mt-5 text-center text-4xl font-extrabold">
-            No Data Available!
+           {{ 'common.noDataAvailable' | transloco }}
         </div>
         <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
-           It looks like you haven’t added any grade information under this curriculum. <br> Add grade information by clicking the (+) button on the to right
+          {{ 'grades.empty_state_line1' | transloco }} <br> {{ 'grades.empty_state_line2' | transloco }}
         </div>
 
     </div>
@@ -132,7 +132,7 @@
         <!-- Header -->
         <div
             class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
-            <div class="text-lg font-medium">{{ mode === 1 ? 'Add New Grade' : 'Update Grade'}}</div>
+            <div class="text-lg font-medium">{{ mode === 1 ? ('grades.button_add_grade' | transloco) : ('grades.button_update_grade' | transloco)}}</div>
             <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
                 <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
             </button>
@@ -145,10 +145,10 @@
 
         <div class="flex w-full">
             <mat-form-field class="w-full" floatLabel="always">
-                <mat-label>Grade Name</mat-label>
+                <mat-label>{{ 'grades.label_grade_name' | transloco }}</mat-label>
                 <input matInput [formControlName]="'name'" [placeholder]="'e.g. Grade 1'" required maxlength="200" />
                 @if (entityForm.get('name').hasError('required')) {
-                <mat-error>Grade Name is required </mat-error>
+                <mat-error>{{ 'grades.error_grade_name_required' | transloco }} </mat-error>
                 }
             </mat-form-field>
         </div>
@@ -157,11 +157,11 @@
 
     <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
 
-        <button mat-button (click)="matDialogRef.close()">Cancel</button>
+        <button mat-button (click)="matDialogRef.close()"> {{ 'common.cancel' | transloco }}</button>
         <button class="ml-3 px-6" mat-flat-button [color]="'primary'" (click)="mode === 1 ? addEntity(): updateEntity()"
             [disabled]="entityForm.invalid || entityForm.disabled">
             @if (!entityForm.disabled) {
-            <span> Save </span>
+            <span>  {{ 'common.save' | transloco }} </span>
             }
             @if (entityForm.disabled) {
             <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>

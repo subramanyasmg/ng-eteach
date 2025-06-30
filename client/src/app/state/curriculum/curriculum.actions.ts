@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { ICurriculum } from 'app/modules/superadmin/curriculum/curriculum.types';
+import { ICurriculum } from 'app/models/curriculum.types';
 
 export const loadCurriculums = createAction('[Curriculum] Load Curriculums');
 export const loadCurriculumsSuccess = createAction('[Curriculum] Load Curriculums Success', props<{ curriculums: ICurriculum[] }>());

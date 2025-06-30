@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as CurriculumActions from './curriculum.actions';
-import { CurriculumService } from 'app/modules/superadmin/curriculum/curriculum-list/curriculum.service';
+import { CurriculumService } from 'app/services/curriculum.service';
 
 @Injectable()
 export class CurriculumEffects {

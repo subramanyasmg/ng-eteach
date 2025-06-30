@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { IChapters } from 'app/modules/superadmin/chapters/chapters.types';
+import { IChapters } from 'app/models/chapters.types';
 
 export const loadChapters = createAction('[Chapter] Load Chapters', props<{subjectId: string}>());
 export const loadChaptersSuccess = createAction('[Chapter] Load Chapters Success', props<{ subjectId: string, chapters: IChapters[] }>());

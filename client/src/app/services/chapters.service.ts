@@ -12,17 +12,17 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { IInstitutes } from './institutes.types';
+import { IChapters } from '../models/chapters.types';
 
 @Injectable({ providedIn: 'root' })
-export class InstituteService {
-    private _items: BehaviorSubject<IInstitutes[] | null> = new BehaviorSubject(
+export class ChaptersService {
+    private _items: BehaviorSubject<IChapters[] | null> = new BehaviorSubject(
         null
     );
-    private _item: BehaviorSubject<IInstitutes | null> = new BehaviorSubject(
+    private _item: BehaviorSubject<IChapters | null> = new BehaviorSubject(
         null
     );
-    private apiUrl = '/api/a/institute';
+    private apiUrl = '/api/a/chapters';
 
     /**
      * Constructor
@@ -32,22 +32,22 @@ export class InstituteService {
     /**
      * Getter for single item
      */
-    get item$(): Observable<IInstitutes> {
+    get item$(): Observable<IChapters> {
         return this._item.asObservable();
     }
 
     /**
      * Getter for all items
      */
-    get items$(): Observable<IInstitutes[]> {
+    get items$(): Observable<IChapters[]> {
         return this._items.asObservable();
     }
 
-    getAll() {
-        return this._httpClient.get(this.apiUrl).pipe(
+    getAll(subjectId: string) {
+        return this._httpClient.get(this.apiUrl + '/' + subjectId).pipe(
             tap((response: any) => {
                 if (response?.status) {
-                    this._items.next(response.data as IInstitutes[]);
+                    this._items.next(response.data as IChapters[]);
                 } else {
                     this._items.next([]);
                 }
@@ -66,7 +66,7 @@ export class InstituteService {
     //                     }
 
     //                     this._items.next([
-    //                         response.data as IInstitutes,
+    //                         response.data as IChapters,
     //                         ...item,
     //                     ]);
 
@@ -77,28 +77,30 @@ export class InstituteService {
     //     );
     // }
 
-    create(request): Observable<any> {
+    create(subjectId, request): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
+                // Split the name string into array of trimmed names
+                const chapterNames = request.name
+                    .split(',')
+                    .map((n) => n.trim())
+                    .filter((n) => n); // remove empty strings
+
+                // Build chapters objects
+                const newChapters: IChapters[] = chapterNames.map((name) => ({
+                    id:
+                        Date.now().toString() +
+                        Math.random().toString(36).slice(2, 6), // ensure unique ID
+                    name,
+                    subjectId
+                }));
+
                 const mockResponse = {
                     status: true,
-                    data: {
-                        id: Date.now().toString(),
-                        name: request.name,
-                        createdOn: new Date().toLocaleDateString(),
-                        expiresOn: request.expiresOn,
-                        noOfLicense: request.noOfLicense,
-                        subdomain: request.subdomain,
-                        instituteAddress: request.instituteAddress,
-                        adminName: request.adminName,
-                        adminEmail: request.adminEmail,
-                        status: request.status,
-                        curriculum: request.curriculum,
-                        accountType: request.accountType
-                    } as IInstitutes,
+                    data: newChapters,
                 };
 
                 return of(mockResponse).pipe(
@@ -113,11 +115,7 @@ export class InstituteService {
                             );
                         }
 
-                        this._items.next([
-                            response.data as IInstitutes,
-                            ...items,
-                        ]);
-
+                        this._items.next([...newChapters, ...items]);
                         return of(response);
                     })
                 );
@@ -125,7 +123,7 @@ export class InstituteService {
         );
     }
 
-    // update(id, data): Observable<IInstitutes> {
+    // update(id, data): Observable<IChapters> {
     //     return this.items$.pipe(
     //         take(1),
     //         switchMap((item) =>
@@ -150,7 +148,7 @@ export class InstituteService {
     //     );
     // }
 
-    update(id: string, updatedData: IInstitutes): Observable<any> {
+    update(id: string, updatedData: IChapters): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
@@ -165,7 +163,7 @@ export class InstituteService {
                 }
 
                 // Create updated item
-                const updatedItem: IInstitutes = {
+                const updatedItem: IChapters = {
                     ...items[index],
                     ...updatedData,
                 };

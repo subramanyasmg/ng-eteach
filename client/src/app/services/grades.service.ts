@@ -12,7 +12,7 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { IGrades } from './grades.types';
+import { IGrades } from '../models/grades.types';
 
 @Injectable({ providedIn: 'root' })
 export class GradesService {

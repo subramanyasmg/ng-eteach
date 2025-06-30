@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { IInstitutes } from 'app/modules/superadmin/institutes/institutes.types';
+import { IInstitutes } from 'app/models/institutes.types';
 
 export const loadInstitutes = createAction('[Institute] Load Institutes');
 export const loadInstitutesSuccess = createAction('[Institute] Load Institutes Success', props<{ institutes: IInstitutes[] }>());

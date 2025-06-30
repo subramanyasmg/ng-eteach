@@ -41,9 +41,10 @@ import {
     selectCurriculumsLoaded,
 } from 'app/state/curriculum/curriculum.selectors';
 import { filter, Observable, Subject, take, tap } from 'rxjs';
-import { ICurriculum } from '../curriculum.types';
+import { ICurriculum } from '../../../../models/curriculum.types';
 import { MatSelectModule } from '@angular/material/select';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -68,7 +69,8 @@ import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.servi
         ReactiveFormsModule,
         PipesModule,
         MatSortModule,
-        MatSelectModule
+        MatSelectModule,
+        TranslocoModule
     ],
     templateUrl: './curriculum-list.component.html',
     styleUrl: './curriculum-list.component.scss',
@@ -104,11 +106,12 @@ export class CurriculumListComponent
         private store: Store,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
+        private translocoService: TranslocoService,
          private titleService: BreadcrumbService
     ) {
         this.titleService.setBreadcrumb([
-            { label: 'Curriculum', url: '/curriculum' },
-            { label: 'Manage Curriculum', url: '' }
+            { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
+            { label: this.translocoService.translate('navigation.manageCurriculum'), url: '' }
         ]);
     }
 
@@ -238,12 +241,11 @@ export class CurriculumListComponent
     deleteItem(item: ICurriculum): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: 'Are you sure you want to delete?',
-            message:
-                'Taking this action will permanently delete this entry. Are you sure about taking this action?',
+            title: this.translocoService.translate('common.deleteConfirmationTitle'),
+            message:this.translocoService.translate('common.deleteConfirmationMessage'),
             actions: {
                 confirm: {
-                    label: 'Delete Permanently',
+                    label: this.translocoService.translate('common.deletePermanently'),
                 },
             },
         });
@@ -291,21 +293,21 @@ export class CurriculumListComponent
                         CurriculumActions.addCurriculumSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Curriculum "${action.curriculum.name}" added successfully!`
+                           this.translocoService.translate('curriculum.success_add')
                         );
                     } else if (
                         action.type ===
                         CurriculumActions.updateCurriculumSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Curriculum "${action.curriculum.name}" updated successfully!`
+                            this.translocoService.translate('curriculum.success_update')
                         );
                     } else if (
                         action.type ===
                         CurriculumActions.deleteCurriculumSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Curriculum deleted successfully!`
+                            this.translocoService.translate('curriculum.success_delete')
                         );
                     }
 
