@@ -123,5 +123,29 @@
         "success_add": "Subject has been added successfully!",
         "success_update": "Subject updated successfully!",
         "success_delete": "Subject deleted successfully!"
+    },
+    "chapters": {
+        "chapter_no": "Chapter {{num}}",
+        "button_edit_chapter": "Edit Chapter Name",
+        "button_delete_chapter": "Delete Chapter",
+        "placeholder_chapter_name": "Enter Chapter Name",
+        "error_chapter_name_required": "Chapter name cannot be empty",
+        "placeholder_phase_content": "Enter content for {{phase}}",
+        "error_phase_content_required": "Content is required",
+        "tab_lesson_plan": "Lesson plan",
+        "tab_text_book": "Text book",
+        "tab_reference_materials": "Reference materials",
+        "upload_drag_drop": "Drag & drop to upload",
+        "upload_browse": "or browse",
+        "button_preview_file": "Preview File",
+        "button_delete_file": "Delete File",
+        "empty_state_title": "It looks like you haven’t added any chapter information under this subject.",
+        "empty_state_description": "Add chapter information by clicking the (+) button on the to right",
+        "section_add_chapters": "Add Chapters",
+        "label_chapter_name": "Chapter name",
+        "button_add_chapter": "Add New Chapter",
+        "success_add": "Chapter has been added successfully!",
+        "success_update": "Chapter updated successfully!",
+        "success_delete": "Chapter deleted successfully!"
     }
 }

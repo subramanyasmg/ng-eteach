@@ -46,6 +46,7 @@ import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
 import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
 import { IChapters } from '../../../models/chapters.types';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-chapters',
@@ -74,6 +75,7 @@ import { IChapters } from '../../../models/chapters.types';
         MatTabsModule,
         MatExpansionModule,
         DragDropModule,
+        TranslocoModule
     ],
     templateUrl: './chapters.component.html',
     styleUrl: './chapters.component.scss',
@@ -101,6 +103,7 @@ export class ChaptersListComponent implements OnInit {
         private _matDialog: MatDialog,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
+        private translocoService: TranslocoService,
         private titleService: BreadcrumbService
     ) {}
 
@@ -134,8 +137,8 @@ export class ChaptersListComponent implements OnInit {
             .subscribe(({ curriculum, grade, subject }) => {
                 this.subjectName = subject.name;
                 this.titleService.setBreadcrumb([
-                    { label: 'Curriculum', url: '/curriculum' },
-                    { label: 'Manage Curriculum', url: '/curriculum' },
+                    { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
+                    { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
                     {
                         label: curriculum.name,
                         url: `/curriculum/${this.curriculumId}/grades`,
@@ -313,12 +316,11 @@ export class ChaptersListComponent implements OnInit {
     deleteItem(item: IChapters): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: 'Are you sure you want to delete?',
-            message:
-                'Taking this action will permanently delete this entry. Are you sure about taking this action?',
+            title: this.translocoService.translate('common.deleteConfirmationTitle'),
+            message:this.translocoService.translate('common.deleteConfirmationMessage'),
             actions: {
                 confirm: {
-                    label: 'Delete Permanently',
+                    label: this.translocoService.translate('common.deletePermanently'),
                 },
             },
         });
@@ -363,19 +365,19 @@ export class ChaptersListComponent implements OnInit {
                     // Handle success
                     if (action.type === ChapterActions.addChapterSuccess.type) {
                         this._snackBar.showSuccess(
-                            `Chapter has been added successfully!`
+                             this.translocoService.translate('chapters.success_add')
                         );
                     } else if (
                         action.type === ChapterActions.updateChapterSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Chapter updated successfully!`
+                             this.translocoService.translate('chapters.success_update')
                         );
                     } else if (
                         action.type === ChapterActions.deleteChapterSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Chapter deleted successfully!`
+                             this.translocoService.translate('chapters.success_delete')
                         );
                     }
 
