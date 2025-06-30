@@ -9,7 +9,8 @@
         "manageInstitute": "Manage Institutes",
         "subscriptions": "Subscriptions",
         "curriculum": "Curriculum",
-        "manageCurriculum": "Manage Curriculum"
+        "manageCurriculum": "Manage Curriculum",
+        "grades": "Grades"
     },
     "common": {
         "search": "Search",
@@ -86,5 +87,21 @@
         "success_add": "Curriculum added successfully!",
         "success_update": "Curriculum updated successfully!",
         "success_delete": "Curriculum deleted successfully!"
+    },
+    "grades": {
+        "page_subtext": "Add grade information under this curriculum",
+        "header_name": "Name",
+        "header_created_on": "Created On",
+        "header_modified_on": "Modified On",
+        "header_subject_count": "Number of Subjects",
+        "empty_state_line1": "It looks like you haven’t added any grade information under this curriculum.",
+        "empty_state_line2": "Add grade information by clicking the (+) button on the to right",
+        "button_add_grade": "Add New Grade",
+        "button_update_grade": "Update Grade",
+        "label_grade_name": "Grade Name",
+        "error_grade_name_required": "Grade Name is required",
+        "success_add": "Grade added successfully!",
+        "success_update": "Grade updated successfully!",
+        "success_delete": "Grade deleted successfully!"
     }
 }

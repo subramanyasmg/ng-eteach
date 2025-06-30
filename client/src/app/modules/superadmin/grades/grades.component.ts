@@ -42,6 +42,7 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Actions, ofType } from '@ngrx/effects';
 import * as GradeActions from 'app/state/grades/grades.actions';
 import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades/grades.selectors';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-grades',
@@ -66,7 +67,8 @@ import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades
         PipesModule,
         MatSortModule,
         MatSelectModule,
-        RouterModule
+        RouterModule,
+        TranslocoModule
     ],
     templateUrl: './grades.component.html',
     styleUrl: './grades.component.scss',
@@ -101,6 +103,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         private _matDialog: MatDialog,
          private actions$: Actions,
         private _cdr: ChangeDetectorRef,
+        private translocoService: TranslocoService,
         private titleService: BreadcrumbService
     ) {}
 
@@ -116,8 +119,8 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             )
             .subscribe((curriculum) => {
                 this.titleService.setBreadcrumb([
-                    { label: 'Curriculum', url: '/curriculum' },
-                    { label: 'Manage Curriculum', url: '/curriculum' },
+                    { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
+                    { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
                     { label: curriculum.name, url: '' },
                 ]);
             });
@@ -230,12 +233,11 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     deleteItem(item: IGrades): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: 'Are you sure you want to delete?',
-            message:
-                'Taking this action will permanently delete this entry. Are you sure about taking this action?',
+            title: this.translocoService.translate('common.deleteConfirmationTitle'),
+            message:this.translocoService.translate('common.deleteConfirmationMessage'),
             actions: {
                 confirm: {
-                    label: 'Delete Permanently',
+                    label: this.translocoService.translate('common.deletePermanently'),
                 },
             },
         });
@@ -283,21 +285,21 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
                         GradeActions.addGradeSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Grade "${action.grade.name}" added successfully!`
+                           this.translocoService.translate('grades.success_add')
                         );
                     } else if (
                         action.type ===
                         GradeActions.updateGradeSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Grade "${action.grade.name}" updated successfully!`
+                           this.translocoService.translate('grades.success_update')
                         );
                     } else if (
                         action.type ===
                         GradeActions.deleteGradeSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Grade deleted successfully!`
+                            this.translocoService.translate('grades.success_delete')
                         );
                     }
 
