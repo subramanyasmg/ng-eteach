@@ -32,8 +32,10 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
@@ -46,7 +48,6 @@ import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
 import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
 import { IChapters } from '../../../models/chapters.types';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-chapters',
@@ -75,13 +76,14 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
         MatTabsModule,
         MatExpansionModule,
         DragDropModule,
-        TranslocoModule
+        TranslocoModule,
     ],
     templateUrl: './chapters.component.html',
     styleUrl: './chapters.component.scss',
 })
 export class ChaptersListComponent implements OnInit {
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
+    @ViewChild('filePreviewModal') filePreviewModal: TemplateRef<any>;
 
     query = '';
     curriculumId;
@@ -104,6 +106,7 @@ export class ChaptersListComponent implements OnInit {
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
         private translocoService: TranslocoService,
+        private sanitizer: DomSanitizer,
         private titleService: BreadcrumbService
     ) {}
 
@@ -137,8 +140,18 @@ export class ChaptersListComponent implements OnInit {
             .subscribe(({ curriculum, grade, subject }) => {
                 this.subjectName = subject.name;
                 this.titleService.setBreadcrumb([
-                    { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
-                    { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
+                    {
+                        label: this.translocoService.translate(
+                            'navigation.curriculum'
+                        ),
+                        url: '/curriculum',
+                    },
+                    {
+                        label: this.translocoService.translate(
+                            'navigation.manageCurriculum'
+                        ),
+                        url: '/curriculum',
+                    },
                     {
                         label: curriculum.name,
                         url: `/curriculum/${this.curriculumId}/grades`,
@@ -273,13 +286,60 @@ export class ChaptersListComponent implements OnInit {
     }
 
     addFiles(chapter: IChapters, files: File[], type) {
-        type === 1 ? chapter.textBook = [...files] : chapter.referenceMaterials.push(...files)
+        type === 1
+            ? (chapter.textBook = [...files])
+            : chapter.referenceMaterials.push(...files);
     }
 
-    removeFile(chapter:IChapters, index: number, type) {
-        type == 1?  chapter.textBook.splice(index, 1) :  chapter.referenceMaterials.splice(index, 1)
+    removeFile(chapter: IChapters, index: number, type) {
+        type == 1
+            ? chapter.textBook.splice(index, 1)
+            : chapter.referenceMaterials.splice(index, 1);
     }
 
+    previewFile(file: File): void {
+        const objectUrl = URL.createObjectURL(file);
+        const safeUrl: SafeResourceUrl =
+            this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl);
+
+        this.matDialogRef = this._matDialog.open(this.filePreviewModal, {
+            width: '800px',
+            data: {
+                name: file.name,
+                url: safeUrl,
+                type: file.type,
+            },
+        });
+
+        this.matDialogRef.afterClosed().subscribe(() => {
+            URL.revokeObjectURL(objectUrl); // prevent memory leaks
+        });
+    }
+
+    isImageFile(type: string): boolean {
+        return type.startsWith('image/');
+    }
+
+    isPdfFile(type: string): boolean {
+        return type === 'application/pdf';
+    }
+
+    isVideoFile(type: string): boolean {
+        return type.startsWith('video/');
+    }
+
+    isAudioFile(type: string): boolean {
+        return type.startsWith('audio/');
+    }
+
+    isSupportedFile(type: string): boolean {
+        return (
+            this.isImageFile(type) ||
+            this.isPdfFile(type) ||
+            this.isVideoFile(type) ||
+            this.isAudioFile(type)
+        );
+    }
 
     /**
      * Track by function for ngFor loops
@@ -316,11 +376,17 @@ export class ChaptersListComponent implements OnInit {
     deleteItem(item: IChapters): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: this.translocoService.translate('common.deleteConfirmationTitle'),
-            message:this.translocoService.translate('common.deleteConfirmationMessage'),
+            title: this.translocoService.translate(
+                'common.deleteConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'common.deleteConfirmationMessage'
+            ),
             actions: {
                 confirm: {
-                    label: this.translocoService.translate('common.deletePermanently'),
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
                 },
             },
         });
@@ -365,19 +431,25 @@ export class ChaptersListComponent implements OnInit {
                     // Handle success
                     if (action.type === ChapterActions.addChapterSuccess.type) {
                         this._snackBar.showSuccess(
-                             this.translocoService.translate('chapters.success_add')
+                            this.translocoService.translate(
+                                'chapters.success_add'
+                            )
                         );
                     } else if (
                         action.type === ChapterActions.updateChapterSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                             this.translocoService.translate('chapters.success_update')
+                            this.translocoService.translate(
+                                'chapters.success_update'
+                            )
                         );
                     } else if (
                         action.type === ChapterActions.deleteChapterSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                             this.translocoService.translate('chapters.success_delete')
+                            this.translocoService.translate(
+                                'chapters.success_delete'
+                            )
                         );
                     }
 
