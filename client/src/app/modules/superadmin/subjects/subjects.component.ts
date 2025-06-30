@@ -56,6 +56,7 @@ import {
     tap,
 } from 'rxjs';
 import { ISubjects } from '../../../models/subject.types';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-subjects',
@@ -82,6 +83,7 @@ import { ISubjects } from '../../../models/subject.types';
         MatSelectModule,
         RouterModule,
         MatChipsModule,
+        TranslocoModule
     ],
     templateUrl: './subjects.component.html',
     styleUrl: './subjects.component.scss',
@@ -118,6 +120,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
         private _matDialog: MatDialog,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
+        private translocoService: TranslocoService,
         private titleService: BreadcrumbService
     ) {}
 
@@ -142,8 +145,8 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
             )
             .subscribe(({ curriculum, grade }) => {
                 this.titleService.setBreadcrumb([
-                    { label: 'Curriculum', url: '/curriculum' },
-                    { label: 'Manage Curriculum', url: '/curriculum' },
+                    { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
+                    { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
                     {
                         label: curriculum.name,
                         url: `/curriculum/${this.curriculumId}/grades`,
@@ -200,7 +203,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (!isDuplicate) {
                 this.subjects.setValue([...currentSubjects, value]);
             } else {
-                this._snackBar.showError(value + ' is already added');
+                this._snackBar.showError(this.translocoService.translate('subjects.error_subject_exists', {name: value}));
             }
         }
 
@@ -311,12 +314,11 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     deleteItem(item: ISubjects): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: 'Are you sure you want to delete?',
-            message:
-                'Taking this action will permanently delete this entry. Are you sure about taking this action?',
+            title: this.translocoService.translate('common.deleteConfirmationTitle'),
+            message:this.translocoService.translate('common.deleteConfirmationMessage'),
             actions: {
                 confirm: {
-                    label: 'Delete Permanently',
+                    label: this.translocoService.translate('common.deletePermanently'),
                 },
             },
         });
@@ -361,19 +363,19 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                     // Handle success
                     if (action.type === SubjectActions.addSubjectSuccess.type) {
                         this._snackBar.showSuccess(
-                            `Subject has been added successfully!`
+                           this.translocoService.translate('subjects.success_add')
                         );
                     } else if (
                         action.type === SubjectActions.updateSubjectSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Subject "${action.subject.name}" updated successfully!`
+                            this.translocoService.translate('subjects.success_update')
                         );
                     } else if (
                         action.type === SubjectActions.deleteSubjectSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            `Subject deleted successfully!`
+                            this.translocoService.translate('subjects.success_delete')
                         );
                     }
 

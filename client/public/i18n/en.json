@@ -10,7 +10,8 @@
         "subscriptions": "Subscriptions",
         "curriculum": "Curriculum",
         "manageCurriculum": "Manage Curriculum",
-        "grades": "Grades"
+        "grades": "Grades",
+        "subjects": "Subjects"
     },
     "common": {
         "search": "Search",
@@ -103,5 +104,24 @@
         "success_add": "Grade added successfully!",
         "success_update": "Grade updated successfully!",
         "success_delete": "Grade deleted successfully!"
+    },
+    "subjects": {
+        "page_subtext": "Add subject information under this grade",
+        "header_name": "Name",
+        "header_created_on": "Created On",
+        "header_modified_on": "Modified On",
+        "header_subject_count": "Number of Subjects",
+        "empty_state_line1": "It looks like you haven’t added any subject information under this grade.",
+        "empty_state_line2": "Add subject information by clicking the (+) button on the to right",
+        "button_add_subject": "Add New Subject",
+        "button_update_subject": "Update Subject",
+        "label_subject_name": "Subject Name",
+        "error_subject_name_required": "Subject Name is required",
+        "hint_bulk_entry": "Add multiple subjects separated with a comma. Eg, Math, Science, Hindi",
+        "type_name_hint": "Type name...",
+        "error_subject_exists": "{{name}} is already added",
+        "success_add": "Subject has been added successfully!",
+        "success_update": "Subject updated successfully!",
+        "success_delete": "Subject deleted successfully!"
     }
 }
