@@ -10,7 +10,7 @@ import { LayoutComponent } from 'app/layout/layout.component';
 export const appRoutes: Route[] = [
 
     // Redirect empty path to '/example'
-    {path: '', pathMatch : 'full', redirectTo: 'dashboard'},
+    {path: '', pathMatch : 'full', redirectTo: 'home'},
 
     // Redirect signed-in user to the '/example'
     //
@@ -34,6 +34,18 @@ export const appRoutes: Route[] = [
             {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.routes')},
             {path: 'sign-in', loadChildren: () => import('app/modules/auth/sign-in/sign-in.routes')},
             {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')}
+        ]
+    },
+
+     // Landing routes
+    {
+        path: '',
+        component: LayoutComponent,
+        data: {
+            layout: 'empty'
+        },
+        children: [
+            {path: 'home', loadChildren: () => import('app/modules/landing/home/home.routes')},
         ]
     },
 
