@@ -4,12 +4,12 @@ import { FuseNavigationItem } from '@fuse/components/navigation';
 export const defaultNavigation: FuseNavigationItem[] = [
     {
         id   : 'platform',
-        title: 'Platform',
+        title: 'navigation.platform',
         type : 'group',
         children: [
             {
                 id: 'dashboards',
-                title: 'Dashboard',
+                title: 'navigation.dashboard',
                 type: 'basic',
                icon : 'mat_outline:grid_view',
                 link: '/dashboard',
@@ -18,19 +18,19 @@ export const defaultNavigation: FuseNavigationItem[] = [
     },
     {
         id   : 'users',
-        title: 'Users',
+        title: 'navigation.users',
         type : 'group',
         children: [
             {
                 id: 'institute',
-                title: 'Manage Institute',
+                title: 'navigation.manageInstitute',
                 type: 'basic',
                 icon : 'heroicons_outline:academic-cap',
                 link: '/institute',
             },
             {
                 id: 'subscriptions',
-                title: 'Subscriptions',
+                title: 'navigation.subscriptions',
                 type: 'basic',
                icon : 'heroicons_outline:ticket',
                 link: '/subscriptions',
@@ -39,12 +39,12 @@ export const defaultNavigation: FuseNavigationItem[] = [
     },
     {
         id   : 'curriculum',
-        title: 'Curriculum',
+        title: 'navigation.curriculum',
         type : 'group',
         children: [
             {
                 id: 'curriculum',
-                title: 'Manage Curriculum',
+                title: 'navigation.manageCurriculum',
                 type: 'basic',
                icon : 'heroicons_outline:book-open',
                 link: '/curriculum',
