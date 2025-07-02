@@ -29,6 +29,13 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 link: '/institute',
             },
             {
+                id: 'institute',
+                title: 'navigation.manageInstitute',
+                type: 'basic',
+                icon : 'heroicons_outline:academic-cap',
+                link: '/institute',
+            },
+            {
                 id: 'subscriptions',
                 title: 'navigation.subscriptions',
                 type: 'basic',
