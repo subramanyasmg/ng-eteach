@@ -168,6 +168,7 @@
         "form_phone": "Phone",
         "form_subject_expertise": "Subject expertise",
         "form_associated_class": "Associated Class",
+        "error_duplicate_combination": "This combination is already added",
         "error_teachers_name_required": "Teacher's name is required",
         "error_email_required": "Email ID is required",
         "error_email_invalid": "Email ID is invalid",

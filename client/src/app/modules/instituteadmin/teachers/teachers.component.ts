@@ -286,7 +286,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             );
 
             if (isDuplicate) {
-                this._snackBar.showError('This combination is already added.');
+                this._snackBar.showError(this.translocoService.translate('error_duplicate_combination'));
                 return; // Prevent duplicate entry
             }
 
