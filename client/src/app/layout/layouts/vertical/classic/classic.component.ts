@@ -9,37 +9,36 @@ import {
     FuseVerticalNavigationComponent,
 } from '@fuse/components/navigation';
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
-import { NavigationService } from 'app/core/navigation/navigation.service';
-import { Navigation } from 'app/core/navigation/navigation.types';
+import { USER_TYPES } from 'app/constants/usertypes';
+import { UserService } from 'app/core/user/user.service';
 import { LanguagesComponent } from 'app/layout/common/languages/languages.component';
-import { MessagesComponent } from 'app/layout/common/messages/messages.component';
-import { NotificationsComponent } from 'app/layout/common/notifications/notifications.component';
-import { QuickChatComponent } from 'app/layout/common/quick-chat/quick-chat.component';
-import { SearchComponent } from 'app/layout/common/search/search.component';
-import { ShortcutsComponent } from 'app/layout/common/shortcuts/shortcuts.component';
 import { UserComponent } from 'app/layout/common/user/user.component';
+import {
+    instituteAdmin,
+    superAdmin,
+} from 'app/mock-api/common/navigation/data';
 import { Subject, takeUntil } from 'rxjs';
-import { BreadcrumbComponent } from "../../../common/breadcrumb/breadcrumb.component";
+import { BreadcrumbComponent } from '../../../common/breadcrumb/breadcrumb.component';
 
 @Component({
     selector: 'classic-layout',
     templateUrl: './classic.component.html',
     encapsulation: ViewEncapsulation.None,
     imports: [
-    FuseLoadingBarComponent,
-    FuseVerticalNavigationComponent,
-    MatButtonModule,
-    MatIconModule,
-    LanguagesComponent,
-    FuseFullscreenComponent,
-    UserComponent,
-    RouterOutlet,
-    BreadcrumbComponent
-],
+        FuseLoadingBarComponent,
+        FuseVerticalNavigationComponent,
+        MatButtonModule,
+        MatIconModule,
+        LanguagesComponent,
+        FuseFullscreenComponent,
+        UserComponent,
+        RouterOutlet,
+        BreadcrumbComponent,
+    ],
 })
 export class ClassicLayoutComponent implements OnInit, OnDestroy {
     isScreenSmall: boolean;
-    navigation: Navigation;
+    navigationData;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -48,7 +47,7 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
     constructor(
         private _activatedRoute: ActivatedRoute,
         private _router: Router,
-        private _navigationService: NavigationService,
+        private _userService: UserService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
         private _fuseNavigationService: FuseNavigationService
     ) {}
@@ -72,11 +71,22 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
-        // Subscribe to navigation data
-        this._navigationService.navigation$
+        this._userService.user$
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((navigation: Navigation) => {
-                this.navigation = navigation;
+            .subscribe((user) => {
+                switch (user.type) {
+                    case USER_TYPES.INSTITUTE_ADMIN: {
+                        this.navigationData = instituteAdmin;
+                    }
+                    break;
+                    case USER_TYPES.SUPER_ADMIN: {
+                        this.navigationData = superAdmin;
+                    }
+                    break;
+                    default:
+                        this.navigationData = [];
+                        break;
+                }
             });
 
         // Subscribe to media changes

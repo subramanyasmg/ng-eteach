@@ -11,7 +11,9 @@
         "curriculum": "Curriculum",
         "manageCurriculum": "Manage Curriculum",
         "grades": "Grades",
-        "subjects": "Subjects"
+        "subjects": "Subjects",
+        "manageTeachers": "Manage Teachers",
+        "schoolStructure": "School Structure"
     },
     "common": {
         "search": "Search",
