@@ -26,7 +26,8 @@
         "noDataAvailable": "No Data Available!",
         "deleteConfirmationTitle": "Are you sure you want to delete?",
         "deleteConfirmationMessage": "Taking this action will permanently delete this entry. Are you sure about taking this action?",
-        "deletePermanently": "Delete Permanently"
+        "deletePermanently": "Delete Permanently",
+        "moreItems": "{{count}} more"
     },
     "institute": {
         "page_subtext": "Manage institute information",
@@ -150,5 +151,35 @@
         "success_update": "Chapter updated successfully!",
         "success_delete": "Chapter deleted successfully!",
         "preview_not_available": "Preview not available for this file type."
+    },
+    "teachers": {
+        "page_subtext": "You can add upto {{count}} teachers in your subscription plan",
+        "empty_state_line1": "It looks like you haven’t added any Teacher information of your institution.",
+        "empty_state_line2": "Add teacher information by clicking the (+) button on the to right",
+        "table_name": "Teacher’s name",
+        "table_assigned_subjects": "Assigned subjects",
+        "table_assigned_classes": "Assigned classes",
+        "subscription_limit_reached_title": "Oops! Subscription limit has been reached!",
+        "subscription_limit_reached_description": "Sorry, but it looks like you have reached the limit of adding more teachers under this subscription plan. Please upgrade your subscription to add more teachers.",
+        "button_upgrade_subscription": "Upgrade subscription",
+        "add_teacher": "Add Teacher",
+        "update_teacher": "Update Teacher",
+        "form_email": "Email",
+        "form_phone": "Phone",
+        "form_subject_expertise": "Subject expertise",
+        "form_associated_class": "Associated Class",
+        "error_teachers_name_required": "Teacher's name is required",
+        "error_email_required": "Email ID is required",
+        "error_email_invalid": "Email ID is invalid",
+        "error_phone_required": "Phone No. is required",
+        "error_phone_invalid": "Phone No. is invalid",
+        "error_subjects_required": "Please select at least one subject",
+        "subjects_placeholder": "Search & select subjects",
+        "grade_placeholder": "Select Grade",
+        "section_placeholder": "Select Section",
+        "subject_placeholder": "Select Grade",
+        "success_add": "Teacher has been added successfully!",
+        "success_update": "Teacher updated successfully!",
+        "success_delete": "Teacher deleted successfully!"
     }
 }

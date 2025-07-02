@@ -81,6 +81,19 @@ export const appRoutes: Route[] = [
             {path: 'institute',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN }, loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
         ]
     },
+    // Institute Admin routes
+    {
+        path: 'institute',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'teachers',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/teachers/teachers.routes')},
+        ]
+    },
     {
         path: 'unauthorized',
         loadChildren: () =>

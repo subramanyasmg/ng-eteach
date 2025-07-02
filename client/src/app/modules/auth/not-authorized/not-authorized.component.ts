@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-not-authorized',
@@ -7,8 +6,7 @@ import { RouterLink } from '@angular/router';
   templateUrl: './not-authorized.component.html',
   styleUrl: './not-authorized.component.scss',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotAuthorizedComponent {
 
