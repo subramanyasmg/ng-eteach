@@ -177,7 +177,7 @@
         "subjects_placeholder": "Search & select subjects",
         "grade_placeholder": "Select Grade",
         "section_placeholder": "Select Section",
-        "subject_placeholder": "Select Grade",
+        "subject_placeholder": "Select Subject",
         "success_add": "Teacher has been added successfully!",
         "success_update": "Teacher updated successfully!",
         "success_delete": "Teacher deleted successfully!"

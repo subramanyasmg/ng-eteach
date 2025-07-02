@@ -3,6 +3,6 @@ export interface ITeachers {
     name: string;
     email: string;
     phone: string;
-    subjectExpertise: string[];
+    subjectExpertise: any[];
     associatedClass: any[];
 }

@@ -37,12 +37,14 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { Actions } from '@ngrx/effects';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { ITeachers } from 'app/models/teachers.types';
-import { map, Observable, of, startWith, Subject } from 'rxjs';
+import * as TeacherActions from 'app/state/teachers/teacher.actions';
+import { selectAllTeachers } from 'app/state/teachers/teacher.selectors';
+import { map, Observable, of, startWith, Subject, tap } from 'rxjs';
 
 @Component({
     selector: 'app-teachers',
@@ -82,7 +84,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
 
     dataSource = new MatTableDataSource<ITeachers>();
-    displayedColumns: string[] = ['name', 'subjects', 'classes', 'actions'];
+    displayedColumns: string[] = ['name', 'subjectExpertise', 'associatedClass', 'actions'];
     mode = null;
     query = '';
     entityForm: UntypedFormGroup;
@@ -103,10 +105,10 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
     filteredSubjects!: Observable<{ id: string; name: string }[]>;
     gradeList$: Observable<{ id: string; name: string }[]> = of([
-        { id: 'cbse', name: 'CBSE' },
-        { id: 'icse', name: 'ICSE' },
-        { id: 'ib', name: 'IB Curriculum' },
-        { id: 'state', name: 'State Board' },
+        { id: 'g1', name: 'Grade 1' },
+        { id: 'g2', name: 'Grade 2' },
+        { id: 'g3', name: 'Grade 3' },
+        { id: 'g4', name: 'Grade 4' },
     ]);
     sectionList$: Observable<{ id: string; name: string }[]> = of([
         { id: 'sec1', name: 'Section 1' },
@@ -115,15 +117,16 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         { id: 'sec4', name: 'Section 4' },
     ]);
     gradeSubjectList$: Observable<{ id: string; name: string }[]> = of([
-        { id: 'g1', name: 'Grade 1' },
-        { id: 'g2', name: 'Grade 2' },
-        { id: 'g3', name: 'Grade 3' },
-        { id: 'g4', name: 'Grade 4' },
+        { id: 's1', name: 'Subject 1' },
+        { id: 's2', name: 'Subject 2' },
+        { id: 's3', name: 'Subject 3' },
+        { id: 's4', name: 'Subject 4' },
     ]);
 
     gradeList: { id: string; name: string }[] = [];
     sectionList: { id: string; name: string }[] = [];
     subjectList: { id: string; name: string }[] = [];
+    list$: Observable<ITeachers[]> = this.store.select(selectAllTeachers);
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -149,6 +152,14 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
                 url: '',
             },
         ]);
+
+        this.handleAPIResponse();
+
+        this.list$.subscribe((data) => {
+            this.dataSource = new MatTableDataSource(data); // reassign!
+            this.dataSource.sort = this.sort;
+            this.dataSource.paginator = this.paginator;
+        });
     }
 
     ngOnInit(): void {
@@ -169,7 +180,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             grade: [''],
             section: [''],
             gradesubject: [''],
-            selectedGradeSectionSubjects:[[], Validators.required]
+            selectedGradeSectionSubjects: [[], Validators.required],
         });
 
         this.filteredSubjects = this.subjectCtrl.valueChanges.pipe(
@@ -227,6 +238,10 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         this._unsubscribeAll.complete();
     }
 
+    trackByFn(index: number, item: any): any {
+        return item.id || index;
+    }
+
     applyFilter(): void {
         const filterValue = this.query?.trim().toLowerCase() || '';
         this.dataSource.filter = filterValue;
@@ -251,7 +266,9 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     addSelectedGrade(): void {
-        const selectedGrades = this.entityForm.get('selectedGradeSectionSubjects')?.value;
+        const selectedGrades = this.entityForm.get(
+            'selectedGradeSectionSubjects'
+        )?.value;
         const gradeId = this.entityForm.get('grade')?.value;
         const sectionId = this.entityForm.get('section')?.value;
         const subjectId = this.entityForm.get('gradesubject')?.value;
@@ -269,14 +286,14 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             );
 
             if (isDuplicate) {
-                this._snackBar.showError(
-                            'This combination is already added.'
-                        );
+                this._snackBar.showError('This combination is already added.');
                 return; // Prevent duplicate entry
             }
 
             selectedGrades.push({ grade, section, subject });
-            this.entityForm.get('selectedGradeSectionSubjects')?.setValue([...selectedGrades]);
+            this.entityForm
+                .get('selectedGradeSectionSubjects')
+                ?.setValue([...selectedGrades]);
 
             this.entityForm.patchValue({
                 grade: '',
@@ -289,8 +306,127 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     removeSelectedGrade(index: number): void {
-         const selectedGrades = this.entityForm.get('selectedGradeSectionSubjects')?.value;
+        const selectedGrades = this.entityForm.get(
+            'selectedGradeSectionSubjects'
+        )?.value;
         selectedGrades.splice(index, 1);
-        this.entityForm.get('selectedGradeSectionSubjects')?.setValue([...selectedGrades]);
+        this.entityForm
+            .get('selectedGradeSectionSubjects')
+            ?.setValue([...selectedGrades]);
+    }
+
+    addEntity() {
+            // Return if the form is invalid
+            if (this.entityForm.invalid) {
+                return;
+            }
+
+            // Disable the form
+            this.entityForm.disable();
+            const formValues = this.entityForm.value;
+            const requestObj: ITeachers = {
+                name: formValues.name,
+                email: formValues.email,
+                phone: formValues.phone,
+                subjectExpertise: formValues.subjects,
+                associatedClass: formValues.selectedGradeSectionSubjects
+            };
+            console.log(requestObj);
+            this.store.dispatch(
+                TeacherActions.addTeacher({ teacher: requestObj })
+            );
+        }
+
+    deleteItem(item: ITeachers): void {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title: this.translocoService.translate(
+                'common.deleteConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'common.deleteConfirmationMessage'
+            ),
+            actions: {
+                confirm: {
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
+                },
+            },
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            if (result === 'confirmed') {
+                this.store.dispatch(
+                    TeacherActions.deleteTeacher({ id: item.id })
+                );
+            }
+        });
+    }
+
+    handleAPIResponse() {
+        this.actions$
+            .pipe(
+                ofType(
+                    TeacherActions.addTeacherSuccess,
+                    TeacherActions.addTeacherFailure,
+                    TeacherActions.updateTeacherSuccess,
+                    TeacherActions.updateTeacherFailure,
+                    TeacherActions.deleteTeacherSuccess,
+                    TeacherActions.deleteTeacherFailure
+                ),
+                tap((action: any) => {
+                    // Close dialog on add/update success/failure
+                    if (
+                        action.type === TeacherActions.addTeacherSuccess.type ||
+                        action.type === TeacherActions.addTeacherFailure.type ||
+                        action.type ===
+                            TeacherActions.updateTeacherSuccess.type ||
+                        action.type === TeacherActions.updateTeacherFailure.type
+                    ) {
+                        this.matDialogRef?.close(true);
+                    }
+
+                    // Handle success
+                    if (action.type === TeacherActions.addTeacherSuccess.type) {
+                        this._snackBar.showSuccess(
+                            this.translocoService.translate(
+                                'teachers.success_add'
+                            )
+                        );
+                    } else if (
+                        action.type === TeacherActions.updateTeacherSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            this.translocoService.translate(
+                                'teachers.success_update'
+                            )
+                        );
+                    } else if (
+                        action.type === TeacherActions.deleteTeacherSuccess.type
+                    ) {
+                        this._snackBar.showSuccess(
+                            this.translocoService.translate(
+                                'teachers.success_delete'
+                            )
+                        );
+                    }
+
+                    // Handle failure
+                    else if (
+                        action.type === TeacherActions.addTeacherFailure.type ||
+                        action.type ===
+                            TeacherActions.updateTeacherFailure.type ||
+                        action.type === TeacherActions.deleteTeacherFailure.type
+                    ) {
+                        this._snackBar.showError(
+                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                        );
+                    }
+                })
+            )
+            .subscribe();
     }
 }
