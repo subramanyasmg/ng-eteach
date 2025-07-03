@@ -27,7 +27,6 @@ import { AuthService } from 'app/core/auth/auth.service';
     animations: fuseAnimations,
     imports: [
         CommonModule,
-        RouterLink,
         FuseAlertComponent,
         FormsModule,
         ReactiveFormsModule,

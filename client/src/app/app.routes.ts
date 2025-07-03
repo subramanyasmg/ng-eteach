@@ -20,6 +20,7 @@ export const appRoutes: Route[] = [
     // path. Below is another redirection for that path to redirect the user to the desired
     // location. This is a small convenience to keep all main routes together here on this file.
     {path: 'signed-in-redirect', pathMatch : 'full', redirectTo: 'dashboard'},
+    {path: 'institute-admin-signed-in-redirect', pathMatch: 'full', redirectTo: '/institute/teachers'},
 
     // Auth routes for super admin portal
     {
@@ -48,11 +49,8 @@ export const appRoutes: Route[] = [
             layout: 'empty'
         },
         children: [
-            {path: 'confirmation-required', loadChildren: () => import('app/modules/auth/confirmation-required/confirmation-required.routes')},
-            {path: 'forgot-password', loadChildren: () => import('app/modules/auth/forgot-password/forgot-password.routes')},
-            {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.routes')},
+            {path: 'sign-in', loadChildren: () => import('app/modules/auth/institute-admin/sign-in/sign-in.routes')},
             {path: 'create-password', loadChildren: () => import('app/modules/auth/institute-admin/create-password/create-password.routes')},
-            {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')}
         ]
     },
     {
