@@ -3,6 +3,8 @@ import { initialDataResolver } from 'app/app.resolvers';
 import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
+import { PrivilegeGuard } from './core/auth/guards/privilege.guard';
+import { USER_TYPES } from './constants/usertypes';
 
 // @formatter:off
 /* eslint-disable max-len */
@@ -64,7 +66,7 @@ export const appRoutes: Route[] = [
         ]
     },
 
-    // Admin routes
+    // Super Admin routes
     {
         path: '',
         canActivate: [AuthGuard],
@@ -74,9 +76,27 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'dashboard', loadChildren: () => import('app/modules/superadmin/example/example.routes')},
-            {path: 'curriculum', loadChildren: () => import('app/modules/superadmin/curriculum/curriculum.routes')},
-            {path: 'institute', loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
+            {path: 'dashboard', canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN },loadChildren: () => import('app/modules/superadmin/example/example.routes')},
+            {path: 'curriculum', canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN },loadChildren: () => import('app/modules/superadmin/curriculum/curriculum.routes')},
+            {path: 'institute',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN }, loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
         ]
+    },
+    // Institute Admin routes
+    {
+        path: 'institute',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'teachers',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/teachers/teachers.routes')},
+        ]
+    },
+    {
+        path: 'unauthorized',
+        loadChildren: () =>
+            import('app/modules/auth/not-authorized/not-authorized.routes'),
     }
 ];
