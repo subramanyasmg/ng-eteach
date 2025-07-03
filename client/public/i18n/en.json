@@ -27,7 +27,7 @@
         "deleteConfirmationTitle": "Are you sure you want to delete?",
         "deleteConfirmationMessage": "Taking this action will permanently delete this entry. Are you sure about taking this action?",
         "deletePermanently": "Delete Permanently",
-        "moreItems": "{{count}} more"
+        "moreItems": "+ {{count}} more"
     },
     "institute": {
         "page_subtext": "Manage institute information",
@@ -179,7 +179,7 @@
         "grade_placeholder": "Select Grade",
         "section_placeholder": "Select Section",
         "subject_placeholder": "Select Subject",
-        "success_add": "Teacher has been added successfully!",
+        "success_add": "Teacher has been added to your institute. An email has been sent to her email to verify",
         "success_update": "Teacher updated successfully!",
         "success_delete": "Teacher deleted successfully!"
     }

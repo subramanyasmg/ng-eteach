@@ -84,7 +84,12 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(MatSort) sort!: MatSort;
 
     dataSource = new MatTableDataSource<ITeachers>();
-    displayedColumns: string[] = ['name', 'subjectExpertise', 'associatedClass', 'actions'];
+    displayedColumns: string[] = [
+        'name',
+        'subjectExpertise',
+        'associatedClass',
+        'actions',
+    ];
     mode = null;
     query = '';
     entityForm: UntypedFormGroup;
@@ -251,7 +256,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mode = mode;
 
         if (this.mode === 2) {
-            // this.patchFormValues(selectedItem);
+            this.patchFormValues(selectedItem);
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '600px',
@@ -263,6 +268,18 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             this.entityForm.get('subjects')?.setValue([]);
             this.entityForm.enable();
         });
+    }
+
+    patchFormValues(data: ITeachers) {
+        this.entityForm.patchValue({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            subjects: JSON.parse(JSON.stringify(data.subjectExpertise)),
+            selectedGradeSectionSubjects: JSON.parse(JSON.stringify(data.associatedClass))
+        });
+        this.selectedSubjects = JSON.parse(JSON.stringify(data.subjectExpertise));
     }
 
     addSelectedGrade(): void {
@@ -286,7 +303,11 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             );
 
             if (isDuplicate) {
-                this._snackBar.showError(this.translocoService.translate('error_duplicate_combination'));
+                this._snackBar.showError(
+                    this.translocoService.translate(
+                        'teachers.error_duplicate_combination'
+                    )
+                );
                 return; // Prevent duplicate entry
             }
 
@@ -315,27 +336,52 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             ?.setValue([...selectedGrades]);
     }
 
-    addEntity() {
-            // Return if the form is invalid
-            if (this.entityForm.invalid) {
-                return;
-            }
+    getRemainingGradeNames(grades: { grade: { name: string } }[]): string {
+        if (grades.length <= 1) return '';
+        return grades
+            .slice(1) // skip the first
+            .map((g) => g.grade.name)
+            .join(', ');
+    }
 
-            // Disable the form
-            this.entityForm.disable();
-            const formValues = this.entityForm.value;
-            const requestObj: ITeachers = {
-                name: formValues.name,
-                email: formValues.email,
-                phone: formValues.phone,
-                subjectExpertise: formValues.subjects,
-                associatedClass: formValues.selectedGradeSectionSubjects
-            };
-            console.log(requestObj);
-            this.store.dispatch(
-                TeacherActions.addTeacher({ teacher: requestObj })
-            );
+    addEntity() {
+        // Return if the form is invalid
+        if (this.entityForm.invalid) {
+            return;
         }
+
+        // Disable the form
+        this.entityForm.disable();
+        const formValues = this.entityForm.value;
+        const requestObj: ITeachers = {
+            name: formValues.name,
+            email: formValues.email,
+            phone: formValues.phone,
+            subjectExpertise: formValues.subjects,
+            associatedClass: formValues.selectedGradeSectionSubjects,
+        };
+        this.store.dispatch(TeacherActions.addTeacher({ teacher: requestObj }));
+    }
+
+    updateEntity() {
+        // Return if the form is invalid
+        if (this.entityForm.invalid) {
+            return;
+        }
+
+        // Disable the form
+        this.entityForm.disable();
+        const formValues = this.entityForm.value;
+        const requestObj: ITeachers = {
+            id: formValues.id,
+            name: formValues.name,
+            email: formValues.email,
+            phone: formValues.phone,
+            subjectExpertise: formValues.subjects,
+            associatedClass: formValues.selectedGradeSectionSubjects,
+        };
+        this.store.dispatch(TeacherActions.updateTeacher({ teacher: requestObj }));
+    }
 
     deleteItem(item: ITeachers): void {
         // Open the confirmation dialog
