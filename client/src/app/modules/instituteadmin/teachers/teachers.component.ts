@@ -266,6 +266,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             this.entityForm.reset();
             this.selectedSubjects = [];
             this.entityForm.get('subjects')?.setValue([]);
+            this.entityForm.get('selectedGradeSectionSubjects')?.setValue([]);
             this.entityForm.enable();
         });
     }
