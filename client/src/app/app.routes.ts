@@ -21,7 +21,7 @@ export const appRoutes: Route[] = [
     // location. This is a small convenience to keep all main routes together here on this file.
     {path: 'signed-in-redirect', pathMatch : 'full', redirectTo: 'dashboard'},
 
-    // Auth routes for guests
+    // Auth routes for super admin portal
     {
         path: '',
         canActivate: [NoAuthGuard],
@@ -37,6 +37,28 @@ export const appRoutes: Route[] = [
             {path: 'sign-in', loadChildren: () => import('app/modules/auth/sign-in/sign-in.routes')},
             {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')}
         ]
+    },
+    // Auth routes for super admin portal
+    {
+        path: 'institute',
+        canActivate: [NoAuthGuard],
+        canActivateChild: [NoAuthGuard],
+        component: LayoutComponent,
+        data: {
+            layout: 'empty'
+        },
+        children: [
+            {path: 'confirmation-required', loadChildren: () => import('app/modules/auth/confirmation-required/confirmation-required.routes')},
+            {path: 'forgot-password', loadChildren: () => import('app/modules/auth/forgot-password/forgot-password.routes')},
+            {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.routes')},
+            {path: 'create-password', loadChildren: () => import('app/modules/auth/institute-admin/create-password/create-password.routes')},
+            {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')}
+        ]
+    },
+    {
+        path: 'institute/create-password-success',
+        loadChildren: () =>
+            import('app/modules/auth/institute-admin/create-password-success/create-password-success.routes'),
     },
 
      // Landing routes
