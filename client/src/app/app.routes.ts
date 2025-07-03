@@ -20,7 +20,7 @@ export const appRoutes: Route[] = [
     // path. Below is another redirection for that path to redirect the user to the desired
     // location. This is a small convenience to keep all main routes together here on this file.
     {path: 'signed-in-redirect', pathMatch : 'full', redirectTo: 'dashboard'},
-    {path: 'institute-admin-signed-in-redirect', pathMatch: 'full', redirectTo: '/institute/teachers'},
+    {path: 'institute-admin-signed-in-redirect', pathMatch: 'full', redirectTo: '/institute/dashboard'},
 
     // Auth routes for super admin portal
     {
@@ -111,6 +111,7 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
+            {path: 'dashboard',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/dashboard/dashboard.routes')},
             {path: 'teachers',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/teachers/teachers.routes')},
         ]
     },

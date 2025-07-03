@@ -1,0 +1,21 @@
+<div class="bg-gray-100 flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
+    <!-- Header -->
+    <div class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ 'dashboard.title' | transloco }}
+            </div>
+            <div class="text-xl text-secondary">
+                {{ 'dashboard.page_subtext' | transloco }}
+            </div>
+        </div>
+        <!-- Actions -->
+        <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
+
+            <button class="ml-4 rounded-md" mat-flat-button [color]="'primary'">
+                {{ 'dashboard.institute_profile' | transloco }}
+            </button>
+        </div>
+    </div>
+</div>
