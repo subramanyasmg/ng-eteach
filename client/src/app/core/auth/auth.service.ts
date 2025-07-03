@@ -175,4 +175,14 @@ export class AuthService {
         // If the access token exists, and it didn't expire, sign in using it
         return this.signInUsingToken();
     }
+
+    createPassword(password: string): Observable<any> {
+        return this._httpClient.post('api/u/create-password-institute', password).pipe(
+            switchMap((response: any) => {
+                // Return a new observable with the response
+                //return of(response);
+                return of(true);
+            })
+        );
+    }
 }
