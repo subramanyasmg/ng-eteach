@@ -7,5 +7,5 @@ export const user = {
     email: 'hughes.brian@company.com',
     avatar: 'images/avatars/brian-hughes.jpg',
     status: 'online',
-    type: USER_TYPES.INSTITUTE_ADMIN
+    type: USER_TYPES.SUPER_ADMIN
 };
