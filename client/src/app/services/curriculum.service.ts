@@ -22,7 +22,7 @@ export class CurriculumService {
     private _item: BehaviorSubject<ICurriculum | null> = new BehaviorSubject(
         null
     );
-    private apiUrl = '/api/a/curriculum';
+    private apiUrl = 'api/superadmin/';
 
     /**
      * Constructor
@@ -44,7 +44,7 @@ export class CurriculumService {
     }
 
     getAll() {
-        return this._httpClient.get(this.apiUrl).pipe(
+        return this._httpClient.get(`${this.apiUrl}getAllPublishers`).pipe(
             tap((response: any) => {
                 if (response?.status) {
                     this._items.next(response.data as ICurriculum[]);
@@ -55,69 +55,69 @@ export class CurriculumService {
         );
     }
 
-    // create(request): Observable<any> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((item) =>
-    //             this._httpClient.post(this.apiUrl, { ...request }).pipe(
-    //                 mergeMap((response: any) => {
-    //                     if (!response.status) {
-    //                         return throwError(() => new Error('Something went wrong while adding'));
-    //                     }
-
-    //                     this._items.next([
-    //                         response.data as ICurriculum,
-    //                         ...item,
-    //                     ]);
-
-    //                     return of(response);
-    //                 })
-    //             )
-    //         )
-    //     );
-    // }
-
     create(request): Observable<any> {
         return this.items$.pipe(
             take(1),
-            switchMap((existingItems) => {
-                const items = existingItems ?? [];
-
-                const mockResponse = {
-                    status: true,
-                    data: {
-                        id: Date.now().toString(),
-                        name: request.name,
-                        createdOn: new Date().toLocaleDateString(),
-                        publisherName: request.publisherName,
-                        publisherEmail: request.publisherEmail,
-                        phone: request.phone,
-                    },
-                };
-
-                return of(mockResponse).pipe(
-                    delay(300), // Simulate API delay
+            switchMap((item) =>
+                this._httpClient.post(`${this.apiUrl}createPublisher`, { ...request }).pipe(
                     mergeMap((response: any) => {
                         if (!response.status) {
-                            return throwError(
-                                () =>
-                                    new Error(
-                                        'Something went wrong while adding'
-                                    )
-                            );
+                            return throwError(() => new Error('Something went wrong while adding'));
                         }
 
                         this._items.next([
                             response.data as ICurriculum,
-                            ...items,
+                            ...item,
                         ]);
 
                         return of(response);
                     })
-                );
-            })
+                )
+            )
         );
     }
+
+    // create(request): Observable<any> {
+    //     return this.items$.pipe(
+    //         take(1),
+    //         switchMap((existingItems) => {
+    //             const items = existingItems ?? [];
+
+    //             const mockResponse = {
+    //                 status: true,
+    //                 data: {
+    //                     id: Date.now().toString(),
+    //                     name: request.name,
+    //                     createdOn: new Date().toLocaleDateString(),
+    //                     publisherName: request.publisherName,
+    //                     publisherEmail: request.publisherEmail,
+    //                     phone: request.phone,
+    //                 },
+    //             };
+
+    //             return of(mockResponse).pipe(
+    //                 delay(300), // Simulate API delay
+    //                 mergeMap((response: any) => {
+    //                     if (!response.status) {
+    //                         return throwError(
+    //                             () =>
+    //                                 new Error(
+    //                                     'Something went wrong while adding'
+    //                                 )
+    //                         );
+    //                     }
+
+    //                     this._items.next([
+    //                         response.data as ICurriculum,
+    //                         ...items,
+    //                     ]);
+
+    //                     return of(response);
+    //                 })
+    //             );
+    //         })
+    //     );
+    // }
 
     // update(id, data): Observable<ICurriculum> {
     //     return this.items$.pipe(

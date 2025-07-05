@@ -215,6 +215,7 @@ export class CurriculumListComponent
         this.store.dispatch(
             CurriculumActions.addCurriculum({ curriculum: requestObj })
         );
+        this.store.dispatch(CurriculumActions.loadCurriculums());
     }
 
     updateEntity() {

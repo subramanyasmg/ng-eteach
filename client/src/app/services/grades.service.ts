@@ -22,7 +22,7 @@ export class GradesService {
     private _item: BehaviorSubject<IGrades | null> = new BehaviorSubject(
         null
     );
-    private apiUrl = '/api/a/grades';
+    private apiUrl = 'api/superadmin/';
 
     /**
      * Constructor
@@ -44,7 +44,7 @@ export class GradesService {
     }
 
     getAll(curriculumId: string) {
-        return this._httpClient.get(this.apiUrl + '/' + curriculumId ).pipe(
+        return this._httpClient.get(`${this.apiUrl}getAllGrades/${curriculumId}`).pipe(
             tap((response: any) => {
                 if (response?.status) {
                     this._items.next(response.data as IGrades[]);
@@ -55,69 +55,69 @@ export class GradesService {
         );
     }
 
-    // create(request): Observable<any> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((item) =>
-    //             this._httpClient.post(this.apiUrl, { ...request }).pipe(
-    //                 mergeMap((response: any) => {
-    //                     if (!response.status) {
-    //                         return throwError(() => new Error('Something went wrong while adding'));
-    //                     }
-
-    //                     this._items.next([
-    //                         response.data as IGrades,
-    //                         ...item,
-    //                     ]);
-
-    //                     return of(response);
-    //                 })
-    //             )
-    //         )
-    //     );
-    // }
-
     create(curriculumId, request): Observable<any> {
         return this.items$.pipe(
             take(1),
-            switchMap((existingItems) => {
-                const items = existingItems ?? [];
-
-                const mockResponse = {
-                    status: true,
-                    data: {
-                        id: Date.now().toString(),
-                        name: request.name,
-                        curriculumId,
-                        createdOn: new Date().toLocaleDateString(),
-                        modifiedOn: new Date().toLocaleDateString(),
-                        noOfsubjects: request.noOfsubjects,
-                    } as IGrades,
-                };
-
-                return of(mockResponse).pipe(
-                    delay(300), // Simulate API delay
+            switchMap((item) =>
+                this._httpClient.post(`${this.apiUrl}createGrade`, { ...request, curriculumId }).pipe(
                     mergeMap((response: any) => {
                         if (!response.status) {
-                            return throwError(
-                                () =>
-                                    new Error(
-                                        'Something went wrong while adding'
-                                    )
-                            );
+                            return throwError(() => new Error('Something went wrong while adding'));
                         }
 
                         this._items.next([
                             response.data as IGrades,
-                            ...items,
+                            ...item,
                         ]);
 
                         return of(response);
                     })
-                );
-            })
+                )
+            )
         );
     }
+
+    // create(curriculumId, request): Observable<any> {
+    //     return this.items$.pipe(
+    //         take(1),
+    //         switchMap((existingItems) => {
+    //             const items = existingItems ?? [];
+
+    //             const mockResponse = {
+    //                 status: true,
+    //                 data: {
+    //                     id: Date.now().toString(),
+    //                     name: request.name,
+    //                     curriculumId,
+    //                     createdOn: new Date().toLocaleDateString(),
+    //                     modifiedOn: new Date().toLocaleDateString(),
+    //                     noOfsubjects: request.noOfsubjects,
+    //                 } as IGrades,
+    //             };
+
+    //             return of(mockResponse).pipe(
+    //                 delay(300), // Simulate API delay
+    //                 mergeMap((response: any) => {
+    //                     if (!response.status) {
+    //                         return throwError(
+    //                             () =>
+    //                                 new Error(
+    //                                     'Something went wrong while adding'
+    //                                 )
+    //                         );
+    //                     }
+
+    //                     this._items.next([
+    //                         response.data as IGrades,
+    //                         ...items,
+    //                     ]);
+
+    //                     return of(response);
+    //                 })
+    //             );
+    //         })
+    //     );
+    // }
 
     // update(id, data): Observable<IGrades> {
     //     return this.items$.pipe(
