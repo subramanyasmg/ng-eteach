@@ -38,7 +38,7 @@ export class CurriculumEffects {
       ofType(CurriculumActions.updateCurriculum),
       mergeMap(({ curriculum }) =>
         this.service.update(curriculum.id,curriculum).pipe(
-          map(response => CurriculumActions.updateCurriculumSuccess({ curriculum: response.data })),
+          map(response => CurriculumActions.updateCurriculumSuccess({ curriculum: response })),
           catchError(error => of(CurriculumActions.updateCurriculumFailure({ error })))
         )
       )

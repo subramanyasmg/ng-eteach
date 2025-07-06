@@ -22,7 +22,7 @@ export class ChaptersService {
     private _item: BehaviorSubject<IChapters | null> = new BehaviorSubject(
         null
     );
-    private apiUrl = '/api/a/chapters';
+    private apiUrl = 'api/superadmin/';
 
     /**
      * Constructor
@@ -44,7 +44,7 @@ export class ChaptersService {
     }
 
     getAll(subjectId: string) {
-        return this._httpClient.get(this.apiUrl + '/' + subjectId).pipe(
+        return this._httpClient.get(`${this.apiUrl}getAllChapters/${subjectId}`).pipe(
             tap((response: any) => {
                 if (response?.status) {
                     this._items.next(response.data as IChapters[]);
@@ -55,74 +55,28 @@ export class ChaptersService {
         );
     }
 
-    // create(request): Observable<any> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((item) =>
-    //             this._httpClient.post(this.apiUrl, { ...request }).pipe(
-    //                 mergeMap((response: any) => {
-    //                     if (!response.status) {
-    //                         return throwError(() => new Error('Something went wrong while adding'));
-    //                     }
-
-    //                     this._items.next([
-    //                         response.data as IChapters,
-    //                         ...item,
-    //                     ]);
-
-    //                     return of(response);
-    //                 })
-    //             )
-    //         )
-    //     );
-    // }
-
-    create(subjectId, request): Observable<any> {
+    create(subjectId: string, request: IChapters): Observable<any> {
         return this.items$.pipe(
             take(1),
-            switchMap((existingItems) => {
-                const items = existingItems ?? [];
-
-                // Split the name string into array of trimmed names
-                const chapterNames = request.name
-                    .split(',')
-                    .map((n) => n.trim())
-                    .filter((n) => n); // remove empty strings
-
-                // Build chapters objects
-                const newChapters: IChapters[] = chapterNames.map((name) => ({
-                    id:
-                        Date.now().toString() +
-                        Math.random().toString(36).slice(2, 6), // ensure unique ID
-                    name,
-                    subjectId
-                }));
-
-                const mockResponse = {
-                    status: true,
-                    data: newChapters,
-                };
-
-                return of(mockResponse).pipe(
-                    delay(300), // Simulate API delay
+            switchMap((item) =>
+                this._httpClient.post(`${this.apiUrl}createChapter/${subjectId}`, { ...request }).pipe(
                     mergeMap((response: any) => {
                         if (!response.status) {
-                            return throwError(
-                                () =>
-                                    new Error(
-                                        'Something went wrong while adding'
-                                    )
-                            );
+                            return throwError(() => new Error('Something went wrong while adding'));
                         }
 
-                        this._items.next([...newChapters, ...items]);
+                        this._items.next([
+                            response.data as IChapters,
+                            ...item,
+                        ]);
+
                         return of(response);
                     })
-                );
-            })
+                )
+            )
         );
     }
-
+    
     // update(id, data): Observable<IChapters> {
     //     return this.items$.pipe(
     //         take(1),
