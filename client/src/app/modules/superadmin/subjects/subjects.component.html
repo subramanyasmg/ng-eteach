@@ -4,7 +4,7 @@
         <div class="min-w-0 flex-1">
             <!-- Title -->
             <div class="text-4xl font-extrabold tracking-tight">
-                {{ 'navigation.subjects' | transloco }}
+                {{ gradeName }}
             </div>
             <div class="text-xl text-secondary">
                {{ 'subjects.page_subtext' | transloco }}
@@ -55,17 +55,17 @@
 
                     <ng-container matColumnDef="createdOn">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'subjects.header_created_on' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element">{{ element.createdOn }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.createdAt | date }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="modifiedOn">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'subjects.header_modified_on' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element">{{ element.modifiedOn }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.updatedAt | date }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="noOfSubjects">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'subjects.header_subject_count' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element">{{ element.noOfSubjects ?? '-' }}</td>
+                    <ng-container matColumnDef="noOfChapters">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'subjects.header_chapter_count' | transloco }}</th>
+                        <td mat-cell *matCellDef="let element">{{ element.noOfChapters ?? '-' }}</td>
                     </ng-container>
 
 

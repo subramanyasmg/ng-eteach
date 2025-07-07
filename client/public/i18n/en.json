@@ -113,7 +113,7 @@
         "header_name": "Name",
         "header_created_on": "Created On",
         "header_modified_on": "Modified On",
-        "header_subject_count": "Number of Subjects",
+        "header_chapter_count": "Number of Chapters",
         "empty_state_line1": "It looks like you haven’t added any subject information under this grade.",
         "empty_state_line2": "Add subject information by clicking the (+) button on the to right",
         "button_add_subject": "Add New Subject",
