@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import {
     BehaviorSubject,
     Observable,
-    delay,
     map,
     mergeMap,
     of,
@@ -59,71 +58,93 @@ export class CurriculumService {
         return this.items$.pipe(
             take(1),
             switchMap((item) =>
-                this._httpClient.post(`${this.apiUrl}createPublisher`, { ...request }).pipe(
-                    mergeMap((response: any) => {
-                        if (!response.status) {
-                            return throwError(() => new Error('Something went wrong while adding'));
-                        }
+                this._httpClient
+                    .post(`${this.apiUrl}createPublisher`, { ...request })
+                    .pipe(
+                        mergeMap((response: any) => {
+                            if (!response.status) {
+                                return throwError(
+                                    () =>
+                                        new Error(
+                                            'Something went wrong while adding'
+                                        )
+                                );
+                            }
 
-                        this._items.next([
-                            response.data as ICurriculum,
-                            ...item,
-                        ]);
+                            this._items.next([
+                                response?.data as ICurriculum,
+                                ...item,
+                            ]);
 
-                        return of(response);
-                    })
-                )
+                            return of(response);
+                        })
+                    )
             )
         );
     }
 
-
-     update(id: string, data: ICurriculum): Observable<ICurriculum> {
+    update(id: string, data: ICurriculum): Observable<ICurriculum> {
         return this.items$.pipe(
             take(1),
-            switchMap((item) =>
-                this._httpClient.put(`${this.apiUrl}updatePublisher/${id}`, { ...data }).pipe(
-                    map((response: any) => {
-                        if (response.status) {
-                            // Find the index of the updated item
-                            const index = item.findIndex(
-                                (item) => item.id === id
-                            );
+            switchMap((existingItems) => {
+                const items = existingItems ?? [];
 
-                            // Update the item
-                            item[index] = response.data;
+                // Find the item to update
+                const index = items.findIndex((item) => item.id === id);
 
-                            // Update the items
-                            this._items.next(item);
-                        }
-                        return response.data as ICurriculum;
-                    })
-                )
-            )
+                if (index === -1) {
+                    // Simulate failure if item not found
+                    return throwError(() => new Error('Item not found'));
+                }
+
+                return this._httpClient
+                    .put(`${this.apiUrl}updatePublisher/${id}`, { ...data })
+                    .pipe(
+                        map((response: any) => {
+                            if (response?.status) {
+                                // Replace the old item with updated item
+                                const updatedList = [...items];
+                                updatedList[index] = response?.data;
+
+                                // Emit new state
+                                this._items.next(updatedList);
+
+                                return response;
+                            } else {
+                                return throwError(
+                                    () => new Error('Update failed')
+                                );
+                            }
+                        })
+                    );
+            })
         );
     }
 
-    // update(id: string, updatedData: ICurriculum): Observable<any> {
-    //     console.log(id, updatedData);   
-
-    //     return this._httpClient.put(`${this.apiUrl}updatePublisher/${id}`, updatedData).pipe(
-    //         map((response: any) => {
-    //             if (response.status) {
-    //                 return response.data;
-    //             }
-    //             return throwError(() => new Error('Update failed'));
-    //         })
-    //     );
-        
-    // }
-
     delete(id: string): Observable<boolean> {
-        return this._httpClient.delete(`${this.apiUrl}deletePublisher/${id}`).pipe(
-            map((response: any) => {
-                if (response.status) {
-                    return true;
-                }
-                return false;
+        return this.items$.pipe(
+            take(1),
+            switchMap((existingItems) => {
+                const items = existingItems ?? [];
+
+                // Find the index of the item to delete
+                const index = items.findIndex((item) => item.id === id);
+
+                return this._httpClient
+                    .delete(`${this.apiUrl}deletePublisher/${id}`)
+                    .pipe(
+                        map((response: any) => {
+                            if (response?.status && index !== -1) {
+                                // Remove item from the list
+                                items.splice(index, 1);
+
+                                // Update the observable stream
+                                this._items.next([...items]);
+                                return true;
+                            }
+                            return false;
+                        })
+                    );
             })
         );
     }
