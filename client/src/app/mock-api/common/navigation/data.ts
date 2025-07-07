@@ -26,7 +26,7 @@ export const superAdmin: FuseNavigationItem[] = [
                 title: 'navigation.manageInstitute',
                 type: 'basic',
                 icon : 'heroicons_outline:academic-cap',
-                link: '/institute',
+                link: '/manage-institute',
             },
             {
                 id: 'subscriptions',
