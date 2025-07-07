@@ -1,5 +1,5 @@
 export interface ICurriculum {
-    id?: string;
+    id?: number;
     name: string;
     publisherName: string;
     publisherEmail: string;

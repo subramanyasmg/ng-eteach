@@ -83,7 +83,7 @@ export class CurriculumService {
         );
     }
 
-    update(id: string, data: ICurriculum): Observable<ICurriculum> {
+    update(id: number, data: ICurriculum): Observable<ICurriculum> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
@@ -121,7 +121,7 @@ export class CurriculumService {
         );
     }
 
-    delete(id: string): Observable<boolean> {
+    delete(id: number): Observable<boolean> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {

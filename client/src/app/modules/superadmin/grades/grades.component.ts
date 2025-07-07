@@ -41,6 +41,7 @@ import { IGrades } from '../../../models/grades.types';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Actions, ofType } from '@ngrx/effects';
 import * as GradeActions from 'app/state/grades/grades.actions';
+import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
 import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades/grades.selectors';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -108,12 +109,13 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.curriculumId = this.route.snapshot.paramMap.get('id');
+        this.curriculumId = Number(this.route.snapshot.paramMap.get('id'));
+        this.store.dispatch(CurriculumActions.loadCurriculums());
 
         this.store
             .select(selectAllCurriculums)
             .pipe(
-                map((curriculums) => curriculums.find((c) => c.id === this.curriculumId)),
+                map((curriculums) => curriculums.find((c) => c.id === this.curriculumId) ),
                 filter(Boolean),
                 take(1)
             )
