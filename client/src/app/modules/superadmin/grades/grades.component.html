@@ -54,12 +54,12 @@
 
                     <ng-container matColumnDef="createdOn">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_created_on' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element">{{ element.createdOn }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.createdAt | date }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="modifiedOn">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_modified_on' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element">{{ element.modifiedOn }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.updatedAt | date }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="noOfSubjects">
