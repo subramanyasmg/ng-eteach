@@ -172,7 +172,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                         { label: grade.name, url: '' },
                     ]);
                 });
-        }, 1000);
+        }, 500);
 
 
         this.entityForm = this._formBuilder.group({
