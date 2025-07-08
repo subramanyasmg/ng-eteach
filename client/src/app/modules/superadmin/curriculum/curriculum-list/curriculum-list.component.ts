@@ -24,6 +24,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -31,20 +32,16 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
+import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
-import {
-    selectAllCurriculums,
-    selectCurriculumsLoaded,
-} from 'app/state/curriculum/curriculum.selectors';
-import { filter, Observable, Subject, take, tap } from 'rxjs';
+import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
+import { Observable, Subject, tap } from 'rxjs';
 import { ICurriculum } from '../../../../models/curriculum.types';
-import { MatSelectModule } from '@angular/material/select';
-import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -70,7 +67,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
         PipesModule,
         MatSortModule,
         MatSelectModule,
-        TranslocoModule
+        TranslocoModule,
     ],
     templateUrl: './curriculum-list.component.html',
     styleUrl: './curriculum-list.component.scss',
@@ -107,11 +104,19 @@ export class CurriculumListComponent
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
         private translocoService: TranslocoService,
-         private titleService: BreadcrumbService
+        private titleService: BreadcrumbService
     ) {
         this.titleService.setBreadcrumb([
-            { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
-            { label: this.translocoService.translate('navigation.manageCurriculum'), url: '' }
+            {
+                label: this.translocoService.translate('navigation.curriculum'),
+                url: '/curriculum',
+            },
+            {
+                label: this.translocoService.translate(
+                    'navigation.manageCurriculum'
+                ),
+                url: '',
+            },
         ]);
     }
 
@@ -131,16 +136,8 @@ export class CurriculumListComponent
                 ],
             ],
         });
-        this.store
-            .select(selectCurriculumsLoaded)
-            .pipe(
-                take(1),
-                filter((loaded) => !loaded)
-            )
-            .subscribe(() => {
-                this.store.dispatch(CurriculumActions.loadCurriculums());
-            });
 
+        this.getAllCurriculums();
         this.handleAPIResponse();
 
         this.list$.subscribe((data) => {
@@ -148,6 +145,10 @@ export class CurriculumListComponent
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
         });
+    }
+
+    getAllCurriculums() {
+        this.store.dispatch(CurriculumActions.loadCurriculums());
     }
 
     ngAfterViewInit(): void {
@@ -215,7 +216,6 @@ export class CurriculumListComponent
         this.store.dispatch(
             CurriculumActions.addCurriculum({ curriculum: requestObj })
         );
-        this.store.dispatch(CurriculumActions.loadCurriculums());
     }
 
     updateEntity() {
@@ -242,11 +242,17 @@ export class CurriculumListComponent
     deleteItem(item: ICurriculum): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: this.translocoService.translate('common.deleteConfirmationTitle'),
-            message:this.translocoService.translate('common.deleteConfirmationMessage'),
+            title: this.translocoService.translate(
+                'common.deleteConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'common.deleteConfirmationMessage'
+            ),
             actions: {
                 confirm: {
-                    label: this.translocoService.translate('common.deletePermanently'),
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
                 },
             },
         });
@@ -294,21 +300,29 @@ export class CurriculumListComponent
                         CurriculumActions.addCurriculumSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                           this.translocoService.translate('curriculum.success_add')
+                            this.translocoService.translate(
+                                'curriculum.success_add'
+                            )
                         );
+                       this.getAllCurriculums();
                     } else if (
                         action.type ===
                         CurriculumActions.updateCurriculumSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            this.translocoService.translate('curriculum.success_update')
+                            this.translocoService.translate(
+                                'curriculum.success_update'
+                            )
                         );
+                        this.getAllCurriculums();
                     } else if (
                         action.type ===
                         CurriculumActions.deleteCurriculumSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            this.translocoService.translate('curriculum.success_delete')
+                            this.translocoService.translate(
+                                'curriculum.success_delete'
+                            )
                         );
                     }
 

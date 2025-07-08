@@ -34,18 +34,18 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
+import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
+import * as GradeActions from 'app/state/grades/grades.actions';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import * as SubjectActions from 'app/state/subjects/subjects.actions';
-import {
-    selectSubjectsByGradeId,
-    selectSubjectsLoaded,
-} from 'app/state/subjects/subjects.selectors';
+import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
 import {
     combineLatest,
     filter,
@@ -56,7 +56,6 @@ import {
     tap,
 } from 'rxjs';
 import { ISubjects } from '../../../models/subject.types';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
     selector: 'app-subjects',
@@ -83,7 +82,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
         MatSelectModule,
         RouterModule,
         MatChipsModule,
-        TranslocoModule
+        TranslocoModule,
     ],
     templateUrl: './subjects.component.html',
     styleUrl: './subjects.component.scss',
@@ -98,7 +97,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
         'name',
         'createdOn',
         'modifiedOn',
-        'noOfSubjects',
+        'noOfChapters',
         'actions',
     ];
     mode = null;
@@ -108,6 +107,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     matDialogRef = null;
     curriculumId;
     gradeId;
+    gradeName: string;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     separatorKeysCodes: number[] = [ENTER, COMMA];
 
@@ -125,35 +125,55 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.curriculumId = this.route.snapshot.paramMap.get('cid');
-        this.gradeId = this.route.snapshot.paramMap.get('gid');
+        this.store.dispatch(CurriculumActions.loadCurriculums());
 
-        combineLatest([
-            this.store.select(selectAllCurriculums),
-            this.store.select(selectGradesByCurriculumId(this.curriculumId)),
-        ])
-            .pipe(
-                take(1),
-                map(([curriculums, grades]) => {
-                    const curriculum = curriculums.find(
-                        (c) => c.id === this.curriculumId
-                    );
-                    const grade = grades?.find((g) => g.id === this.gradeId);
-                    return { curriculum, grade };
-                }),
-                filter(({ curriculum, grade }) => !!curriculum && !!grade)
-            )
-            .subscribe(({ curriculum, grade }) => {
-                this.titleService.setBreadcrumb([
-                    { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
-                    { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
-                    {
-                        label: curriculum.name,
-                        url: `/curriculum/${this.curriculumId}/grades`,
-                    },
-                    { label: grade.name, url: '' },
-                ]);
-            });
+        this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
+        this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
+
+        this.store.dispatch(
+            GradeActions.loadGrades({ curriculumId: this.curriculumId })
+        );
+
+        setTimeout(() => {
+            combineLatest([
+                this.store.select(selectAllCurriculums),
+                this.store.select(selectGradesByCurriculumId(this.curriculumId)),
+            ])
+                .pipe(
+                    take(1),
+                    map(([curriculums, grades]) => {
+                        const curriculum = curriculums.find(
+                            (c) => c.id === this.curriculumId
+                        );
+                        const grade = grades?.find((g) => g.id === this.gradeId);
+                        return { curriculum, grade };
+                    }),
+                    filter(({ curriculum, grade }) => !!curriculum && !!grade)
+                )
+                .subscribe(({ curriculum, grade }) => {
+                    this.gradeName = grade.name;
+                    this.titleService.setBreadcrumb([
+                        {
+                            label: this.translocoService.translate(
+                                'navigation.curriculum'
+                            ),
+                            url: '/curriculum',
+                        },
+                        {
+                            label: this.translocoService.translate(
+                                'navigation.manageCurriculum'
+                            ),
+                            url: '/curriculum',
+                        },
+                        {
+                            label: curriculum.name,
+                            url: `/curriculum/${this.curriculumId}/grades`,
+                        },
+                        { label: grade.name, url: '' },
+                    ]);
+                });
+        }, 500);
+
 
         this.entityForm = this._formBuilder.group({
             id: [''],
@@ -163,17 +183,9 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.list$ = this.store.select(selectSubjectsByGradeId(this.gradeId));
 
-        this.store
-            .select(selectSubjectsLoaded)
-            .pipe(
-                take(1),
-                filter((loaded) => !loaded)
-            )
-            .subscribe(() => {
-                this.store.dispatch(
-                    SubjectActions.loadSubjects({ gradeId: this.gradeId })
-                );
-            });
+        this.store.dispatch(
+            SubjectActions.loadSubjects({ gradeId: this.gradeId })
+        );
 
         this.handleAPIResponse();
 
@@ -203,7 +215,12 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
             if (!isDuplicate) {
                 this.subjects.setValue([...currentSubjects, value]);
             } else {
-                this._snackBar.showError(this.translocoService.translate('subjects.error_subject_exists', {name: value}));
+                this._snackBar.showError(
+                    this.translocoService.translate(
+                        'subjects.error_subject_exists',
+                        { name: value }
+                    )
+                );
             }
         }
 
@@ -248,7 +265,9 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.entityForm.get('subjects')?.clearValidators();
             this.patchFormValues(selectedItem);
         } else {
-            this.entityForm.get('subjects')?.setValidators([Validators.required]);
+            this.entityForm
+                .get('subjects')
+                ?.setValidators([Validators.required]);
             this.entityForm.get('name')?.clearValidators();
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
@@ -314,11 +333,17 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     deleteItem(item: ISubjects): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: this.translocoService.translate('common.deleteConfirmationTitle'),
-            message:this.translocoService.translate('common.deleteConfirmationMessage'),
+            title: this.translocoService.translate(
+                'common.deleteConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'common.deleteConfirmationMessage'
+            ),
             actions: {
                 confirm: {
-                    label: this.translocoService.translate('common.deletePermanently'),
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
                 },
             },
         });
@@ -363,19 +388,25 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                     // Handle success
                     if (action.type === SubjectActions.addSubjectSuccess.type) {
                         this._snackBar.showSuccess(
-                           this.translocoService.translate('subjects.success_add')
+                            this.translocoService.translate(
+                                'subjects.success_add'
+                            )
                         );
                     } else if (
                         action.type === SubjectActions.updateSubjectSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            this.translocoService.translate('subjects.success_update')
+                            this.translocoService.translate(
+                                'subjects.success_update'
+                            )
                         );
                     } else if (
                         action.type === SubjectActions.deleteSubjectSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            this.translocoService.translate('subjects.success_delete')
+                            this.translocoService.translate(
+                                'subjects.success_delete'
+                            )
                         );
                     }
 

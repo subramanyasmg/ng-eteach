@@ -42,6 +42,9 @@ import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
 import * as ChapterActions from 'app/state/chapters/chapters.actions';
+import * as GradeActions from 'app/state/grades/grades.actions';
+import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
+import * as SubjectActions from 'app/state/subjects/subjects.actions';
 import { selectChaptersBySubjectId } from 'app/state/chapters/chapters.selectors';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
@@ -111,58 +114,75 @@ export class ChaptersListComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.curriculumId = this.route.snapshot.paramMap.get('cid');
-        this.gradeId = this.route.snapshot.paramMap.get('gid');
-        this.subjectId = this.route.snapshot.paramMap.get('sid');
+        this.store.dispatch(CurriculumActions.loadCurriculums());
 
-        combineLatest([
-            this.store.select(selectAllCurriculums),
-            this.store.select(selectGradesByCurriculumId(this.curriculumId)),
-            this.store.select(selectSubjectsByGradeId(this.gradeId)),
-        ])
-            .pipe(
-                take(1),
-                map(([curriculums, grades, subjects]) => {
-                    const curriculum = curriculums.find(
-                        (c) => c.id === this.curriculumId
-                    );
-                    const grade = grades?.find((g) => g.id === this.gradeId);
-                    const subject = subjects?.find(
-                        (s) => s.id === this.subjectId
-                    );
-                    return { curriculum, grade, subject };
-                }),
-                filter(
-                    ({ curriculum, grade, subject }) =>
-                        !!curriculum && !!grade && !!subject
+        this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
+        this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
+        this.subjectId = Number(this.route.snapshot.paramMap.get('sid'));
+
+        this.store.dispatch(
+            GradeActions.loadGrades({ curriculumId: this.curriculumId })
+        );
+        this.store.dispatch(
+            SubjectActions.loadSubjects({ gradeId: this.gradeId })
+        );
+
+        this.store.dispatch(
+            ChapterActions.loadChapters({ subjectId: this.subjectId })
+        );
+
+        setTimeout(() => {
+
+            combineLatest([
+                this.store.select(selectAllCurriculums),
+                this.store.select(selectGradesByCurriculumId(this.curriculumId)),
+                this.store.select(selectSubjectsByGradeId(this.gradeId)),
+            ])
+                .pipe(
+                    take(1),
+                    map(([curriculums, grades, subjects]) => {
+                        const curriculum = curriculums.find(
+                            (c) => c.id === this.curriculumId
+                        );
+                        const grade = grades?.find((g) => g.id === this.gradeId);
+                        const subject = subjects?.find(
+                            (s) => s.id === this.subjectId
+                        );
+                        return { curriculum, grade, subject };
+                    }),
+                    filter(
+                        ({ curriculum, grade, subject }) =>
+                            !!curriculum && !!grade && !!subject
+                    )
                 )
-            )
-            .subscribe(({ curriculum, grade, subject }) => {
-                this.subjectName = subject.name;
-                this.titleService.setBreadcrumb([
-                    {
-                        label: this.translocoService.translate(
-                            'navigation.curriculum'
-                        ),
-                        url: '/curriculum',
-                    },
-                    {
-                        label: this.translocoService.translate(
-                            'navigation.manageCurriculum'
-                        ),
-                        url: '/curriculum',
-                    },
-                    {
-                        label: curriculum.name,
-                        url: `/curriculum/${this.curriculumId}/grades`,
-                    },
-                    {
-                        label: grade.name,
-                        url: `/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
-                    },
-                    { label: subject.name, url: '' },
-                ]);
-            });
+                .subscribe(({ curriculum, grade, subject }) => {
+                    this.subjectName = subject.name;
+                    this.titleService.setBreadcrumb([
+                        {
+                            label: this.translocoService.translate(
+                                'navigation.curriculum'
+                            ),
+                            url: '/curriculum',
+                        },
+                        {
+                            label: this.translocoService.translate(
+                                'navigation.manageCurriculum'
+                            ),
+                            url: '/curriculum',
+                        },
+                        {
+                            label: curriculum.name,
+                            url: `/curriculum/${this.curriculumId}/grades`,
+                        },
+                        {
+                            label: grade.name,
+                            url: `/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
+                        },
+                        { label: subject.name, url: '' },
+                    ]);
+                });
+        }, 1000);
+
 
         this.entityForm = this._formBuilder.group({
             chapters: this._formBuilder.array([this.createChapter()]),

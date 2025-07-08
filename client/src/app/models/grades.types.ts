@@ -2,7 +2,7 @@ export interface IGrades {
     id?: string;
     curriculumId?:string;
     name: string;
-    modifiedOn?: string;
+    updatedAt?: string;
     noOfsubjects?: string;
-    createdOn?: string;
+    createdAt?: string;
 }

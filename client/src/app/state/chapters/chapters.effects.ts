@@ -37,7 +37,7 @@ export class ChaptersEffects {
   )
 );
 
-  updateGrade$ = createEffect(() =>
+  updateChapter$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ChapterActions.updateChapter),
       mergeMap(({ subjectId, chapter }) =>
@@ -49,11 +49,11 @@ export class ChaptersEffects {
     )
   );
 
-  deleteGrade$ = createEffect(() =>
+  deleteChapter$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ChapterActions.deleteChapter),
       mergeMap(({ subjectId, chapterId }) =>
-        this.service.delete(subjectId).pipe(
+        this.service.delete(chapterId).pipe(
           map(() => ChapterActions.deleteChapterSuccess({ subjectId, chapterId })),
           catchError(error => of(ChapterActions.deleteChapterFailure({ error })))
         )

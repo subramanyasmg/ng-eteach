@@ -41,6 +41,7 @@ import { IGrades } from '../../../models/grades.types';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Actions, ofType } from '@ngrx/effects';
 import * as GradeActions from 'app/state/grades/grades.actions';
+import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
 import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades/grades.selectors';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
@@ -108,39 +109,35 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.curriculumId = this.route.snapshot.paramMap.get('id');
+        this.store.dispatch(CurriculumActions.loadCurriculums());
+        this.curriculumId = Number(this.route.snapshot.paramMap.get('id'));
 
-        this.store
-            .select(selectAllCurriculums)
-            .pipe(
-                map((curriculums) => curriculums.find((c) => c.id === this.curriculumId)),
-                filter(Boolean),
-                take(1)
-            )
-            .subscribe((curriculum) => {
-                this.titleService.setBreadcrumb([
-                    { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
-                    { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
-                    { label: curriculum.name, url: '' },
-                ]);
-            });
+        if (this.curriculumId) {
+            this.store
+                .select(selectAllCurriculums)
+                .pipe(
+                    map((curriculums) => curriculums.find((c) => c.id === this.curriculumId) ),
+                    filter(Boolean),
+                    take(1)
+                )
+                .subscribe((curriculum) => {
+                    this.titleService.setBreadcrumb([
+                        { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
+                        { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
+                        { label: curriculum.name, url: '' },
+                    ]);
+                });
+
+
+            this.list$ = this.store.select(selectGradesByCurriculumId(this.curriculumId));
+            this.loadGradesForCurriculum();
+        }
 
         this.entityForm = this._formBuilder.group({
             id: [''],
             name: ['', [Validators.required]],
         });
 
-        this.list$ = this.store.select(selectGradesByCurriculumId(this.curriculumId));
-
-        this.store
-            .select(selectGradesLoaded)
-            .pipe(
-                take(1),
-                filter((loaded) => !loaded)
-            )
-            .subscribe(() => {
-                this.store.dispatch(GradeActions.loadGrades({ curriculumId: this.curriculumId }));
-            });
 
         this.handleAPIResponse();
 
@@ -149,6 +146,10 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
         });
+    }
+
+    loadGradesForCurriculum() {
+        this.store.dispatch(GradeActions.loadGrades({ curriculumId: this.curriculumId }));
     }
 
     ngAfterViewInit(): void {

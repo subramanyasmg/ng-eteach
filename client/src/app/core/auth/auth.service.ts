@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
+import * as CryptoJS from 'crypto-js';
 import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -61,6 +62,10 @@ export class AuthService {
             return throwError('User is already logged in.');
         }
 
+        // credentials.password = CryptoJS.MD5(credentials.password).toString(
+        //     CryptoJS.enc.Hex
+        // );
+
         return this._httpClient.post(`${this._baseUrl}login`, credentials).pipe(
             switchMap((response: any) => {
                 // Store the access token in the local storage
@@ -71,6 +76,9 @@ export class AuthService {
 
                 // Store the user on the user service
                 this._userService.user = response.user;
+
+                 sessionStorage.setItem(
+                            'user', JSON.stringify(response.user));
 
                 // Return a new observable with the response
                 return of(response);
@@ -170,13 +178,13 @@ export class AuthService {
             return of(false);
         }
 
-        // Check the access token expire date
-        if (AuthUtils.isTokenExpired(this.accessToken)) {
-            return of(false);
+        let user = JSON.parse(sessionStorage.getItem('user'));
+        if (user) {
+            this._userService.user = user;
         }
 
         // If the access token exists, and it didn't expire, sign in using it
-        return this.signInUsingToken();
+        return of(true);
     }
 
     createPassword(password: string): Observable<any> {

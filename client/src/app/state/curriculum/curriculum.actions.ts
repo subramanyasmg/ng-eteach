@@ -13,6 +13,6 @@ export const updateCurriculum = createAction('[Curriculum] Update Curriculum', p
 export const updateCurriculumSuccess = createAction('[Curriculum] Update Curriculum Success', props<{ curriculum: ICurriculum }>());
 export const updateCurriculumFailure = createAction('[Curriculum] Update Curriculum Failure', props<{ error: any }>());
 
-export const deleteCurriculum = createAction('[Curriculum] Delete Curriculum', props<{ id: string }>());
-export const deleteCurriculumSuccess = createAction('[Curriculum] Delete Curriculum Success', props<{ id: string }>());
+export const deleteCurriculum = createAction('[Curriculum] Delete Curriculum', props<{ id: number }>());
+export const deleteCurriculumSuccess = createAction('[Curriculum] Delete Curriculum Success', props<{ id: number }>());
 export const deleteCurriculumFailure = createAction('[Curriculum] Delete Curriculum Failure', props<{ error: any }>());
