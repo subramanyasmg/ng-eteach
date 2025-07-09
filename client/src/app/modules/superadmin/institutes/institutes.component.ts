@@ -137,15 +137,10 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             accountType: ['', [Validators.required]],
         });
 
-        this.store
-            .select(selectCurriculumsLoaded)
-            .pipe(
-                take(1),
-                filter((loaded) => !loaded)
-            )
-            .subscribe(() => {
-                this.store.dispatch(CurriculumActions.loadCurriculums());
-            });
+
+        this.store.dispatch(CurriculumActions.loadCurriculums());
+        this.store.dispatch(InstituteActions.loadInstitutes());
+
 
         this.handleAPIResponse();
 
