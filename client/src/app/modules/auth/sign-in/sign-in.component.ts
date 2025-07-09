@@ -16,6 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
+import { USER_TYPES } from 'app/constants/usertypes';
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
@@ -91,7 +92,7 @@ export class AuthSignInComponent implements OnInit {
         this.showAlert = false;
 
         // Sign in
-        this._authService.signIn(this.signInForm.value).subscribe(
+        this._authService.signIn(this.signInForm.value, USER_TYPES.SUPER_ADMIN).subscribe(
             (response) => {
                 console.log(response);
                 // Set the redirect url.
