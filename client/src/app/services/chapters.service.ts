@@ -44,65 +44,51 @@ export class ChaptersService {
     }
 
     getAll(subjectId: string) {
-        return this._httpClient.get(`${this.apiUrl}getAllChapters/${subjectId}`).pipe(
-            tap((response: any) => {
-                if (response?.status) {
-                    this._items.next(response.data as IChapters[]);
-                } else {
-                    this._items.next([]);
-                }
-            })
-        );
+        return this._httpClient
+            .get(`${this.apiUrl}getAllChapters/${subjectId}`)
+            .pipe(
+                tap((response: any) => {
+                    if (response?.status) {
+                        this._items.next(response.data as IChapters[]);
+                    } else {
+                        this._items.next([]);
+                    }
+                })
+            );
     }
 
     create(subjectId: string, request: IChapters): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((item) =>
-                this._httpClient.post(`${this.apiUrl}createChapter/${subjectId}`, { ...request }).pipe(
-                    mergeMap((response: any) => {
-                        if (!response.status) {
-                            return throwError(() => new Error('Something went wrong while adding'));
-                        }
-
-                        this._items.next([
-                            response.data as IChapters,
-                            ...item,
-                        ]);
-
-                        return of(response);
+                this._httpClient
+                    .post(`${this.apiUrl}createChapter/${subjectId}`, {
+                        ...request,
                     })
-                )
+                    .pipe(
+                        mergeMap((response: any) => {
+                            if (!response.status) {
+                                return throwError(
+                                    () =>
+                                        new Error(
+                                            'Something went wrong while adding'
+                                        )
+                                );
+                            }
+
+                            this._items.next([
+                                response.data as IChapters,
+                                ...item,
+                            ]);
+
+                            return of(response);
+                        })
+                    )
             )
         );
     }
 
-    // update(id, data): Observable<IChapters> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((item) =>
-    //             this._httpClient.put(this.apiUrl + '/' + id, { ...data }).pipe(
-    //                 map((response: any) => {
-    //                     if (response.status) {
-    //                         // Find the index of the updated item
-    //                         const index = item.findIndex(
-    //                             (item) => item.id === id
-    //                         );
-
-    //                         // Update the item
-    //                         item[index] = response.data[0];
-
-    //                         // Update the items
-    //                         this._items.next(item);
-    //                     }
-    //                     return response;
-    //                 })
-    //             )
-    //         )
-    //     );
-    // }
-
-    update(id: string, updatedData: IChapters): Observable<any> {
+    update(id: string, data: IChapters): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
@@ -116,38 +102,33 @@ export class ChaptersService {
                     return throwError(() => new Error('Item not found'));
                 }
 
-                // Create updated item
-                const updatedItem: IChapters = {
-                    ...items[index],
-                    ...updatedData,
-                };
-
                 // Simulate API delay and response
-                return of({
-                    status: true,
-                    data: updatedItem,
-                }).pipe(
-                    delay(300),
-                    map((response) => {
-                        if (response.status) {
-                            // Replace the old item with updated item
-                            const updatedList = [...items];
-                            updatedList[index] = updatedItem;
+                return this._httpClient
+                    .put(`${this.apiUrl}updateChapter/${id}`, { ...data })
+                    .pipe(
+                        delay(300),
+                        map((response: any) => {
+                            if (response.status) {
+                                // Replace the old item with updated item
+                                const updatedList = [...items];
+                                updatedList[index] = response?.data;
 
-                            // Emit new state
-                            this._items.next(updatedList);
+                                // Emit new state
+                                this._items.next(updatedList);
 
-                            return response;
-                        } else {
-                            return throwError(() => new Error('Update failed'));
-                        }
-                    })
-                );
+                                return response;
+                            } else {
+                                return throwError(
+                                    () => new Error('Update failed')
+                                );
+                            }
+                        })
+                    );
             })
         );
     }
 
-     delete(id: string): Observable<boolean> {
+    delete(id: string): Observable<boolean> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
