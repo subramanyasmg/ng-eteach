@@ -1,7 +1,10 @@
 import { I18nPluralPipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { USER_TYPES } from 'app/constants/usertypes';
 import { AuthService } from 'app/core/auth/auth.service';
+import { UserService } from 'app/core/user/user.service';
+import { User } from 'app/core/user/user.types';
 import { Subject, finalize, takeUntil, takeWhile, tap, timer } from 'rxjs';
 
 @Component({
@@ -16,6 +19,7 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
         '=1': '# second',
         other: '# seconds',
     };
+    signOutURL = '';
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -23,7 +27,8 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
      */
     constructor(
         private _authService: AuthService,
-        private _router: Router
+        private _router: Router,
+        private _userService: UserService
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -37,17 +42,27 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
         // Sign out
         this._authService.signOut();
 
-        // Redirect after the countdown
-        timer(1000, 1000)
-            .pipe(
-                finalize(() => {
-                    this._router.navigate(['sign-in']);
-                }),
-                takeWhile(() => this.countdown > 0),
-                takeUntil(this._unsubscribeAll),
-                tap(() => this.countdown--)
-            )
-            .subscribe();
+        this._userService.user$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((user: User) => {
+
+                if (user.type === USER_TYPES.INSTITUTE_ADMIN) {
+                    this.signOutURL = 'institute/sign-in';
+                } else if (user.type === USER_TYPES.SUPER_ADMIN) {
+                    this.signOutURL = 'sign-in';
+                }
+                // Redirect after the countdown
+                timer(1000, 1000)
+                    .pipe(
+                        finalize(() => {
+                            this._router.navigate([this.signOutURL]);
+                        }),
+                        takeWhile(() => this.countdown > 0),
+                        takeUntil(this._unsubscribeAll),
+                        tap(() => this.countdown--)
+                    )
+                    .subscribe();
+            });
     }
 
     /**
