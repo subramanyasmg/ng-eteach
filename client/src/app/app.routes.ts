@@ -96,7 +96,7 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'dashboard', canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN },loadChildren: () => import('app/modules/superadmin/example/example.routes')},
+            {path: 'dashboard', canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN },loadChildren: () => import('app/modules/superadmin/dashboard/dashboard.routes')},
             {path: 'curriculum', canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN },loadChildren: () => import('app/modules/superadmin/curriculum/curriculum.routes')},
             {path: 'manage-institute',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN }, loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
         ]
