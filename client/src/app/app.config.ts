@@ -15,6 +15,7 @@ import { appRoutes } from 'app/app.routes';
 import { provideAuth } from 'app/core/auth/auth.provider';
 import { provideIcons } from 'app/core/icons/icons.provider';
 import { MockApiService } from 'app/mock-api';
+import { provideQuillConfig } from 'ngx-quill/config';
 import { firstValueFrom } from 'rxjs';
 import { TranslocoHttpLoader } from './core/transloco/transloco.http-loader';
 import { provideState, provideStore } from '@ngrx/store';
@@ -135,6 +136,18 @@ export const appConfig: ApplicationConfig = {
                     },
                 ],
             },
+        }),
+        provideQuillConfig({
+            modules: {
+                syntax: false,
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    ['blockquote'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                    ['link']
+                ]
+            }
         }),
         provideState('curriculum', curriculumReducer),
         provideEffects(CurriculumEffects),

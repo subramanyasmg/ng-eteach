@@ -13,6 +13,6 @@ export const updateInstitute = createAction('[Institute] Update Institute', prop
 export const updateInstituteSuccess = createAction('[Institute] Update Institute Success', props<{ institute: IInstitutes }>());
 export const updateInstituteFailure = createAction('[Institute] Update Institute Failure', props<{ error: any }>());
 
-export const deleteInstitute = createAction('[Institute] Delete Institute', props<{ id: string }>());
-export const deleteInstituteSuccess = createAction('[Institute] Delete Institute Success', props<{ id: string }>());
+export const deleteInstitute = createAction('[Institute] Delete Institute', props<{ id: number }>());
+export const deleteInstituteSuccess = createAction('[Institute] Delete Institute Success', props<{ id: number }>());
 export const deleteInstituteFailure = createAction('[Institute] Delete Institute Failure', props<{ error: any }>());

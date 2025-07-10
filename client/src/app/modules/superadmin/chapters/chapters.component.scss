@@ -5,3 +5,11 @@
 ::ng-deep .mat-mdc-tab-group .mat-mdc-tab-header .mat-mdc-tab-label-container {
     margin: 0 !important;
 }
+
+::ng-deep .ql-container {
+    height: auto !important;
+    .ql-editor {
+        height: auto !important;
+        min-height: 160px !important;
+    }
+}
