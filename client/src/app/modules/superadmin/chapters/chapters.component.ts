@@ -51,6 +51,7 @@ import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
 import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
 import { IChapters } from '../../../models/chapters.types';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
     selector: 'app-chapters',
@@ -80,6 +81,7 @@ import { IChapters } from '../../../models/chapters.types';
         MatExpansionModule,
         DragDropModule,
         TranslocoModule,
+        QuillModule
     ],
     templateUrl: './chapters.component.html',
     styleUrl: './chapters.component.scss',

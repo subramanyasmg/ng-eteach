@@ -16,6 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
+import { USER_TYPES } from 'app/constants/usertypes';
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
@@ -69,10 +70,10 @@ export class InstituteAdminSignInComponent implements OnInit {
         // Create the form
         this.signInForm = this._formBuilder.group({
             email: [
-                'hughes.brian@company.com',
+                '',
                 [Validators.required, Validators.email],
             ],
-            password: ['admin', Validators.required]
+            password: ['', Validators.required]
         });
     }
 
@@ -96,7 +97,7 @@ export class InstituteAdminSignInComponent implements OnInit {
         this.showAlert = false;
 
         // Sign in
-        this._authService.signIn(this.signInForm.value).subscribe(
+        this._authService.signIn(this.signInForm.value, USER_TYPES.INSTITUTE_ADMIN).subscribe(
             (response) => {
                 console.log(response);
                 // Set the redirect url.

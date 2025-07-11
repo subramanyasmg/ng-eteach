@@ -22,7 +22,7 @@ export class InstituteService {
     private _item: BehaviorSubject<IInstitutes | null> = new BehaviorSubject(
         null
     );
-    private apiUrl = '/api/a/institute';
+    private apiUrl = 'api/superadmin/';
 
     /**
      * Constructor
@@ -44,7 +44,7 @@ export class InstituteService {
     }
 
     getAll() {
-        return this._httpClient.get(this.apiUrl).pipe(
+        return this._httpClient.get(`${this.apiUrl}getAllInstitutes`).pipe(
             tap((response: any) => {
                 if (response?.status) {
                     this._items.next(response.data as IInstitutes[]);
@@ -55,102 +55,41 @@ export class InstituteService {
         );
     }
 
-    // create(request): Observable<any> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((item) =>
-    //             this._httpClient.post(this.apiUrl, { ...request }).pipe(
-    //                 mergeMap((response: any) => {
-    //                     if (!response.status) {
-    //                         return throwError(() => new Error('Something went wrong while adding'));
-    //                     }
-
-    //                     this._items.next([
-    //                         response.data as IInstitutes,
-    //                         ...item,
-    //                     ]);
-
-    //                     return of(response);
-    //                 })
-    //             )
-    //         )
-    //     );
-    // }
-
     create(request): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
-                const mockResponse = {
-                    status: true,
-                    data: {
-                        id: Date.now().toString(),
-                        name: request.name,
-                        createdOn: new Date().toLocaleDateString(),
-                        expiresOn: request.expiresOn,
-                        noOfLicense: request.noOfLicense,
-                        subdomain: request.subdomain,
-                        instituteAddress: request.instituteAddress,
-                        adminName: request.adminName,
-                        adminEmail: request.adminEmail,
-                        status: request.status,
-                        curriculum: request.curriculum,
-                        accountType: request.accountType
-                    } as IInstitutes,
-                };
-
-                return of(mockResponse).pipe(
-                    delay(300), // Simulate API delay
-                    mergeMap((response: any) => {
-                        if (!response.status) {
-                            return throwError(
-                                () =>
-                                    new Error(
-                                        'Something went wrong while adding'
-                                    )
-                            );
-                        }
-
-                        this._items.next([
-                            response.data as IInstitutes,
-                            ...items,
-                        ]);
-
-                        return of(response);
+                return this._httpClient
+                    .post(`${this.apiUrl}createInstitute`, {
+                        ...request,
                     })
-                );
+                    .pipe(
+                        delay(300), // Simulate API delay
+                        mergeMap((response: any) => {
+                            if (!response.status) {
+                                return throwError(
+                                    () =>
+                                        new Error(
+                                            'Something went wrong while adding'
+                                        )
+                                );
+                            }
+
+                            this._items.next([
+                                response.data as IInstitutes,
+                                ...items,
+                            ]);
+
+                            return of(response);
+                        })
+                    );
             })
         );
     }
 
-    // update(id, data): Observable<IInstitutes> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((item) =>
-    //             this._httpClient.put(this.apiUrl + '/' + id, { ...data }).pipe(
-    //                 map((response: any) => {
-    //                     if (response.status) {
-    //                         // Find the index of the updated item
-    //                         const index = item.findIndex(
-    //                             (item) => item.id === id
-    //                         );
-
-    //                         // Update the item
-    //                         item[index] = response.data[0];
-
-    //                         // Update the items
-    //                         this._items.next(item);
-    //                     }
-    //                     return response;
-    //                 })
-    //             )
-    //         )
-    //     );
-    // }
-
-    update(id: string, updatedData: IInstitutes): Observable<any> {
+    update(id: number, data: IInstitutes): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
@@ -164,86 +103,55 @@ export class InstituteService {
                     return throwError(() => new Error('Item not found'));
                 }
 
-                // Create updated item
-                const updatedItem: IInstitutes = {
-                    ...items[index],
-                    ...updatedData,
-                };
+                return this._httpClient
+                    .put(`${this.apiUrl}updateInstitute/${id}`, { ...data })
+                    .pipe(
+                        delay(300),
+                        map((response: any) => {
+                            if (response.status) {
+                                // Replace the old item with updated item
+                                const updatedList = [...items];
+                                updatedList[index] = response?.data;
 
-                // Simulate API delay and response
-                return of({
-                    status: true,
-                    data: updatedItem,
-                }).pipe(
-                    delay(300),
-                    map((response) => {
-                        if (response.status) {
-                            // Replace the old item with updated item
-                            const updatedList = [...items];
-                            updatedList[index] = updatedItem;
+                                // Emit new state
+                                this._items.next(updatedList);
 
-                            // Emit new state
-                            this._items.next(updatedList);
-
-                            return response;
-                        } else {
-                            return throwError(() => new Error('Update failed'));
-                        }
-                    })
-                );
+                                return response;
+                            } else {
+                                return throwError(
+                                    () => new Error('Update failed')
+                                );
+                            }
+                        })
+                    );
             })
         );
     }
 
-    // delete(id: string): Observable<boolean> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((existingItems) => {
-    //             const items = existingItems ?? [];
-    //             return this._httpClient.delete(this.apiUrl + '/' + id).pipe(
-    //                 map((isDeleted: boolean) => {
-    //                     if (isDeleted) {
-    //                         // Find the index of the deleted item
-    //                         const index = items.findIndex(
-    //                             (item) => item.id === id
-    //                         );
-    //                         // Delete the item
-    //                         items.splice(index, 1);
-
-    //                         // Update the items
-    //                         this._items.next(items);
-    //                     }
-    //                     // Return the deleted status
-    //                     return isDeleted;
-    //                 })
-    //             );
-    //         })
-    //     );
-    // }
-
-    delete(id: string): Observable<boolean> {
+    delete(id: number): Observable<boolean> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
-                const safeItems = existingItems ?? [];
+                const items = [...(existingItems ?? [])];
 
                 // Find the index of the item to delete
-                const index = safeItems.findIndex((item) => item.id === id);
+                const index = items.findIndex((item) => item.id === id);
 
-                // Simulate API delay and deletion
-                return of(true).pipe(
-                    delay(300),
-                    map((isDeleted) => {
-                        if (isDeleted && index !== -1) {
-                            // Remove item from the list
-                            safeItems.splice(index, 1);
+                return this._httpClient
+                    .delete(`${this.apiUrl}deleteInstitute/${id}`)
+                    .pipe(
+                        map((response: any) => {
+                            if (response?.status && index !== -1) {
+                                // Remove item from the list
+                                items.splice(index, 1);
 
-                            // Update the observable stream
-                            this._items.next([...safeItems]);
-                        }
-                        return isDeleted;
-                    })
-                );
+                                // Update the observable stream
+                                this._items.next([...items]);
+                                return true;
+                            }
+                            return false;
+                        })
+                    );
             })
         );
     }

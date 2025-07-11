@@ -1,14 +1,15 @@
 export interface IInstitutes {
-    id?: string;
+    id?: number;
     name: string;
-    expiresOn: string;
-    noOfLicense: number;
+    license_end: string;
+    total_licenses: number;
     subdomain: string;
-    instituteAddress: string;
-    adminName: string;
-    adminEmail: string;
-    status: string;
-    curriculum: string;
-    accountType: string;
+    address: string;
+    admin_name: string;
+    admin_email: string;
+    status?: string;
+    curriculum: number;
+    publisher_id?: number;
+    account_type: string;
     createdOn?: string;
 }

@@ -11,7 +11,6 @@ import {
 import { FuseMediaWatcherService } from '@fuse/services/media-watcher';
 import { USER_TYPES } from 'app/constants/usertypes';
 import { UserService } from 'app/core/user/user.service';
-import { LanguagesComponent } from 'app/layout/common/languages/languages.component';
 import { UserComponent } from 'app/layout/common/user/user.component';
 import {
     instituteAdmin,
@@ -29,7 +28,6 @@ import { BreadcrumbComponent } from '../../../common/breadcrumb/breadcrumb.compo
         FuseVerticalNavigationComponent,
         MatButtonModule,
         MatIconModule,
-        LanguagesComponent,
         FuseFullscreenComponent,
         UserComponent,
         RouterOutlet,

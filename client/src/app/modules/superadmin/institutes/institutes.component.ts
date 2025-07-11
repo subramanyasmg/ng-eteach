@@ -137,15 +137,10 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             accountType: ['', [Validators.required]],
         });
 
-        this.store
-            .select(selectCurriculumsLoaded)
-            .pipe(
-                take(1),
-                filter((loaded) => !loaded)
-            )
-            .subscribe(() => {
-                this.store.dispatch(CurriculumActions.loadCurriculums());
-            });
+
+        this.store.dispatch(CurriculumActions.loadCurriculums());
+        this.store.dispatch(InstituteActions.loadInstitutes());
+
 
         this.handleAPIResponse();
 
@@ -194,18 +189,19 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     patchFormValues(data: IInstitutes) {
+        console.log(data);
         this.entityForm.patchValue({
             id: data.id,
             name: data.name,
-            noOfLicense: data.noOfLicense,
-            adminName: data.adminName,
-            instituteAddress: data.instituteAddress,
-            adminEmail: data.adminEmail,
+            noOfLicense: data.total_licenses,
+            adminName: data.admin_name,
+            instituteAddress: data.address,
+            adminEmail: data.admin_email,
             subdomain: data.subdomain,
-            expiresOn: data.expiresOn,
+            expiresOn: data.license_end,
             status: data.status,
-            curriculum: data.curriculum,
-            accountType: data.accountType
+            curriculum: data.publisher_id,
+            accountType: data.account_type
         });
     }
 
@@ -220,15 +216,14 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         const formValues = this.entityForm.value;
         const requestObj: IInstitutes = {
             name: formValues.name,
-            noOfLicense: formValues.noOfLicense,
-            instituteAddress: formValues.instituteAddress,
-            adminName: formValues.adminName,
-            adminEmail: formValues.adminEmail,
+            total_licenses: formValues.noOfLicense,
+            address: formValues.instituteAddress,
+            admin_name: formValues.adminName,
+            admin_email: formValues.adminEmail,
             subdomain: formValues.subdomain,
-            expiresOn: formValues.expiresOn,
-            status: formValues.status,
-            curriculum: formValues.curriculum,
-            accountType: formValues.accountType,
+            license_end: formValues.expiresOn,
+            curriculum: Number(formValues.curriculum),
+            account_type: formValues.accountType,
         };
         this.store.dispatch(
             InstituteActions.addInstitute({ institute: requestObj })
@@ -247,16 +242,16 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         const requestObj: IInstitutes = {
             id: formValues.id,
             name: formValues.name,
-            noOfLicense: formValues.noOfLicense,
-            instituteAddress: formValues.instituteAddress,
-            adminName: formValues.adminName,
-            adminEmail: formValues.adminEmail,
+            total_licenses: formValues.noOfLicense,
+            address: formValues.instituteAddress,
+            admin_name: formValues.adminName,
+            admin_email: formValues.adminEmail,
             subdomain: formValues.subdomain,
-            expiresOn: formValues.expiresOn,
-            status: formValues.status,
-            curriculum: formValues.curriculum,
-            accountType: formValues.accountType,
+            license_end: formValues.expiresOn,
+            curriculum: Number(formValues.curriculum),
+            account_type: formValues.accountType
         };
+        
         this.store.dispatch(
             InstituteActions.updateInstitute({ institute: requestObj })
         );
@@ -278,6 +273,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         confirmation.afterClosed().subscribe((result) => {
             // If the confirm button pressed...
             if (result === 'confirmed') {
+                console.log('confirmed', item);
                 this.store.dispatch(
                     InstituteActions.deleteInstitute({ id: item.id })
                 );

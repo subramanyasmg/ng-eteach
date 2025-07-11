@@ -51,15 +51,15 @@
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'institute.header_name' | transloco }}</th>
                         <td mat-cell *matCellDef="let element">{{ element.name }}
                             <span class="inline-block ml-2 h-2 w-2 rounded-full" [ngClass]="{
-                                'bg-green-500': element.status === 'active',
-                                'bg-red-500': element.status === 'trial'
+                                'bg-green-500': element.status === 'ACTIVE',
+                                'bg-red-500': element.status === 'TRIAL'
                             }"></span>
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="createdOn">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'institute.header_created_on' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element">{{ element.createdOn }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.createdAt | date }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="expiresOn">
@@ -238,8 +238,8 @@
                 <mat-label>{{ 'institute.label_status' | transloco }}</mat-label>
 
                 <mat-select [formControlName]="'status'">
-                    <mat-option value="active">{{ 'institute.status_active' | transloco }}</mat-option>
-                    <mat-option value="trial">{{ 'institute.status_trial' | transloco }}</mat-option>
+                    <mat-option value="ACTIVE">{{ 'institute.status_active' | transloco }}</mat-option>
+                    <mat-option value="TRIAL">{{ 'institute.status_trial' | transloco }}</mat-option>
                 </mat-select>
 
                 @if (entityForm.get('status').hasError('required')) {

@@ -131,7 +131,7 @@ export class GradesService {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
-                const items = existingItems ?? [];
+                const items = [...(existingItems ?? [])];
 
                 // Find the index of the item to delete
                 const index = items.findIndex((item) => item.id === id);

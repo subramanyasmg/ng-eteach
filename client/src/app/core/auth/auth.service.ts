@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { USER_TYPES } from 'app/constants/usertypes';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
 import * as CryptoJS from 'crypto-js';
@@ -55,7 +56,7 @@ export class AuthService {
      *
      * @param credentials
      */
-    signIn(credentials: { email: string; password: string }): Observable<any> {
+    signIn(credentials: { email: string; password: string }, type): Observable<any> {
 
         // Throw error, if the user is already logged in
         if (this._authenticated) {
@@ -66,7 +67,15 @@ export class AuthService {
         //     CryptoJS.enc.Hex
         // );
 
-        return this._httpClient.post(`${this._baseUrl}login`, credentials).pipe(
+        let url = '';
+
+        if (type === USER_TYPES.SUPER_ADMIN) {
+            url = '/api/superadmin/';
+        } else if (type === USER_TYPES.INSTITUTE_ADMIN) {
+            url = '/api/instituteadmin/';
+        }
+
+        return this._httpClient.post(`${url}login`, credentials).pipe(
             switchMap((response: any) => {
                 // Store the access token in the local storage
                 this.accessToken = response.accessToken;

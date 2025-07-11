@@ -30,3 +30,9 @@ mat-snack-bar-container {
 .mat-expansion-panel-header.mat-expanded {
     height: 75px !important;
 }
+
+span.mat-mdc-form-field-required-marker {
+    &:after {
+        color: red;
+    }
+}

@@ -27,7 +27,10 @@
         "deleteConfirmationTitle": "Are you sure you want to delete?",
         "deleteConfirmationMessage": "Taking this action will permanently delete this entry. Are you sure about taking this action?",
         "deletePermanently": "Delete Permanently",
-        "moreItems": "+ {{count}} more"
+        "moreItems": "+ {{count}} more",
+        "signedInAs":"Signed in as",
+        "profile": "Profile",
+        "signOut": "Sign out"
     },
     "institute": {
         "page_subtext": "Manage institute information",

@@ -87,7 +87,7 @@ export class CurriculumService {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
-                const items = existingItems ?? [];
+                const items = [...(existingItems ?? [])];
 
                 // Find the item to update
                 const index = items.findIndex((item) => item.id === id);

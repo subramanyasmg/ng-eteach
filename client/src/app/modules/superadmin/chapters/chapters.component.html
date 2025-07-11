@@ -106,15 +106,16 @@
                                                             }}</mat-panel-title>
                                                     </mat-expansion-panel-header>
                                                     <div class="p-2 flex flex-col gap-2">
-                                                        <mat-form-field class="w-full">
-                                                            <textarea matInput required [(ngModel)]="phase.content"
-                                                                [placeholder]="'chapters.placeholder_phase_content' | transloco: {phase: phase.label}"
-                                                                rows="3"></textarea>
-                                                            <mat-error>
-                                                                {{ 'chapters.error_phase_content_required' | transloco}}
-                                                            </mat-error>
-                                                        </mat-form-field>
-                                                        <button [disabled]="phase?.content?.trim().length === 0"
+                                                        
+                                                        <div class="w-full">
+                                                            <quill-editor
+                                                                id="quill-editor"
+                                                                class="w-full"
+                                                                [(ngModel)]="phase.content"
+                                                                [style]="{ height: '200px' }"
+                                                            ></quill-editor>
+                                                        </div>
+                                                        <button [disabled]="!phase.content || phase?.content?.trim().length === 0"
                                                             matTooltip="{{ 'common.save' | transloco}}"
                                                             class="rounded-md w-fit self-end" mat-flat-button
                                                             [color]="'primary'" (click)="updateChapterPhase(chapter)">
