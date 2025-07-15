@@ -1,7 +1,7 @@
 export interface IChapters {
     id?: string;
     subjectId?:string;
-    name: string;
+    title: string;
     lessonPlan?: any;
     textBook?: any;
     referenceMaterials?: any;

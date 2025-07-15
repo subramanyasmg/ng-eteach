@@ -32,6 +32,8 @@ import { chaptersReducer } from './state/chapters/chapters.reducer';
 import { ChaptersEffects } from './state/chapters/chapters.effects';
 import { teacherReducer } from './state/teachers/teacher.reducer';
 import { TeacherEffects } from './state/teachers/teacher.effects';
+import { publisherReducer } from './state/publishers/publishers.reducer';
+import { PublisherEffects } from './state/publishers/publishers.effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -149,6 +151,8 @@ export const appConfig: ApplicationConfig = {
                 ]
             }
         }),
+        provideState('publisher', publisherReducer),
+        provideEffects(PublisherEffects),
         provideState('curriculum', curriculumReducer),
         provideEffects(CurriculumEffects),
         provideState('grades', gradeReducer),

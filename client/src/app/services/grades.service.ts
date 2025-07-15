@@ -62,7 +62,7 @@ export class GradesService {
                 this._httpClient
                     .post(`${this.apiUrl}createGrade`, {
                         ...request,
-                        curriculumId,
+                        curriculum_id: curriculumId,
                     })
                     .pipe(
                         mergeMap((response: any) => {
@@ -87,14 +87,14 @@ export class GradesService {
         );
     }
 
-    update(id: string, data: IGrades): Observable<any> {
+    update(curriculumId: string, data: IGrades): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
                 // Find the item to update
-                const index = items.findIndex((item) => item.id === id);
+                const index = items.findIndex((item) => Number(item.id) === Number(data.id));
 
                 if (index === -1) {
                     // Simulate failure if item not found
@@ -103,7 +103,7 @@ export class GradesService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateGrade/${id}`, { ...data })
+                    .put(`${this.apiUrl}updateGrade`, { name: data.grade_name, curriculum_id: curriculumId, id: Number(data.id) })
                     .pipe(
                         delay(300),
                         map((response: any) => {

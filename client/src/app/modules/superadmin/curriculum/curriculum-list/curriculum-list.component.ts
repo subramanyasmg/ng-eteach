@@ -30,7 +30,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Actions, ofType } from '@ngrx/effects';
@@ -39,9 +39,11 @@ import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
+import * as PublisherActions from 'app/state/publishers/publishers.actions';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
-import { Observable, Subject, tap } from 'rxjs';
+import { filter, map, Observable, Subject, take, tap } from 'rxjs';
 import { ICurriculum } from '../../../../models/curriculum.types';
+import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -83,19 +85,19 @@ export class CurriculumListComponent
     displayedColumns: string[] = [
         'name',
         'createdOn',
-        'publisherName',
-        'publisherEmail',
-        'phone',
+        'modifiedOn',
         'actions',
     ];
     mode = null;
     query = '';
-    list$: Observable<ICurriculum[]> = this.store.select(selectAllCurriculums);
+    list$: Observable<ICurriculum[]>;
     entityForm: UntypedFormGroup;
     matDialogRef = null;
+    publisherId;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
+        private route: ActivatedRoute,
         private _fuseConfirmationService: FuseConfirmationService,
         private _matDialog: MatDialog,
         private _formBuilder: UntypedFormBuilder,
@@ -106,38 +108,40 @@ export class CurriculumListComponent
         private translocoService: TranslocoService,
         private titleService: BreadcrumbService
     ) {
-        this.titleService.setBreadcrumb([
-            {
-                label: this.translocoService.translate('navigation.curriculum'),
-                url: '/curriculum',
-            },
-            {
-                label: this.translocoService.translate(
-                    'navigation.manageCurriculum'
-                ),
-                url: '',
-            },
-        ]);
     }
 
     ngOnInit(): void {
+        this.store.dispatch(PublisherActions.loadPublishers());
+        this.publisherId = Number(this.route.snapshot.paramMap.get('id'));
+
+        if (this.publisherId) {
+            this.store
+                .select(selectAllPublishers)
+                .pipe(
+                    map((publishers) => publishers.find((c) => c.id === this.publisherId) ),
+                    filter(Boolean),
+                    take(1)
+                )
+                .subscribe((publisher) => {
+                    this.titleService.setBreadcrumb([
+                        { label: this.translocoService.translate('navigation.curriculum'), url: '/manage-publishers', },
+                        { label: this.translocoService.translate('navigation.managePublishers'),  url: '/manage-publishers', },
+                        { label: publisher.publication_name, url: '' },
+                    ]);
+                });
+
+
+            this.list$ = this.store.select(selectAllCurriculums(this.publisherId));
+            this.getAllCurriculums();
+        }
+
+
+
         this.entityForm = this._formBuilder.group({
             id: [''],
-            name: ['', [Validators.required]],
-            publisherName: ['', [Validators.required]],
-            publisherEmail: ['', [Validators.required, Validators.email]],
-            phone: [
-                '',
-                [
-                    Validators.required,
-                    Validators.minLength(10),
-                    Validators.maxLength(15),
-                    Validators.pattern(/^\+?[0-9]{10,15}$/),
-                ],
-            ],
+            curriculum_name: ['', [Validators.required]]
         });
 
-        this.getAllCurriculums();
         this.handleAPIResponse();
 
         this.list$.subscribe((data) => {
@@ -148,7 +152,7 @@ export class CurriculumListComponent
     }
 
     getAllCurriculums() {
-        this.store.dispatch(CurriculumActions.loadCurriculums());
+        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
     }
 
     ngAfterViewInit(): void {
@@ -191,10 +195,7 @@ export class CurriculumListComponent
     patchFormValues(data: ICurriculum) {
         this.entityForm.patchValue({
             id: data.id,
-            name: data.name,
-            publisherName: data.publisherName,
-            publisherEmail: data.publisherEmail,
-            phone: data.phone,
+            curriculum_name: data.curriculum_name
         });
     }
 
@@ -208,13 +209,11 @@ export class CurriculumListComponent
         this.entityForm.disable();
         const formValues = this.entityForm.value;
         const requestObj: ICurriculum = {
-            name: formValues.name,
-            publisherName: formValues.publisherName,
-            publisherEmail: formValues.publisherEmail,
-            phone: formValues.phone,
+            curriculum_name: formValues.curriculum_name,
+            publisher_id: this.publisherId
         };
         this.store.dispatch(
-            CurriculumActions.addCurriculum({ curriculum: requestObj })
+            CurriculumActions.addCurriculum({ publisherId: this.publisherId, curriculum: requestObj })
         );
     }
 
@@ -229,13 +228,11 @@ export class CurriculumListComponent
         const formValues = this.entityForm.value;
         const requestObj: ICurriculum = {
             id: formValues.id,
-            name: formValues.name,
-            publisherName: formValues.publisherName,
-            publisherEmail: formValues.publisherEmail,
-            phone: formValues.phone,
+            curriculum_name: formValues.curriculum_name,
+            publisher_id: this.publisherId
         };
         this.store.dispatch(
-            CurriculumActions.updateCurriculum({ curriculum: requestObj })
+            CurriculumActions.updateCurriculum({ publisherId: this.publisherId, curriculum: requestObj })
         );
     }
 
@@ -262,7 +259,7 @@ export class CurriculumListComponent
             // If the confirm button pressed...
             if (result === 'confirmed') {
                 this.store.dispatch(
-                    CurriculumActions.deleteCurriculum({ id: item.id })
+                    CurriculumActions.deleteCurriculum({ publisherId: this.publisherId, curriculumId: item.id })
                 );
             }
         });

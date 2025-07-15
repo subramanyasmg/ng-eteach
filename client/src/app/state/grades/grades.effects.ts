@@ -37,7 +37,7 @@ export class GradesEffects {
     this.actions$.pipe(
       ofType(GradeActions.updateGrade),
       mergeMap(({ curriculumId, grade }) =>
-        this.service.update(grade.id,grade).pipe(
+        this.service.update(curriculumId,grade).pipe(
           map(response => GradeActions.updateGradeSuccess({ curriculumId, grade: response.data })),
           catchError(error => of(GradeActions.updateGradeFailure({ error })))
         )

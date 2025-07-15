@@ -40,6 +40,7 @@ import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
+import * as PublisherActions from 'app/state/publishers/publishers.actions';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
 import * as GradeActions from 'app/state/grades/grades.actions';
@@ -56,6 +57,7 @@ import {
     tap,
 } from 'rxjs';
 import { ISubjects } from '../../../models/subject.types';
+import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 
 @Component({
     selector: 'app-subjects',
@@ -107,6 +109,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     matDialogRef = null;
     curriculumId;
     gradeId;
+    publisherId;
     gradeName: string;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     separatorKeysCodes: number[] = [ENTER, COMMA];
@@ -125,10 +128,13 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.store.dispatch(CurriculumActions.loadCurriculums());
-
+        
         this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
         this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
+        this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
+        
+         this.store.dispatch(PublisherActions.loadPublishers());
+        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
 
         this.store.dispatch(
             GradeActions.loadGrades({ curriculumId: this.curriculumId })
@@ -136,40 +142,48 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
         setTimeout(() => {
             combineLatest([
-                this.store.select(selectAllCurriculums),
+                this.store.select(selectAllPublishers),
+                this.store.select(selectAllCurriculums(this.publisherId)),
                 this.store.select(selectGradesByCurriculumId(this.curriculumId)),
             ])
                 .pipe(
                     take(1),
-                    map(([curriculums, grades]) => {
+                    map(([publishers, curriculums, grades]) => {
+                        const publisher = publishers.find(
+                            (p) => p.id === this.publisherId
+                        );
                         const curriculum = curriculums.find(
                             (c) => c.id === this.curriculumId
                         );
                         const grade = grades?.find((g) => g.id === this.gradeId);
-                        return { curriculum, grade };
+                        return { publisher, curriculum, grade };
                     }),
-                    filter(({ curriculum, grade }) => !!curriculum && !!grade)
+                    filter(({ publisher, curriculum, grade }) => !!publisher && !!curriculum && !!grade)
                 )
-                .subscribe(({ curriculum, grade }) => {
-                    this.gradeName = grade.name;
+                .subscribe(({ publisher, curriculum, grade }) => {
+                    this.gradeName = grade.grade_name;
                     this.titleService.setBreadcrumb([
                         {
                             label: this.translocoService.translate(
                                 'navigation.curriculum'
                             ),
-                            url: '/curriculum',
+                            url: '/manage-publishers',
                         },
                         {
                             label: this.translocoService.translate(
-                                'navigation.manageCurriculum'
+                                'navigation.managePublishers'
                             ),
-                            url: '/curriculum',
+                            url: '/manage-publishers',
                         },
                         {
-                            label: curriculum.name,
-                            url: `/curriculum/${this.curriculumId}/grades`,
+                            label: publisher.publication_name,
+                            url: `/manage-publishers/${this.publisherId}/curriculum`,
                         },
-                        { label: grade.name, url: '' },
+                        {
+                            label: curriculum.curriculum_name,
+                            url: `/manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
+                        },
+                        { label: grade.grade_name, url: '' },
                     ]);
                 });
         }, 500);
@@ -285,7 +299,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     patchFormValues(data: ISubjects) {
         this.entityForm.patchValue({
             id: data.id,
-            name: data.name,
+            name: data.subject_name,
         });
     }
 
@@ -299,7 +313,8 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.entityForm.disable();
         const formValues = this.entityForm.value;
         const requestObj: ISubjects = {
-            name: formValues.subjects.join(','),
+            subject_name: formValues.subjects.join(','),
+            grade_id: this.gradeId
         };
         this.store.dispatch(
             SubjectActions.addSubject({
@@ -320,7 +335,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
         const formValues = this.entityForm.value;
         const requestObj: ISubjects = {
             id: formValues.id,
-            name: formValues.name,
+            subject_name: formValues.name,
         };
         this.store.dispatch(
             SubjectActions.updateSubject({

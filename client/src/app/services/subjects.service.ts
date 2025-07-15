@@ -62,8 +62,9 @@ export class SubjectsService {
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}createSubject/${gradeId}`, {
-                        ...request,
+                    .post(`${this.apiUrl}createSubject`, {
+                        grade_id: request.grade_id,
+                        name: request.subject_name
                     })
                     .pipe(
                         mergeMap((response: any) => {
@@ -93,6 +94,8 @@ export class SubjectsService {
             take(1),
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
+
+                console.log(items, id);
 
                 // Find the item to update
                 const index = items.findIndex((item) => item.id === id);

@@ -53,7 +53,7 @@ export class SubjectsEffects {
     this.actions$.pipe(
       ofType(SubjectActions.deleteSubject),
       mergeMap(({ gradeId, subjectId }) =>
-        this.service.delete(gradeId).pipe(
+        this.service.delete(subjectId).pipe(
           map(() => SubjectActions.deleteSubjectSuccess({ gradeId, subjectId })),
           catchError(error => of(SubjectActions.deleteSubjectFailure({ error })))
         )

@@ -1,7 +1,7 @@
 export interface ISubjects {
     id?: string;
-    gradeId?: string;
-    name: string;
+    grade_id?: string;
+    subject_name: string;
     updatedAt?: string;
     noOfChapters?: number;
     createdAt?: string;

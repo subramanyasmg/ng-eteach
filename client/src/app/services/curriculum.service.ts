@@ -42,8 +42,8 @@ export class CurriculumService {
         return this._items.asObservable();
     }
 
-    getAll() {
-        return this._httpClient.get(`${this.apiUrl}getAllPublishers`).pipe(
+    getAll(publisherId: string) {
+        return this._httpClient.get(`${this.apiUrl}getAllCurriculums/${publisherId}`).pipe(
             tap((response: any) => {
                 if (response?.status) {
                     this._items.next(response.data as ICurriculum[]);
@@ -54,12 +54,12 @@ export class CurriculumService {
         );
     }
 
-    create(request): Observable<any> {
+    create(publisherId, request): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}createPublisher`, { ...request })
+                    .post(`${this.apiUrl}createCurriculum`, { ...request, publisher_id: publisherId })
                     .pipe(
                         mergeMap((response: any) => {
                             if (!response.status) {
@@ -98,7 +98,7 @@ export class CurriculumService {
                 }
 
                 return this._httpClient
-                    .put(`${this.apiUrl}updatePublisher/${id}`, { ...data })
+                    .put(`${this.apiUrl}updateCurriculum/${id}`, { curriculum_name: data.curriculum_name, publisher_id: data.publisher_id })
                     .pipe(
                         map((response: any) => {
                             if (response?.status) {
@@ -131,7 +131,7 @@ export class CurriculumService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deletePublisher/${id}`)
+                    .delete(`${this.apiUrl}deleteCurriculum/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status && index !== -1) {

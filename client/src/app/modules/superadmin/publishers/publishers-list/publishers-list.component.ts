@@ -30,25 +30,21 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { IPublisher } from 'app/models/publisher.types';
 import { PipesModule } from 'app/pipes/pipes.module';
-import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
-import { combineLatest, filter, map, Observable, Subject, take, tap } from 'rxjs';
-import { IGrades } from '../../../models/grades.types';
-import { FuseConfirmationService } from '@fuse/services/confirmation';
-import { Actions, ofType } from '@ngrx/effects';
 import * as PublisherActions from 'app/state/publishers/publishers.actions';
-import * as GradeActions from 'app/state/grades/grades.actions';
-import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
-import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades/grades.selectors';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
+import { Observable, Subject, tap } from 'rxjs';
 
 @Component({
-    selector: 'app-grades',
+    selector: 'app-publishers-list',
     standalone: true,
     imports: [
         MatProgressBarModule,
@@ -66,117 +62,94 @@ import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
         MatTabsModule,
         MatTableModule,
         CommonModule,
+        RouterModule,
         ReactiveFormsModule,
         PipesModule,
         MatSortModule,
         MatSelectModule,
-        RouterModule,
-        TranslocoModule
+        TranslocoModule,
     ],
-    templateUrl: './grades.component.html',
-    styleUrl: './grades.component.scss',
+    templateUrl: './publishers-list.component.html',
+    styleUrl: './publishers-list.component.scss',
 })
-export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
+export class PublishersListComponent
+    implements OnInit, AfterViewInit, OnDestroy
+{
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
 
-    dataSource = new MatTableDataSource<IGrades>();
+    dataSource = new MatTableDataSource<IPublisher>();
     displayedColumns: string[] = [
-        'name',
-        'createdOn',
-        'modifiedOn',
-        'noOfSubjects',
+        'publication_name',
+        'contact_name',
+        'email',
+        'phone',
         'actions',
     ];
     mode = null;
     query = '';
-    list$: Observable<IGrades[]>;
+    list$: Observable<IPublisher[]> = this.store.select(selectAllPublishers);
     entityForm: UntypedFormGroup;
     matDialogRef = null;
-    curriculumId;
-    publisherId;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
-        private route: ActivatedRoute,
         private _fuseConfirmationService: FuseConfirmationService,
-        private store: Store,
+        private _matDialog: MatDialog,
         private _formBuilder: UntypedFormBuilder,
         private _snackBar: SnackBarService,
-        private _matDialog: MatDialog,
-         private actions$: Actions,
+        private store: Store,
+        private actions$: Actions,
         private _cdr: ChangeDetectorRef,
         private translocoService: TranslocoService,
         private titleService: BreadcrumbService
-    ) {}
+    ) {
+        this.titleService.setBreadcrumb([
+            {
+                label: this.translocoService.translate('navigation.curriculum'),
+                url: '/manage-publishers',
+            },
+            {
+                label: this.translocoService.translate(
+                    'navigation.managePublishers'
+                ),
+                url: '',
+            },
+        ]);
+    }
 
     ngOnInit(): void {
-        this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
-        this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
-        this.store.dispatch(PublisherActions.loadPublishers());
-        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
-
-        setTimeout(() => {
-            combineLatest([
-                this.store.select(selectAllPublishers),
-                this.store.select(selectAllCurriculums(this.publisherId)),
-            ])
-                .pipe(
-                    take(1),
-                    map(([publishers, curriculums]) => {
-                        const publisher = publishers.find(
-                            (p) => p.id === this.publisherId
-                        );
-                        const curr = curriculums?.find((c) => c.id === this.curriculumId);
-                        return { publisher, curr };
-                    }),
-                    filter(({ publisher, curr }) => !!publisher && !!curr)
-                )
-                .subscribe(({ publisher, curr }) => {
-                    this.titleService.setBreadcrumb([
-                        {
-                            label: this.translocoService.translate(
-                                'navigation.curriculum'
-                            ),
-                            url: '/manage-publishers',
-                        },
-                        {
-                            label: this.translocoService.translate(
-                                'navigation.managePublishers'
-                            ),
-                            url: '/manage-publishers',
-                        },
-                        {
-                            label: publisher.publication_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum`,
-                        },
-                        { label: curr.curriculum_name, url: '' },
-                    ]);
-                });
-        }, 500);
-
-
-        this.list$ = this.store.select(selectGradesByCurriculumId(this.curriculumId));
-        this.loadGradesForCurriculum();
-            
-
         this.entityForm = this._formBuilder.group({
             id: [''],
-            name: ['', [Validators.required]],
+            contact_name: ['', [Validators.required]],
+            publication_name: ['', [Validators.required]],
+            address: ['', [Validators.required]],
+            email: ['', [Validators.required, Validators.email]],
+            phone: [
+                '',
+                [
+                    Validators.required,
+                    Validators.minLength(10),
+                    Validators.maxLength(15),
+                    Validators.pattern(/^\+?[0-9]{10,15}$/),
+                ],
+            ],
         });
 
+        this.getAllPublishers();
         this.handleAPIResponse();
 
         this.list$.subscribe((data) => {
+            console.log('data', data);
             this.dataSource = new MatTableDataSource(data); // reassign!
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
         });
     }
 
-    loadGradesForCurriculum() {
-        this.store.dispatch(GradeActions.loadGrades({ curriculumId: this.curriculumId }));
+    getAllPublishers() {
+        this.store.dispatch(PublisherActions.loadPublishers());
     }
 
     ngAfterViewInit(): void {
@@ -216,10 +189,14 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    patchFormValues(data: IGrades) {
+    patchFormValues(data: IPublisher) {
         this.entityForm.patchValue({
             id: data.id,
-            name: data.grade_name,
+            publication_name: data.publication_name,
+            contact_name: data.contact_name,
+            email: data.email,
+            phone: data.phone,
+            address: data.address,
         });
     }
 
@@ -232,11 +209,15 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         // Disable the form
         this.entityForm.disable();
         const formValues = this.entityForm.value;
-        const requestObj: IGrades = {
-            grade_name: formValues.name
+        const requestObj: IPublisher = {
+            publication_name: formValues.publication_name,
+            contact_name: formValues.contact_name,
+            email: formValues.email,
+            phone: formValues.phone,
+            address: formValues.address,
         };
         this.store.dispatch(
-            GradeActions.addGrade({ curriculumId: this.curriculumId, grade: requestObj })
+            PublisherActions.addPublisher({ publisher: requestObj })
         );
     }
 
@@ -249,23 +230,33 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         // Disable the form
         this.entityForm.disable();
         const formValues = this.entityForm.value;
-        const requestObj: IGrades = {
+        const requestObj: IPublisher = {
             id: formValues.id,
-            grade_name: formValues.name
+            publication_name: formValues.publication_name,
+            contact_name: formValues.contact_name,
+            email: formValues.email,
+            phone: formValues.phone,
+            address: formValues.address,
         };
         this.store.dispatch(
-            GradeActions.updateGrade({ curriculumId: this.curriculumId, grade: requestObj })
+            PublisherActions.updatePublisher({ publisher: requestObj })
         );
     }
 
-    deleteItem(item: IGrades): void {
+    deleteItem(item: IPublisher): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: this.translocoService.translate('common.deleteConfirmationTitle'),
-            message:this.translocoService.translate('common.deleteConfirmationMessage'),
+            title: this.translocoService.translate(
+                'common.deleteConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'common.deleteConfirmationMessage'
+            ),
             actions: {
                 confirm: {
-                    label: this.translocoService.translate('common.deletePermanently'),
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
                 },
             },
         });
@@ -275,7 +266,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             // If the confirm button pressed...
             if (result === 'confirmed') {
                 this.store.dispatch(
-                    GradeActions.deleteGrade({ curriculumId: this.curriculumId, gradeId: item.id })
+                    PublisherActions.deletePublisher({ id: item.id })
                 );
             }
         });
@@ -285,24 +276,24 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.actions$
             .pipe(
                 ofType(
-                    GradeActions.addGradeSuccess,
-                    GradeActions.addGradeFailure,
-                    GradeActions.updateGradeSuccess,
-                    GradeActions.updateGradeFailure,
-                    GradeActions.deleteGradeSuccess,
-                    GradeActions.deleteGradeFailure
+                    PublisherActions.addPublisherSuccess,
+                    PublisherActions.addPublisherFailure,
+                    PublisherActions.updatePublisherSuccess,
+                    PublisherActions.updatePublisherFailure,
+                    PublisherActions.deletePublisherSuccess,
+                    PublisherActions.deletePublisherFailure
                 ),
                 tap((action: any) => {
                     // Close dialog on add/update success/failure
                     if (
                         action.type ===
-                            GradeActions.addGradeSuccess.type ||
+                            PublisherActions.addPublisherSuccess.type ||
                         action.type ===
-                            GradeActions.addGradeFailure.type ||
+                            PublisherActions.addPublisherFailure.type ||
                         action.type ===
-                            GradeActions.updateGradeSuccess.type ||
+                            PublisherActions.updatePublisherSuccess.type ||
                         action.type ===
-                            GradeActions.updateGradeFailure.type
+                            PublisherActions.updatePublisherFailure.type
                     ) {
                         this.matDialogRef?.close(true);
                     }
@@ -310,35 +301,43 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
                     // Handle success
                     if (
                         action.type ===
-                        GradeActions.addGradeSuccess.type
+                        PublisherActions.addPublisherSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                           this.translocoService.translate('grades.success_add')
+                            this.translocoService.translate(
+                                'publisher.success_add'
+                            )
                         );
+                        this.getAllPublishers();
                     } else if (
                         action.type ===
-                        GradeActions.updateGradeSuccess.type
+                        PublisherActions.updatePublisherSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                           this.translocoService.translate('grades.success_update')
+                            this.translocoService.translate(
+                                'publisher.success_update'
+                            )
                         );
+                        this.getAllPublishers();
                     } else if (
                         action.type ===
-                        GradeActions.deleteGradeSuccess.type
+                        PublisherActions.deletePublisherSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            this.translocoService.translate('grades.success_delete')
+                            this.translocoService.translate(
+                                'publisher.success_delete'
+                            )
                         );
                     }
 
                     // Handle failure
                     else if (
                         action.type ===
-                            GradeActions.addGradeFailure.type ||
+                            PublisherActions.addPublisherFailure.type ||
                         action.type ===
-                            GradeActions.updateGradeFailure.type ||
+                            PublisherActions.updatePublisherFailure.type ||
                         action.type ===
-                            GradeActions.deleteGradeFailure.type
+                            PublisherActions.deletePublisherFailure.type
                     ) {
                         this._snackBar.showError(
                             `Error: ${action.error?.message || 'Something went wrong.'}`
@@ -349,4 +348,3 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
             .subscribe();
     }
 }
-

@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { IPublisher } from 'app/models/publisher.types';
 import {
     BehaviorSubject,
     Observable,
-    delay,
     map,
     mergeMap,
     of,
@@ -12,14 +12,13 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { IChapters } from '../models/chapters.types';
 
 @Injectable({ providedIn: 'root' })
-export class ChaptersService {
-    private _items: BehaviorSubject<IChapters[] | null> = new BehaviorSubject(
+export class PublisherService {
+    private _items: BehaviorSubject<IPublisher[] | null> = new BehaviorSubject(
         null
     );
-    private _item: BehaviorSubject<IChapters | null> = new BehaviorSubject(
+    private _item: BehaviorSubject<IPublisher | null> = new BehaviorSubject(
         null
     );
     private apiUrl = 'api/superadmin/';
@@ -32,41 +31,35 @@ export class ChaptersService {
     /**
      * Getter for single item
      */
-    get item$(): Observable<IChapters> {
+    get item$(): Observable<IPublisher> {
         return this._item.asObservable();
     }
 
     /**
      * Getter for all items
      */
-    get items$(): Observable<IChapters[]> {
+    get items$(): Observable<IPublisher[]> {
         return this._items.asObservable();
     }
 
-    getAll(subjectId: string) {
-        return this._httpClient
-            .get(`${this.apiUrl}getAllChapters/${subjectId}`)
-            .pipe(
-                tap((response: any) => {
-                    if (response?.status) {
-                        this._items.next(response.data as IChapters[]);
-                    } else {
-                        this._items.next([]);
-                    }
-                })
-            );
+    getAll() {
+        return this._httpClient.get(`${this.apiUrl}getAllPublishers`).pipe(
+            tap((response: any) => {
+                if (response?.status) {
+                    this._items.next(response.publishers as IPublisher[]);
+                } else {
+                    this._items.next([]);
+                }
+            })
+        );
     }
 
-    create(subjectId: string, request: IChapters): Observable<any> {
+    create(request): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}createChapter`, {
-                        subject_id: subjectId,
-                        title: request.title,
-                        description: request.title //passing dummy as of now
-                    })
+                    .post(`${this.apiUrl}createPublisher`, { ...request})
                     .pipe(
                         mergeMap((response: any) => {
                             if (!response.status) {
@@ -79,7 +72,7 @@ export class ChaptersService {
                             }
 
                             this._items.next([
-                                response.data as IChapters,
+                                response?.publisher as IPublisher,
                                 ...item,
                             ]);
 
@@ -90,11 +83,11 @@ export class ChaptersService {
         );
     }
 
-    update(id: string, data: IChapters): Observable<any> {
+    update(id: number, data: IPublisher): Observable<IPublisher> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
-                const items = existingItems ?? [];
+                const items = [...(existingItems ?? [])];
 
                 // Find the item to update
                 const index = items.findIndex((item) => item.id === id);
@@ -104,13 +97,11 @@ export class ChaptersService {
                     return throwError(() => new Error('Item not found'));
                 }
 
-                // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateChapter/${id}`, { ...data })
+                    .put(`${this.apiUrl}updatePublisher/${id}`, { ...data })
                     .pipe(
-                        delay(300),
                         map((response: any) => {
-                            if (response.status) {
+                            if (response?.status) {
                                 // Replace the old item with updated item
                                 const updatedList = [...items];
                                 updatedList[index] = response?.data;
@@ -130,17 +121,17 @@ export class ChaptersService {
         );
     }
 
-    delete(id: string): Observable<boolean> {
+    delete(id: number): Observable<boolean> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
-                const items = [...(existingItems ?? [])];
+                const items = existingItems ?? [];
 
                 // Find the index of the item to delete
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deleteChapter/${id}`)
+                    .delete(`${this.apiUrl}deletePublisher/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status && index !== -1) {
