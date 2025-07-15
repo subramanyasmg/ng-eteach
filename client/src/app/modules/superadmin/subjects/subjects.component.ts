@@ -153,7 +153,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                     filter(({ curriculum, grade }) => !!curriculum && !!grade)
                 )
                 .subscribe(({ curriculum, grade }) => {
-                    this.gradeName = grade.name;
+                    this.gradeName = grade.grade_name;
                     this.titleService.setBreadcrumb([
                         {
                             label: this.translocoService.translate(
@@ -171,7 +171,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                             label: curriculum.curriculum_name,
                             url: `/curriculum/${this.curriculumId}/grades`,
                         },
-                        { label: grade.name, url: '' },
+                        { label: grade.grade_name, url: '' },
                     ]);
                 });
         }, 500);

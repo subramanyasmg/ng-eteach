@@ -180,7 +180,7 @@ export class ChaptersListComponent implements OnInit {
                             url: `/curriculum/${this.curriculumId}/grades`,
                         },
                         {
-                            label: grade.name,
+                            label: grade.grade_name,
                             url: `/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
                         },
                         { label: subject.name, url: '' },

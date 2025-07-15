@@ -36,14 +36,16 @@ import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
-import { filter, map, Observable, Subject, take, tap } from 'rxjs';
+import { combineLatest, filter, map, Observable, Subject, take, tap } from 'rxjs';
 import { IGrades } from '../../../models/grades.types';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { Actions, ofType } from '@ngrx/effects';
+import * as PublisherActions from 'app/state/publishers/publishers.actions';
 import * as GradeActions from 'app/state/grades/grades.actions';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
 import { selectGradesByCurriculumId, selectGradesLoaded } from 'app/state/grades/grades.selectors';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 
 @Component({
     selector: 'app-grades',
@@ -112,34 +114,57 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     ngOnInit(): void {
         this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
         this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
+        this.store.dispatch(PublisherActions.loadPublishers());
         this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
 
-        if (this.curriculumId) {
-            this.store
-                .select(selectAllCurriculums(this.publisherId))
+        setTimeout(() => {
+            combineLatest([
+                this.store.select(selectAllPublishers),
+                this.store.select(selectAllCurriculums(this.publisherId)),
+            ])
                 .pipe(
-                    map((curriculums) => curriculums.find((c) => c.id === this.curriculumId) ),
-                    filter(Boolean),
-                    take(1)
+                    take(1),
+                    map(([publishers, curriculums]) => {
+                        const publisher = publishers.find(
+                            (p) => p.id === this.publisherId
+                        );
+                        const curr = curriculums?.find((c) => c.id === this.curriculumId);
+                        return { publisher, curr };
+                    }),
+                    filter(({ publisher, curr }) => !!publisher && !!curr)
                 )
-                .subscribe((curriculum) => {
+                .subscribe(({ publisher, curr }) => {
                     this.titleService.setBreadcrumb([
-                        { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
-                        { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
-                        { label: curriculum.curriculum_name, url: '' },
+                        {
+                            label: this.translocoService.translate(
+                                'navigation.curriculum'
+                            ),
+                            url: '/manage-publishers',
+                        },
+                        {
+                            label: this.translocoService.translate(
+                                'navigation.managePublishers'
+                            ),
+                            url: '/manage-publishers',
+                        },
+                        {
+                            label: publisher.publication_name,
+                            url: `/manage-publishers/${this.publisherId}/curriculum`,
+                        },
+                        { label: curr.curriculum_name, url: '' },
                     ]);
                 });
+        }, 500);
 
 
-            this.list$ = this.store.select(selectGradesByCurriculumId(this.curriculumId));
-            this.loadGradesForCurriculum();
-        }
+        this.list$ = this.store.select(selectGradesByCurriculumId(this.curriculumId));
+        this.loadGradesForCurriculum();
+            
 
         this.entityForm = this._formBuilder.group({
             id: [''],
             name: ['', [Validators.required]],
         });
-
 
         this.handleAPIResponse();
 
@@ -194,7 +219,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     patchFormValues(data: IGrades) {
         this.entityForm.patchValue({
             id: data.id,
-            name: data.name,
+            name: data.grade_name,
         });
     }
 
@@ -208,7 +233,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.entityForm.disable();
         const formValues = this.entityForm.value;
         const requestObj: IGrades = {
-            name: formValues.name
+            grade_name: formValues.name
         };
         this.store.dispatch(
             GradeActions.addGrade({ curriculumId: this.curriculumId, grade: requestObj })
@@ -226,7 +251,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
         const formValues = this.entityForm.value;
         const requestObj: IGrades = {
             id: formValues.id,
-            name: formValues.name
+            grade_name: formValues.name
         };
         this.store.dispatch(
             GradeActions.updateGrade({ curriculumId: this.curriculumId, grade: requestObj })
