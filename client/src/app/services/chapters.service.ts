@@ -62,8 +62,10 @@ export class ChaptersService {
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}createChapter/${subjectId}`, {
-                        ...request,
+                    .post(`${this.apiUrl}createChapter`, {
+                        subject_id: subjectId,
+                        title: request.title,
+                        description: request.title //passing dummy as of now
                     })
                     .pipe(
                         mergeMap((response: any) => {

@@ -265,7 +265,7 @@ export class ChaptersListComponent implements OnInit {
         this.entityForm.disable();
         const formValues = this.entityForm.value;
         const requestObj: IChapters = {
-            name: formValues.chapters.map((c) => c.name).join(','),
+            title: formValues.chapters.map((c) => c.name).join(','),
         };
         this.store.dispatch(
             ChapterActions.addChapter({
@@ -282,7 +282,7 @@ export class ChaptersListComponent implements OnInit {
     updateChapterName(chapter: IChapters) {
         const requestObj: IChapters = {
             id: chapter.id,
-            name: this.newChapterName,
+            title: this.newChapterName,
         };
         this.store.dispatch(
             ChapterActions.updateChapter({
@@ -403,7 +403,7 @@ export class ChaptersListComponent implements OnInit {
     toggleEditChapter(chapter: IChapters) {
         chapter.editMode = !chapter.editMode;
         if (chapter.editMode) {
-            this.newChapterName = chapter.name;
+            this.newChapterName = chapter.title;
         } else {
             this.newChapterName = '';
         }

@@ -43,7 +43,7 @@
                                     </div>
                                     <div class="flex items-center gap-2 justify-between w-full">
                                         <div class="flex items-center gap-2 text-2xl font-semibold">
-                                            {{ chapter.name }}
+                                            {{ chapter.title }}
                                         </div>
                                         <div class="flex items-center gap-2 ml-3 mr-auto">
                                             <button [matTooltip]="'chapters.button_edit_chapter' | transloco"
@@ -65,7 +65,7 @@
                                 <div class="w-full flex flex-col mr-5" *ngIf="chapter.editMode">
                                     <div class="flex items-center gap-2 justify-between w-full">
                                         <mat-form-field class="w-full" [subscriptSizing]="'dynamic'">
-                                            <input required autofocus [ngModel]="chapter.name"
+                                            <input required autofocus [ngModel]="chapter.title"
                                                 (ngModelChange)="noChapterNameModelChange($event, chapter)"
                                                 (keydown)="$event.stopPropagation()" (click)="$event.stopPropagation()"
                                                 matInput
