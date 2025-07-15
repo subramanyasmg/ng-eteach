@@ -43,12 +43,19 @@ export const superAdmin: FuseNavigationItem[] = [
         type : 'group',
         children: [
             {
-                id: 'curriculum',
-                title: 'navigation.manageCurriculum',
+                id: 'publishers',
+                title: 'navigation.managePublishers',
                 type: 'basic',
-               icon : 'heroicons_outline:book-open',
-                link: '/curriculum',
+                icon : 'heroicons_outline:book-open',
+                link: '/manage-publishers',
             }
+            // {
+            //     id: 'curriculum',
+            //     title: 'navigation.manageCurriculum',
+            //     type: 'basic',
+            //    icon : 'heroicons_outline:book-open',
+            //     link: '/curriculum',
+            // }
         ],
     }
 ];
