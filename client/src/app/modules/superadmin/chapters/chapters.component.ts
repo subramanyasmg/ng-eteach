@@ -41,6 +41,7 @@ import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
+import * as PublisherActions from 'app/state/publishers/publishers.actions';
 import * as ChapterActions from 'app/state/chapters/chapters.actions';
 import * as GradeActions from 'app/state/grades/grades.actions';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
@@ -52,6 +53,7 @@ import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
 import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
 import { IChapters } from '../../../models/chapters.types';
 import { QuillModule } from 'ngx-quill';
+import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 
 @Component({
     selector: 'app-chapters',
@@ -123,6 +125,7 @@ export class ChaptersListComponent implements OnInit {
         this.subjectId = Number(this.route.snapshot.paramMap.get('sid'));
         this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
         
+        this.store.dispatch(PublisherActions.loadPublishers());
         this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
 
         this.store.dispatch(
@@ -139,13 +142,17 @@ export class ChaptersListComponent implements OnInit {
         setTimeout(() => {
 
             combineLatest([
+                this.store.select(selectAllPublishers),
                 this.store.select(selectAllCurriculums(this.publisherId)),
                 this.store.select(selectGradesByCurriculumId(this.curriculumId)),
                 this.store.select(selectSubjectsByGradeId(this.gradeId)),
             ])
                 .pipe(
                     take(1),
-                    map(([curriculums, grades, subjects]) => {
+                    map(([publishers, curriculums, grades, subjects]) => {
+                         const publisher = publishers.find(
+                            (p) => p.id === this.publisherId
+                        );
                         const curriculum = curriculums.find(
                             (c) => c.id === this.curriculumId
                         );
@@ -153,37 +160,41 @@ export class ChaptersListComponent implements OnInit {
                         const subject = subjects?.find(
                             (s) => s.id === this.subjectId
                         );
-                        return { curriculum, grade, subject };
+                        return { publisher, curriculum, grade, subject };
                     }),
                     filter(
-                        ({ curriculum, grade, subject }) =>
-                            !!curriculum && !!grade && !!subject
+                        ({ publisher, curriculum, grade, subject }) =>
+                            !!publisher && !!curriculum && !!grade && !!subject
                     )
                 )
-                .subscribe(({ curriculum, grade, subject }) => {
-                    this.subjectName = subject.name;
+                .subscribe(({ publisher, curriculum, grade, subject }) => {
+                    this.subjectName = subject.subject_name;
                     this.titleService.setBreadcrumb([
                         {
                             label: this.translocoService.translate(
                                 'navigation.curriculum'
                             ),
-                            url: '/curriculum',
+                            url: '/manage-publishers',
                         },
                         {
                             label: this.translocoService.translate(
-                                'navigation.manageCurriculum'
+                                'navigation.managePublishers'
                             ),
-                            url: '/curriculum',
+                            url: '/manage-publishers',
+                        },
+                        {
+                            label: publisher.publication_name,
+                            url: `/manage-publishers/${this.publisherId}/curriculum`,
                         },
                         {
                             label: curriculum.curriculum_name,
-                            url: `/curriculum/${this.curriculumId}/grades`,
+                            url: `/manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
                         },
                         {
                             label: grade.grade_name,
-                            url: `/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
+                            url: `/manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
                         },
-                        { label: subject.name, url: '' },
+                        { label: subject.subject_name, url: '' },
                     ]);
                 });
         }, 1000);
