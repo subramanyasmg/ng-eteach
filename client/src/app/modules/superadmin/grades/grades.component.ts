@@ -93,6 +93,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     entityForm: UntypedFormGroup;
     matDialogRef = null;
     curriculumId;
+    publisherId;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -109,12 +110,13 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.store.dispatch(CurriculumActions.loadCurriculums());
-        this.curriculumId = Number(this.route.snapshot.paramMap.get('id'));
+        this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
+        this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
+        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
 
         if (this.curriculumId) {
             this.store
-                .select(selectAllCurriculums)
+                .select(selectAllCurriculums(this.publisherId))
                 .pipe(
                     map((curriculums) => curriculums.find((c) => c.id === this.curriculumId) ),
                     filter(Boolean),
@@ -124,7 +126,7 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.titleService.setBreadcrumb([
                         { label: this.translocoService.translate('navigation.curriculum'), url: '/curriculum' },
                         { label: this.translocoService.translate('navigation.manageCurriculum'), url: '/curriculum' },
-                        { label: curriculum.name, url: '' },
+                        { label: curriculum.curriculum_name, url: '' },
                     ]);
                 });
 

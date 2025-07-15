@@ -107,6 +107,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     matDialogRef = null;
     curriculumId;
     gradeId;
+    publisherId;
     gradeName: string;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     separatorKeysCodes: number[] = [ENTER, COMMA];
@@ -125,10 +126,11 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.store.dispatch(CurriculumActions.loadCurriculums());
-
+        
         this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
         this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
+        this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
+        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
 
         this.store.dispatch(
             GradeActions.loadGrades({ curriculumId: this.curriculumId })
@@ -136,7 +138,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
         setTimeout(() => {
             combineLatest([
-                this.store.select(selectAllCurriculums),
+                this.store.select(selectAllCurriculums(this.publisherId)),
                 this.store.select(selectGradesByCurriculumId(this.curriculumId)),
             ])
                 .pipe(
@@ -166,7 +168,7 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                             url: '/curriculum',
                         },
                         {
-                            label: curriculum.name,
+                            label: curriculum.curriculum_name,
                             url: `/curriculum/${this.curriculumId}/grades`,
                         },
                         { label: grade.name, url: '' },

@@ -94,6 +94,7 @@ export class ChaptersListComponent implements OnInit {
     curriculumId;
     gradeId;
     subjectId;
+    publisherId;
     subjectName = '';
     matDialogRef = null;
     entityForm: UntypedFormGroup;
@@ -116,11 +117,13 @@ export class ChaptersListComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.store.dispatch(CurriculumActions.loadCurriculums());
-
+        
         this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
         this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
         this.subjectId = Number(this.route.snapshot.paramMap.get('sid'));
+        this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
+        
+        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
 
         this.store.dispatch(
             GradeActions.loadGrades({ curriculumId: this.curriculumId })
@@ -136,7 +139,7 @@ export class ChaptersListComponent implements OnInit {
         setTimeout(() => {
 
             combineLatest([
-                this.store.select(selectAllCurriculums),
+                this.store.select(selectAllCurriculums(this.publisherId)),
                 this.store.select(selectGradesByCurriculumId(this.curriculumId)),
                 this.store.select(selectSubjectsByGradeId(this.gradeId)),
             ])
@@ -173,7 +176,7 @@ export class ChaptersListComponent implements OnInit {
                             url: '/curriculum',
                         },
                         {
-                            label: curriculum.name,
+                            label: curriculum.curriculum_name,
                             url: `/curriculum/${this.curriculumId}/grades`,
                         },
                         {

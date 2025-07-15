@@ -1,8 +1,6 @@
 export interface ICurriculum {
     id?: number;
-    name: string;
-    publisherName: string;
-    publisherEmail: string;
-    phone: string;
+    curriculum_name: string;
+    publisher_id?: string;
     createdOn?: string;
 }

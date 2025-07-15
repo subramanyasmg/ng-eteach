@@ -97,8 +97,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
     mode = null;
     query = '';
-    curriculumList$: Observable<ICurriculum[]> =
-        this.store.select(selectAllCurriculums);
+  //  curriculumList$: Observable<ICurriculum[]> = this.store.select(selectAllCurriculums);
     list$: Observable<IInstitutes[]> = this.store.select(selectAllInstitutes);
     entityForm: UntypedFormGroup;
     matDialogRef = null;
@@ -138,7 +137,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
 
-        this.store.dispatch(CurriculumActions.loadCurriculums());
+       // this.store.dispatch(CurriculumActions.loadCurriculums());
         this.store.dispatch(InstituteActions.loadInstitutes());
 
 

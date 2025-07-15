@@ -3,9 +3,9 @@ import { CurriculumState } from './curriculum.reducer';
 
 export const selectCurriculumState = createFeatureSelector<CurriculumState>('curriculum');
 
-export const selectAllCurriculums = createSelector(
+export const selectAllCurriculums = (publisherId: string) =>  createSelector(
   selectCurriculumState,
-  (state) => state.curriculums
+  (state) => state.curriculums[publisherId] || []
 );
 
 export const selectCurriculumsLoaded = createSelector(

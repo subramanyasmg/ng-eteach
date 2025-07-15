@@ -12,9 +12,9 @@ export class CurriculumEffects {
   loadCurriculums$ = createEffect(() =>
     this.actions$.pipe(
       ofType(CurriculumActions.loadCurriculums),
-      mergeMap(() =>
-        this.service.getAll().pipe(
-          map(response => CurriculumActions.loadCurriculumsSuccess({ curriculums: response.data })),
+      mergeMap(({publisherId}) =>
+        this.service.getAll(publisherId).pipe(
+          map(response => CurriculumActions.loadCurriculumsSuccess({ publisherId, curriculums: response.data })),
           catchError(error => of(CurriculumActions.loadCurriculumsFailure({ error })))
         )
       )
@@ -24,9 +24,9 @@ export class CurriculumEffects {
   addCurriculum$ = createEffect(() =>
     this.actions$.pipe(
       ofType(CurriculumActions.addCurriculum),
-      mergeMap(({ curriculum }) =>
-        this.service.create(curriculum).pipe(
-          map(response => CurriculumActions.addCurriculumSuccess({ curriculum: response.data })),
+      mergeMap(({ publisherId, curriculum }) =>
+        this.service.create(publisherId, curriculum).pipe(
+          map(response => CurriculumActions.addCurriculumSuccess({ publisherId, curriculum: response.data })),
           catchError(error => of(CurriculumActions.addCurriculumFailure({ error })))
         )
       )
@@ -36,9 +36,9 @@ export class CurriculumEffects {
   updateCurriculum$ = createEffect(() =>
     this.actions$.pipe(
       ofType(CurriculumActions.updateCurriculum),
-      mergeMap(({ curriculum }) =>
+      mergeMap(({ publisherId, curriculum }) =>
         this.service.update(curriculum.id,curriculum).pipe(
-          map(response => CurriculumActions.updateCurriculumSuccess({ curriculum: response })),
+          map(response => CurriculumActions.updateCurriculumSuccess({ publisherId, curriculum: response })),
           catchError(error => of(CurriculumActions.updateCurriculumFailure({ error })))
         )
       )
@@ -48,9 +48,9 @@ export class CurriculumEffects {
   deleteCurriculum$ = createEffect(() =>
     this.actions$.pipe(
       ofType(CurriculumActions.deleteCurriculum),
-      mergeMap(({ id }) =>
-        this.service.delete(id).pipe(
-          map(() => CurriculumActions.deleteCurriculumSuccess({ id })),
+      mergeMap(({ publisherId, curriculumId }) =>
+        this.service.delete(curriculumId).pipe(
+          map(() => CurriculumActions.deleteCurriculumSuccess({ publisherId, curriculumId })),
           catchError(error => of(CurriculumActions.deleteCurriculumFailure({ error })))
         )
       )
