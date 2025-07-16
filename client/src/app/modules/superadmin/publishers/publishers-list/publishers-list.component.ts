@@ -141,7 +141,6 @@ export class PublishersListComponent
         this.handleAPIResponse();
 
         this.list$.subscribe((data) => {
-            console.log('data', data);
             this.dataSource = new MatTableDataSource(data); // reassign!
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;

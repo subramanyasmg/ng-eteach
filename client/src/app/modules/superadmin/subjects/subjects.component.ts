@@ -96,10 +96,10 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dataSource = new MatTableDataSource<ISubjects>();
     displayedColumns: string[] = [
-        'name',
-        'createdOn',
-        'modifiedOn',
-        'noOfChapters',
+        'subject_name',
+        'createdAt',
+        'updatedAt',
+        'chapter_count',
         'actions',
     ];
     mode = null;
@@ -253,7 +253,6 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     ngAfterViewInit(): void {
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
-        this._cdr.detectChanges();
     }
 
     ngOnDestroy(): void {
