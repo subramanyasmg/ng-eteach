@@ -175,13 +175,34 @@
 
         </div>
 
-        <div class="flex w-full">
+        <div class="flex flex-col md:flex-row lg:flex-row xl:flex-row gap-4 w-full">
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{ 'institute.label_address' | transloco }}</mat-label>
                 <input matInput [formControlName]="'instituteAddress'"
                     [placeholder]="'e.g. 49, Saki-Vikhrol Road, Mumbai, Maharashtra, India'" required maxlength="300" />
                 @if (entityForm.get('instituteAddress').hasError('required')) {
                 <mat-error>{{ 'institute.error_address_required' | transloco }} </mat-error>
+                }
+            </mat-form-field>
+            <mat-form-field class="w-full" floatLabel="always">
+                <mat-label>{{ 'institute.label_phone' | transloco }}</mat-label>
+                <input
+                    matInput
+                    [formControlName]="'phone'"
+                    placeholder="e.g. +919876543210"
+                    required
+                    minlength="10"
+                    maxlength="15"
+                />
+                @if (entityForm.get('phone')?.hasError('required')) {
+                    <mat-error>{{
+                        'institute.error_phone_required' | transloco
+                    }}</mat-error>
+                }
+                @if (entityForm.get('phone')?.hasError('pattern')) {
+                    <mat-error>{{
+                        'institute.error_phone_invalid' | transloco
+                    }}</mat-error>
                 }
             </mat-form-field>
 
@@ -251,29 +272,30 @@
         <div class="flex flex-col md:flex-row lg:flex-row xl:flex-row gap-4 w-full">
 
             <mat-form-field class="w-full" floatLabel="always">
-                <mat-label>{{ 'institute.label_curriculum' | transloco }}</mat-label>
+                <mat-label>{{ 'institute.label_publisher' | transloco }}</mat-label>
 
-                <mat-select [formControlName]="'curriculum'">
-                    <mat-option *ngFor="let curriculum of curriculumList$ | async" [value]="curriculum.id">
-                        {{ curriculum.name }}
+                <mat-select [formControlName]="'publisher'">
+                    <mat-option *ngFor="let publisher of publisherList$ | async" [value]="publisher.id">
+                        {{ publisher.publication_name }}
                     </mat-option>
                 </mat-select>
 
-                @if (entityForm.get('status').hasError('required')) {
-                <mat-error>{{ 'institute.error_curriculum_required' | transloco }}</mat-error>
+                @if (entityForm.get('publisher').hasError('required')) {
+                <mat-error>{{ 'institute.error_publisher_required' | transloco }}</mat-error>
                 }
             </mat-form-field>
 
             <mat-form-field class="w-full" floatLabel="always">
-                <mat-label>{{ 'institute.label_account_type' | transloco }}</mat-label>
+                <mat-label>{{ 'institute.label_curriculum' | transloco }}</mat-label>
 
-                <mat-select [formControlName]="'accountType'">
-                    <mat-option value="k12">K-12</mat-option>
-                    <mat-option value="higher">Higher Education</mat-option>
+                <mat-select formControlName="curriculum">
+                    <mat-option *ngFor="let curriculum of curriculumList$ | async" [value]="curriculum.id">
+                        {{ curriculum.curriculum_name }}
+                    </mat-option>
                 </mat-select>
 
-                @if (entityForm.get('accountType').hasError('required')) {
-                <mat-error>{{ 'institute.error_account_type_required' | transloco }}</mat-error>
+                @if (entityForm.get('curriculum').hasError('required')) {
+                <mat-error>{{ 'institute.error_curriculum_required' | transloco }}</mat-error>
                 }
             </mat-form-field>
         </div>

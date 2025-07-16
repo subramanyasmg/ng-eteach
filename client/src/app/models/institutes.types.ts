@@ -7,6 +7,7 @@ export interface IInstitutes {
     address: string;
     admin_name: string;
     admin_email: string;
+    phone: string;
     status?: string;
     curriculum: number;
     publisher_id?: number;

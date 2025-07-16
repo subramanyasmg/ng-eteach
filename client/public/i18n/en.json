@@ -66,8 +66,13 @@
         "error_status_required": "Status is required",
         "label_curriculum": "Choose Curriculum",
         "error_curriculum_required": "Curriculum is required ",
+        "label_publisher": "Choose Publisher",
+        "error_publisher_required": "Publisher is required ",
         "label_account_type": "Account Type",
         "error_account_type_required": "Account Type is required",
+        "label_phone": "Phone",
+        "error_phone_required": "Phone is required",
+        "error_phone_invalid": "Invalid phone number",
         "success_add": "Institute added successfully!",
         "success_update": "Institute updated successfully!",
         "success_delete": "Institute deleted successfully!"

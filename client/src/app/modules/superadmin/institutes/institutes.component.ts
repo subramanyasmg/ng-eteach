@@ -39,6 +39,7 @@ import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import * as PublisherActions from 'app/state/publishers/publishers.actions';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
 import * as InstituteActions from 'app/state/institute/institute.actions';
 import {
@@ -46,10 +47,13 @@ import {
     selectCurriculumsLoaded,
 } from 'app/state/curriculum/curriculum.selectors';
 import { selectAllInstitutes } from 'app/state/institute/institute.selectors';
-import { filter, Observable, Subject, take, tap } from 'rxjs';
+import { filter, map, Observable, Subject, take, tap } from 'rxjs';
 import { ICurriculum } from '../../../models/curriculum.types';
 import { IInstitutes } from '../../../models/institutes.types';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
+import { IPublisher } from 'app/models/publisher.types';
+import { CurriculumService } from 'app/services/curriculum.service';
 
 @Component({
     selector: 'app-institutes',
@@ -97,7 +101,8 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
     mode = null;
     query = '';
-  //  curriculumList$: Observable<ICurriculum[]> = this.store.select(selectAllCurriculums);
+    curriculumList$: Observable<ICurriculum[]>;
+    publisherList$: Observable<IPublisher[]> = this.store.select(selectAllPublishers);
     list$: Observable<IInstitutes[]> = this.store.select(selectAllInstitutes);
     entityForm: UntypedFormGroup;
     matDialogRef = null;
@@ -113,6 +118,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
         private titleService: BreadcrumbService,
+        private curriculumService: CurriculumService,
         private translocoService: TranslocoService
     ) {
         this.titleService.setBreadcrumb([
@@ -127,17 +133,26 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             name: ['', [Validators.required]],
             noOfLicense: ['', [Validators.required]],
             instituteAddress: ['', [Validators.required]],
+            phone: [
+                '',
+                [
+                    Validators.required,
+                    Validators.minLength(10),
+                    Validators.maxLength(15),
+                    Validators.pattern(/^\+?[0-9]{10,15}$/),
+                ],
+            ],
             adminName: ['', [Validators.required]],
             adminEmail: ['', [Validators.required, Validators.email]],
             subdomain: ['', [Validators.required]],
             expiresOn: ['', [Validators.required]],
             status: ['', [Validators.required]],
             curriculum: ['', [Validators.required]],
-            accountType: ['', [Validators.required]],
+            publisher: ['', [Validators.required]],
         });
 
 
-       // this.store.dispatch(CurriculumActions.loadCurriculums());
+        this.store.dispatch(PublisherActions.loadPublishers());
         this.store.dispatch(InstituteActions.loadInstitutes());
 
 
@@ -147,6 +162,17 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             this.dataSource = new MatTableDataSource(data); // reassign!
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
+        });
+
+        this.entityForm.get('publisher')?.valueChanges.subscribe((publisherId: string) => {
+            if (publisherId) {
+                this.entityForm.patchValue({ curriculum: '' });
+
+                // Direct service call
+                this.curriculumList$ = this.curriculumService.getAll(publisherId).pipe(
+                    map((response: any) => response.data ?? [])
+                );
+            }
         });
     }
 
@@ -200,7 +226,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             expiresOn: data.license_end,
             status: data.status,
             curriculum: data.publisher_id,
-            accountType: data.account_type
+           // accountType: data.account_type
         });
     }
 
@@ -211,8 +237,8 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         // Disable the form
-        this.entityForm.disable();
         const formValues = this.entityForm.value;
+        this.entityForm.disable();
         const requestObj: IInstitutes = {
             name: formValues.name,
             total_licenses: formValues.noOfLicense,
@@ -221,8 +247,10 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             admin_email: formValues.adminEmail,
             subdomain: formValues.subdomain,
             license_end: formValues.expiresOn,
-            curriculum: Number(formValues.curriculum),
-            account_type: formValues.accountType,
+            curriculum: formValues.curriculum,
+            publisher_id: formValues.publisher,
+            account_type: 'k12',
+            phone: formValues.phone
         };
         this.store.dispatch(
             InstituteActions.addInstitute({ institute: requestObj })
@@ -248,7 +276,8 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             subdomain: formValues.subdomain,
             license_end: formValues.expiresOn,
             curriculum: Number(formValues.curriculum),
-            account_type: formValues.accountType
+            account_type: 'k12',
+            phone: formValues.phone
         };
         
         this.store.dispatch(
