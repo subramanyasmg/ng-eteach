@@ -11,7 +11,6 @@ export const AuthGuard: CanActivateFn | CanActivateChildFn = (route, state) => {
         .check()
         .pipe(
             switchMap((authenticated) => {
-                console.log('authenticated', authenticated);
                 // If the user is not authenticated...
                 if (!authenticated) {
                     const isInstitutePage = state.url.includes('/institute');

@@ -214,7 +214,6 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     patchFormValues(data: IInstitutes) {
-        console.log(data);
         this.entityForm.patchValue({
             id: data.id,
             name: data.name,
@@ -301,7 +300,6 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         confirmation.afterClosed().subscribe((result) => {
             // If the confirm button pressed...
             if (result === 'confirmed') {
-                console.log('confirmed', item);
                 this.store.dispatch(
                     InstituteActions.deleteInstitute({ id: item.id })
                 );
