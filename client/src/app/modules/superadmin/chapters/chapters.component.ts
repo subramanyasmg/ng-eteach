@@ -41,20 +41,20 @@ import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
-import * as PublisherActions from 'app/state/publishers/publishers.actions';
+import { ChaptersService } from 'app/services/chapters.service';
 import * as ChapterActions from 'app/state/chapters/chapters.actions';
-import * as GradeActions from 'app/state/grades/grades.actions';
-import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
-import * as SubjectActions from 'app/state/subjects/subjects.actions';
 import { selectChaptersBySubjectId } from 'app/state/chapters/chapters.selectors';
+import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
+import * as GradeActions from 'app/state/grades/grades.actions';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
+import * as PublisherActions from 'app/state/publishers/publishers.actions';
+import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
+import * as SubjectActions from 'app/state/subjects/subjects.actions';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
+import { QuillModule } from 'ngx-quill';
 import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
 import { IChapters } from '../../../models/chapters.types';
-import { QuillModule } from 'ngx-quill';
-import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
-import { ChaptersService } from 'app/services/chapters.service';
 
 @Component({
     selector: 'app-chapters',
@@ -84,7 +84,7 @@ import { ChaptersService } from 'app/services/chapters.service';
         MatExpansionModule,
         DragDropModule,
         TranslocoModule,
-        QuillModule
+        QuillModule,
     ],
     templateUrl: './chapters.component.html',
     styleUrl: './chapters.component.scss',
@@ -103,7 +103,7 @@ export class ChaptersListComponent implements OnInit {
     entityForm: UntypedFormGroup;
     chapters$: Observable<IChapters[]>;
     chapterList: IChapters[];
-    phases:[] = [];
+    phases: [] = [];
     newChapterName: string = '';
 
     constructor(
@@ -122,16 +122,17 @@ export class ChaptersListComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        
         this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
         this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
         this.subjectId = Number(this.route.snapshot.paramMap.get('sid'));
         this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
 
         this.getAllPhases();
-        
+
         this.store.dispatch(PublisherActions.loadPublishers());
-        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
+        this.store.dispatch(
+            CurriculumActions.loadCurriculums({ publisherId: this.publisherId })
+        );
         this.store.dispatch(
             GradeActions.loadGrades({ curriculumId: this.curriculumId })
         );
@@ -143,23 +144,26 @@ export class ChaptersListComponent implements OnInit {
         );
 
         setTimeout(() => {
-
             combineLatest([
                 this.store.select(selectAllPublishers),
                 this.store.select(selectAllCurriculums(this.publisherId)),
-                this.store.select(selectGradesByCurriculumId(this.curriculumId)),
+                this.store.select(
+                    selectGradesByCurriculumId(this.curriculumId)
+                ),
                 this.store.select(selectSubjectsByGradeId(this.gradeId)),
             ])
                 .pipe(
                     take(1),
                     map(([publishers, curriculums, grades, subjects]) => {
-                         const publisher = publishers.find(
+                        const publisher = publishers.find(
                             (p) => p.id === this.publisherId
                         );
                         const curriculum = curriculums.find(
                             (c) => c.id === this.curriculumId
                         );
-                        const grade = grades?.find((g) => g.id === this.gradeId);
+                        const grade = grades?.find(
+                            (g) => g.id === this.gradeId
+                        );
                         const subject = subjects?.find(
                             (s) => s.id === this.subjectId
                         );
@@ -202,7 +206,6 @@ export class ChaptersListComponent implements OnInit {
                 });
         }, 1000);
 
-
         this.entityForm = this._formBuilder.group({
             chapters: this._formBuilder.array([this.createChapter()]),
         });
@@ -218,44 +221,37 @@ export class ChaptersListComponent implements OnInit {
                     textBook: [],
                     referenceMaterials: [],
                     lessonPlan: this.clonePhases(
-                        chapter.lessonPlan ?? this.defaultPhases()
+                        chapter.lessonPlan ?? this.phases
                     ),
                 }));
             });
-
-        
     }
 
     getAllPhases() {
-        this._chapterService.getPhases().subscribe({
-            next: (response) => {
-                this.phases = response.data.map((el: any) => ({
-                    label: el.name,
-                    content: '',
-                    id: el.id
-                }));
-                console.log(this.phases);
+        this._chapterService.phases$.subscribe(
+            (response: any) => {
+                if (response) {
+                    this.phases = response.map((el: any) => ({
+                        label: el.name,
+                        content: '',
+                        id: el.id,
+                    }));
+                } else {
+                    this._snackBar.showError(
+                        'No Phases available for Lesson Plans'
+                    );
+                }
             },
-            error: (err) => {
-                console.error('Failed to get phases:', err.message);
-                // Optionally show an error message to the user
+            (error) => {
+                this._snackBar.showError(
+                    'Oh no! Server error occured while fetching Phases for Lesson Plans'
+                );
             }
-        });
+        );
     }
 
     clonePhases(phases: any[]): any[] {
         return phases.map((phase) => ({ ...phase }));
-    }
-
-    defaultPhases() {
-        // return [
-        //     { label: 'Phase 1: Engage', content: '' },
-        //     { label: 'Phase 2: Explore', content: '' },
-        //     { label: 'Phase 3: Explain', content: '' },
-        //     { label: 'Phase 4: Elaborate', content: '' },
-        //     { label: 'Phase 5: Evaluate', content: '' },
-        // ];
-        return this.phases;
     }
 
     get chapters(): FormArray {

@@ -20,28 +20,26 @@ export class ChaptersService {
     private _items: BehaviorSubject<IChapters[] | null> = new BehaviorSubject(
         null
     );
+    private _phases: BehaviorSubject<any[] | null> =
+        new BehaviorSubject(null);
     private _item: BehaviorSubject<IChapters | null> = new BehaviorSubject(
         null
     );
     private apiUrl = 'api/superadmin/';
 
-    /**
-     * Constructor
-     */
     constructor(private _httpClient: HttpClient) {}
 
-    /**
-     * Getter for single item
-     */
+
     get item$(): Observable<IChapters> {
         return this._item.asObservable();
     }
 
-    /**
-     * Getter for all items
-     */
     get items$(): Observable<IChapters[]> {
         return this._items.asObservable();
+    }
+
+    get phases$(): Observable<IChapters[]> {
+        return this._phases.asObservable();
     }
 
     getAll(subjectId: string) {
@@ -58,24 +56,36 @@ export class ChaptersService {
             );
     }
 
+    // getPhases() {
+    //     return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
+    //         map((response: any) => {
+    //             if (response?.status) {
+    //                 this._items.next(response.data);
+    //             } else {
+    //                 throw new Error(
+    //                     'Something went wrong while fetching phases'
+    //                 );
+    //             }
+    //         }),
+    //         catchError((error) => {
+    //             console.error('Error fetching phases:', error);
+    //             return throwError(
+    //                 () => new Error(error.message || 'Unknown error')
+    //             );
+    //         })
+    //     );
+    // }
+
     getPhases() {
-        return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
-            map((response: any) => {
-                if (response?.status) {
-                    return response;
-                } else {
-                    throw new Error(
-                        'Something went wrong while fetching phases'
-                    );
-                }
-            }),
-            catchError((error) => {
-                console.error('Error fetching phases:', error);
-                return throwError(
-                    () => new Error(error.message || 'Unknown error')
-                );
-            })
-        );
+        return this._httpClient
+            .get(`${this.apiUrl}getPhases`)
+            .pipe(
+                tap((response: any) => {
+                    if (response.status) {
+                        this._phases.next(response.data);
+                    }
+                })
+            );
     }
 
     create(subjectId: string, request: IChapters): Observable<any> {

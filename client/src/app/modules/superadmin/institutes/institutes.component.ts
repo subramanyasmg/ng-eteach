@@ -92,7 +92,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dataSource = new MatTableDataSource<IInstitutes>();
     displayedColumns: string[] = [
-        'name',
+        'institute_name',
         'createdOn',
         'expiresOn',
         'noOfLicense',
