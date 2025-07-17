@@ -54,6 +54,7 @@ import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
 import { IChapters } from '../../../models/chapters.types';
 import { QuillModule } from 'ngx-quill';
 import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
+import { ChaptersService } from 'app/services/chapters.service';
 
 @Component({
     selector: 'app-chapters',
@@ -102,6 +103,7 @@ export class ChaptersListComponent implements OnInit {
     entityForm: UntypedFormGroup;
     chapters$: Observable<IChapters[]>;
     chapterList: IChapters[];
+    phases:[] = [];
     newChapterName: string = '';
 
     constructor(
@@ -115,7 +117,8 @@ export class ChaptersListComponent implements OnInit {
         private _cdr: ChangeDetectorRef,
         private translocoService: TranslocoService,
         private sanitizer: DomSanitizer,
-        private titleService: BreadcrumbService
+        private titleService: BreadcrumbService,
+        private _chapterService: ChaptersService
     ) {}
 
     ngOnInit(): void {
@@ -124,17 +127,17 @@ export class ChaptersListComponent implements OnInit {
         this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
         this.subjectId = Number(this.route.snapshot.paramMap.get('sid'));
         this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
+
+        this.getAllPhases();
         
         this.store.dispatch(PublisherActions.loadPublishers());
         this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
-
         this.store.dispatch(
             GradeActions.loadGrades({ curriculumId: this.curriculumId })
         );
         this.store.dispatch(
             SubjectActions.loadSubjects({ gradeId: this.gradeId })
         );
-
         this.store.dispatch(
             ChapterActions.loadChapters({ subjectId: this.subjectId })
         );
@@ -219,6 +222,25 @@ export class ChaptersListComponent implements OnInit {
                     ),
                 }));
             });
+
+        
+    }
+
+    getAllPhases() {
+        this._chapterService.getPhases().subscribe({
+            next: (response) => {
+                this.phases = response.data.map((el: any) => ({
+                    label: el.name,
+                    content: '',
+                    id: el.id
+                }));
+                console.log(this.phases);
+            },
+            error: (err) => {
+                console.error('Failed to get phases:', err.message);
+                // Optionally show an error message to the user
+            }
+        });
     }
 
     clonePhases(phases: any[]): any[] {
@@ -226,13 +248,14 @@ export class ChaptersListComponent implements OnInit {
     }
 
     defaultPhases() {
-        return [
-            { label: 'Phase 1: Engage', content: '' },
-            { label: 'Phase 2: Explore', content: '' },
-            { label: 'Phase 3: Explain', content: '' },
-            { label: 'Phase 4: Elaborate', content: '' },
-            { label: 'Phase 5: Evaluate', content: '' },
-        ];
+        // return [
+        //     { label: 'Phase 1: Engage', content: '' },
+        //     { label: 'Phase 2: Explore', content: '' },
+        //     { label: 'Phase 3: Explain', content: '' },
+        //     { label: 'Phase 4: Elaborate', content: '' },
+        //     { label: 'Phase 5: Evaluate', content: '' },
+        // ];
+        return this.phases;
     }
 
     get chapters(): FormArray {

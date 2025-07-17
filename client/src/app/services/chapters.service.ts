@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import {
     BehaviorSubject,
     Observable,
+    catchError,
     delay,
     map,
     mergeMap,
@@ -57,6 +58,26 @@ export class ChaptersService {
             );
     }
 
+    getPhases() {
+        return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
+            map((response: any) => {
+                if (response?.status) {
+                    return response;
+                } else {
+                    throw new Error(
+                        'Something went wrong while fetching phases'
+                    );
+                }
+            }),
+            catchError((error) => {
+                console.error('Error fetching phases:', error);
+                return throwError(
+                    () => new Error(error.message || 'Unknown error')
+                );
+            })
+        );
+    }
+
     create(subjectId: string, request: IChapters): Observable<any> {
         return this.items$.pipe(
             take(1),
@@ -65,7 +86,6 @@ export class ChaptersService {
                     .post(`${this.apiUrl}createChapter`, {
                         subject_id: subjectId,
                         title: request.title,
-                        description: request.title //passing dummy as of now
                     })
                     .pipe(
                         mergeMap((response: any) => {
