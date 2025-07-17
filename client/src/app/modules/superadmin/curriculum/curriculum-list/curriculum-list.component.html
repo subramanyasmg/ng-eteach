@@ -44,22 +44,21 @@
 
 
             <div class="p-4 overflow-x-auto">
-                <table *ngIf="dataSource?.data?.length > 0 else noData" mat-table [dataSource]="dataSource" matSort
-                    class="w-full rounded-lg border border-gray-300 overflow-hidden shadow-sm">
+                
+                <table  mat-table [dataSource]="dataSource" matSort
+                    class="w-full rounded-lg border border-gray-300 overflow-hidden shadow-sm" [hidden]="dataSource.data.length === 0">
 
-                    <!-- Name Column -->
-                    <ng-container matColumnDef="name">
+                    <ng-container matColumnDef="curriculum_name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'curriculum.header_name' | transloco }}</th>
                         <td mat-cell *matCellDef="let element"><a class="text-primary" routerLink="{{ element.id + '/grades' }}">{{ element.curriculum_name }}</a></td>
                     </ng-container>
 
-                    <!-- Created On Column -->
-                    <ng-container matColumnDef="createdOn">
+                    <ng-container matColumnDef="createdAt">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'curriculum.header_created_on' | transloco }}</th>
                         <td mat-cell *matCellDef="let element">{{ element.createdAt | date }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="modifiedOn">
+                    <ng-container matColumnDef="updatedAt">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'curriculum.header_modified_on' | transloco }}</th>
                         <td mat-cell *matCellDef="let element">{{ element.updatedAt | date }}</td>
                     </ng-container>
@@ -94,16 +93,20 @@
                     <tr class="mat-row" *matNoDataRow>
                         <td class="mat-cell" [attr.colspan]="displayedColumns.length">
                             <div class="p-6 text-center text-xl tracking-tight">
-                               {{ 'common.noRecordsFound' | transloco }} <span class="font-semibold">"{{ query }}"</span>
+                                {{ 'common.noRecordsFound' | transloco }} <span class="font-semibold">"{{ query }}"</span>
                             </div>
                         </td>
                     </tr>
                 </table>
 
-                <mat-paginator *ngIf="dataSource?.data?.length > 0" class="z-10 border-b mt-5 bg-white rounded-md"
+                <mat-paginator  [ngClass]="{ 'hidden': dataSource.data.length === 0 }" class="z-10 border-b mt-5 bg-white rounded-md"
                     [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons>
                 </mat-paginator>
 
+                <!-- Custom noData template outside -->
+                <ng-container *ngIf="dataSource.data.length === 0">
+                    <ng-container *ngTemplateOutlet="noData"></ng-container>
+                </ng-container>
             </div>
         </div>
     </div>

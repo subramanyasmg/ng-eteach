@@ -99,7 +99,6 @@ export class InstituteAdminSignInComponent implements OnInit {
         // Sign in
         this._authService.signIn(this.signInForm.value, USER_TYPES.INSTITUTE_ADMIN).subscribe(
             (response) => {
-                console.log(response);
                 // Set the redirect url.
                 // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
                 // to the correct page after a successful sign in. This way, that url can be set via

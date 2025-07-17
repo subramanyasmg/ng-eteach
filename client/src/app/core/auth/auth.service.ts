@@ -86,7 +86,7 @@ export class AuthService {
                 // Store the user on the user service
                 this._userService.user = response.user;
 
-                 sessionStorage.setItem(
+                 localStorage.setItem(
                             'user', JSON.stringify(response.user));
 
                 // Return a new observable with the response
@@ -187,9 +187,11 @@ export class AuthService {
             return of(false);
         }
 
-        let user = JSON.parse(sessionStorage.getItem('user'));
+        let user = JSON.parse(localStorage.getItem('user'));
         if (user) {
             this._userService.user = user;
+        } else {
+            return of(false);
         }
 
         // If the access token exists, and it didn't expire, sign in using it

@@ -95,8 +95,6 @@ export class SubjectsService {
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
-                console.log(items, id);
-
                 // Find the item to update
                 const index = items.findIndex((item) => item.id === id);
 

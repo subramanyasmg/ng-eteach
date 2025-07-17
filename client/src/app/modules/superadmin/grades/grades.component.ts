@@ -83,10 +83,10 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dataSource = new MatTableDataSource<IGrades>();
     displayedColumns: string[] = [
-        'name',
-        'createdOn',
-        'modifiedOn',
-        'noOfSubjects',
+        'grade_name',
+        'createdAt',
+        'updatedAt',
+        'subject_count',
         'actions',
     ];
     mode = null;
@@ -182,7 +182,6 @@ export class GradesListComponent implements OnInit, AfterViewInit, OnDestroy {
     ngAfterViewInit(): void {
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
-        this._cdr.detectChanges();
     }
 
     ngOnDestroy(): void {

@@ -39,11 +39,11 @@ import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
 import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
-import * as PublisherActions from 'app/state/publishers/publishers.actions';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
+import * as PublisherActions from 'app/state/publishers/publishers.actions';
+import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 import { filter, map, Observable, Subject, take, tap } from 'rxjs';
 import { ICurriculum } from '../../../../models/curriculum.types';
-import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -83,9 +83,9 @@ export class CurriculumListComponent
 
     dataSource = new MatTableDataSource<ICurriculum>();
     displayedColumns: string[] = [
-        'name',
-        'createdOn',
-        'modifiedOn',
+        'curriculum_name',
+        'createdAt',
+        'updatedAt',
         'actions',
     ];
     mode = null;
@@ -107,8 +107,7 @@ export class CurriculumListComponent
         private _cdr: ChangeDetectorRef,
         private translocoService: TranslocoService,
         private titleService: BreadcrumbService
-    ) {
-    }
+    ) {}
 
     ngOnInit(): void {
         this.store.dispatch(PublisherActions.loadPublishers());
@@ -118,28 +117,39 @@ export class CurriculumListComponent
             this.store
                 .select(selectAllPublishers)
                 .pipe(
-                    map((publishers) => publishers.find((c) => c.id === this.publisherId) ),
+                    map((publishers) =>
+                        publishers.find((c) => c.id === this.publisherId)
+                    ),
                     filter(Boolean),
                     take(1)
                 )
                 .subscribe((publisher) => {
                     this.titleService.setBreadcrumb([
-                        { label: this.translocoService.translate('navigation.curriculum'), url: '/manage-publishers', },
-                        { label: this.translocoService.translate('navigation.managePublishers'),  url: '/manage-publishers', },
+                        {
+                            label: this.translocoService.translate(
+                                'navigation.curriculum'
+                            ),
+                            url: '/manage-publishers',
+                        },
+                        {
+                            label: this.translocoService.translate(
+                                'navigation.managePublishers'
+                            ),
+                            url: '/manage-publishers',
+                        },
                         { label: publisher.publication_name, url: '' },
                     ]);
                 });
 
-
-            this.list$ = this.store.select(selectAllCurriculums(this.publisherId));
+            this.list$ = this.store.select(
+                selectAllCurriculums(this.publisherId)
+            );
             this.getAllCurriculums();
         }
 
-
-
         this.entityForm = this._formBuilder.group({
             id: [''],
-            curriculum_name: ['', [Validators.required]]
+            curriculum_name: ['', [Validators.required]],
         });
 
         this.handleAPIResponse();
@@ -152,13 +162,14 @@ export class CurriculumListComponent
     }
 
     getAllCurriculums() {
-        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
+        this.store.dispatch(
+            CurriculumActions.loadCurriculums({ publisherId: this.publisherId })
+        );
     }
 
     ngAfterViewInit(): void {
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
-        this._cdr.detectChanges();
     }
 
     ngOnDestroy(): void {
@@ -195,7 +206,7 @@ export class CurriculumListComponent
     patchFormValues(data: ICurriculum) {
         this.entityForm.patchValue({
             id: data.id,
-            curriculum_name: data.curriculum_name
+            curriculum_name: data.curriculum_name,
         });
     }
 
@@ -210,10 +221,13 @@ export class CurriculumListComponent
         const formValues = this.entityForm.value;
         const requestObj: ICurriculum = {
             curriculum_name: formValues.curriculum_name,
-            publisher_id: this.publisherId
+            publisher_id: this.publisherId,
         };
         this.store.dispatch(
-            CurriculumActions.addCurriculum({ publisherId: this.publisherId, curriculum: requestObj })
+            CurriculumActions.addCurriculum({
+                publisherId: this.publisherId,
+                curriculum: requestObj,
+            })
         );
     }
 
@@ -229,10 +243,13 @@ export class CurriculumListComponent
         const requestObj: ICurriculum = {
             id: formValues.id,
             curriculum_name: formValues.curriculum_name,
-            publisher_id: this.publisherId
+            publisher_id: this.publisherId,
         };
         this.store.dispatch(
-            CurriculumActions.updateCurriculum({ publisherId: this.publisherId, curriculum: requestObj })
+            CurriculumActions.updateCurriculum({
+                publisherId: this.publisherId,
+                curriculum: requestObj,
+            })
         );
     }
 
@@ -259,7 +276,10 @@ export class CurriculumListComponent
             // If the confirm button pressed...
             if (result === 'confirmed') {
                 this.store.dispatch(
-                    CurriculumActions.deleteCurriculum({ publisherId: this.publisherId, curriculumId: item.id })
+                    CurriculumActions.deleteCurriculum({
+                        publisherId: this.publisherId,
+                        curriculumId: item.id,
+                    })
                 );
             }
         });
@@ -301,7 +321,7 @@ export class CurriculumListComponent
                                 'curriculum.success_add'
                             )
                         );
-                       this.getAllCurriculums();
+                        this.getAllCurriculums();
                     } else if (
                         action.type ===
                         CurriculumActions.updateCurriculumSuccess.type

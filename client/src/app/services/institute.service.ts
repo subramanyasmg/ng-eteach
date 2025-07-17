@@ -55,7 +55,7 @@ export class InstituteService {
         );
     }
 
-    create(request): Observable<any> {
+    create(request: IInstitutes): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
@@ -63,7 +63,17 @@ export class InstituteService {
 
                 return this._httpClient
                     .post(`${this.apiUrl}createInstitute`, {
-                        ...request,
+                        "school_name": request.name,
+                        "admin_name": request.admin_name,
+                        "email": request.admin_email,
+                        "phone": request.phone,
+                        "address": request.address,
+                        "publisher_id": request.publisher_id,
+                        "curriculum_id": request.curriculum,
+                        "subdomain": request.subdomain,
+                        "account_type": "k12",
+                        "total_licenses": request.total_licenses,
+                        "license_end": request.license_end
                     })
                     .pipe(
                         delay(300), // Simulate API delay

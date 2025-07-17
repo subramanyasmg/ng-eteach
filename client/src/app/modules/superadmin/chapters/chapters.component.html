@@ -100,9 +100,9 @@
                                     <mat-tab label="{{ 'chapters.tab_lesson_plan' | transloco}}">
                                         <div class="mt-4 px-2 pb-2">
                                             <mat-accordion class="space-y-4"> <!-- multi -->
-                                                <mat-expansion-panel *ngFor="let phase of chapter.lessonPlan">
+                                                <mat-expansion-panel *ngFor="let phase of chapter.lessonPlan; let index = index">
                                                     <mat-expansion-panel-header>
-                                                        <mat-panel-title class="text-2xl">{{ phase.label
+                                                        <mat-panel-title class="text-2xl">Phase {{ (index + 1) + ' - ' + phase.label
                                                             }}</mat-panel-title>
                                                     </mat-expansion-panel-header>
                                                     <div class="p-2 flex flex-col gap-2">
