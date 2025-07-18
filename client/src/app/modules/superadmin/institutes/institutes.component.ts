@@ -54,6 +54,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 import { IPublisher } from 'app/models/publisher.types';
 import { CurriculumService } from 'app/services/curriculum.service';
+import { subdomainAvailabilityValidator } from './subdomaincheck.validator';
+import { InstituteService } from 'app/services/institute.service';
 
 @Component({
     selector: 'app-institutes',
@@ -119,7 +121,8 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         private _cdr: ChangeDetectorRef,
         private titleService: BreadcrumbService,
         private curriculumService: CurriculumService,
-        private translocoService: TranslocoService
+        private translocoService: TranslocoService,
+        private instituteService: InstituteService
     ) {
         this.titleService.setBreadcrumb([
             { label: this.translocoService.translate('navigation.users'), url: '/institute' },
@@ -144,7 +147,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             ],
             adminName: ['', [Validators.required]],
             adminEmail: ['', [Validators.required, Validators.email]],
-            subdomain: ['', [Validators.required]],
+            subdomain: ['', [Validators.required], [subdomainAvailabilityValidator(this.instituteService)]],
             expiresOn: ['', [Validators.required]],
             status: ['', [Validators.required]],
             curriculum: ['', [Validators.required]],

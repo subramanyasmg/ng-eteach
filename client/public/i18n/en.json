@@ -64,6 +64,7 @@
         "error_admin_email_invalid": "Admin Email is invalid",
         "error_subdomain_required": "Subdomain is required",
         "subdomain_tooltip": "Subdomain is the url that will be the portal address of the institution",
+        "subdomain_duplicate_error": "Sorry you subdomain is already taken or is invalid",
         "label_expiry": "Choose Expiry",
         "error_expiry_required": "Expiry Date is required",
         "label_status": "Choose Status",

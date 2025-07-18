@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import {
     BehaviorSubject,
     Observable,
+    catchError,
     delay,
     map,
     mergeMap,
@@ -55,6 +56,21 @@ export class InstituteService {
         );
     }
 
+    checkSubdomainAvailability(subdomain: string): Observable<boolean> {
+        return this._httpClient.post<boolean>(
+            `${this.apiUrl}checkSubdomainAvailability`,
+            { subdomain }
+        ).pipe(
+            map(() => true), // Success => subdomain is available
+            catchError(err => {
+                if (err.status === 400) {
+                    return of(false);
+                }
+                return throwError(() => err); // rethrow other errors
+            })
+        );
+    }
+
     create(request: IInstitutes): Observable<any> {
         return this.items$.pipe(
             take(1),
@@ -63,17 +79,17 @@ export class InstituteService {
 
                 return this._httpClient
                     .post(`${this.apiUrl}createInstitute`, {
-                        "school_name": request.name,
-                        "admin_name": request.admin_name,
-                        "email": request.admin_email,
-                        "phone": request.phone,
-                        "address": request.address,
-                        "publisher_id": request.publisher_id,
-                        "curriculum_id": request.curriculum,
-                        "subdomain": request.subdomain,
-                        "account_type": "k12",
-                        "total_licenses": request.total_licenses,
-                        "license_end": request.license_end
+                        school_name: request.name,
+                        admin_name: request.admin_name,
+                        email: request.admin_email,
+                        phone: request.phone,
+                        address: request.address,
+                        publisher_id: request.publisher_id,
+                        curriculum_id: request.curriculum,
+                        subdomain: request.subdomain,
+                        account_type: 'k12',
+                        total_licenses: request.total_licenses,
+                        license_end: request.license_end,
                     })
                     .pipe(
                         delay(300), // Simulate API delay
@@ -82,7 +98,8 @@ export class InstituteService {
                                 return throwError(
                                     () =>
                                         new Error(
-                                           response.message ?? 'Something went wrong while adding'
+                                            response.message ??
+                                                'Something went wrong while adding'
                                         )
                                 );
                             }
