@@ -72,7 +72,7 @@ export class AuthService {
         if (type === USER_TYPES.SUPER_ADMIN) {
             url = '/api/superadmin/';
         } else if (type === USER_TYPES.INSTITUTE_ADMIN) {
-            url = '/api/instituteadmin/';
+            url = '/api/insadmin/';
         }
 
         return this._httpClient.post(`${url}login`, credentials).pipe(

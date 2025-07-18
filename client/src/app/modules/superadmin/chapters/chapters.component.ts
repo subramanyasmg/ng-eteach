@@ -254,6 +254,23 @@ export class ChaptersListComponent implements OnInit {
         return phases.map((phase) => ({ ...phase }));
     }
 
+    onChapterExpand(chapter: IChapters, index: number): void {
+        chapter.isLoading = true;
+        this._chapterService.getChapterDetails(this.subjectId, chapter.id).subscribe({
+            next: (response: any) => {
+                console.log('response', response);
+                // chapter.data = data;
+                chapter.isLoading = false;
+            },
+            error: (error: any) => {
+                 chapter.isLoading = false;
+                 this._snackBar.showError(
+                    `Error: ${error?.message || 'Something went wrong.'}`
+                );
+            }
+        });
+    }
+
     get chapters(): FormArray {
         return this.entityForm.get('chapters') as FormArray;
     }
@@ -311,13 +328,29 @@ export class ChaptersListComponent implements OnInit {
         );
     }
 
-    updateChapterPhase(chapter: IChapters) {
-        this.store.dispatch(
-            ChapterActions.updateChapter({
-                subjectId: this.subjectId,
-                chapter,
-            })
-        );
+    updateChapterPhase(chapter: IChapters, phase) {
+        console.log(chapter, phase);
+        const requestObj = {
+            chapter_id: chapter.id,
+            phase_id: phase.id,
+            content_type: "TEXT",
+            content_text: phase.content
+        };
+        this._chapterService.createLessonPlan(requestObj).subscribe({
+            next: (response: any) => {
+                console.log('response', response);
+                if (response.status === 200) {
+                    this._snackBar.showSuccess(
+                        `Lesson plan created successfully!`
+                    );
+                }
+            },
+            error: (error: any) => {
+                this._snackBar.showError(
+                    `Error: ${error?.message || 'Something went wrong.'}`
+                );
+            }
+        });
     }
 
     onFileDrop(chapter: IChapters, event: DragEvent, type) {

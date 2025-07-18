@@ -76,6 +76,18 @@ export class ChaptersService {
     //     );
     // }
 
+    getChapterDetails(subjectId, chapterId) {
+        return this._httpClient
+            .get(`${this.apiUrl}getAllChapterDetails/${subjectId}/${chapterId}`);
+    }
+
+    createLessonPlan(request) {
+        return this._httpClient.post<boolean>(
+            `${this.apiUrl}createLessonPlan`,
+            { ...request }
+        )
+    }
+
     getPhases() {
         return this._httpClient
             .get(`${this.apiUrl}getPhases`)

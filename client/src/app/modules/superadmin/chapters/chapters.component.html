@@ -27,15 +27,9 @@
         <div class="flex px-5 py-1 flex-auto flex-col gap-3 overflow-hidden sm:overflow-y-auto">
             <ng-container *ngIf="chapterList | SearchFilter:query:'name'">
                 <ng-container *ngIf="chapterList.length > 0; else noData">
-                    <!-- <mat-expansion-panel class="rounded-md" *ngFor="let chapter of chapters; trackBy: trackByFn">
-                        <mat-expansion-panel-header [collapsedHeight]="'56px'">
-                            <mat-panel-title>{{ chapter.name }}</mat-panel-title>
-                        </mat-expansion-panel-header>
-                        {{ 'test' }}
-                    </mat-expansion-panel> -->
                     <mat-accordion>
                         <mat-expansion-panel *ngFor="let chapter of chapterList; let i = index; trackBy: trackByFn"
-                            class="rounded-xl mb-4">
+                            class="rounded-xl mb-4"  (opened)="onChapterExpand(chapter, i)">
                             <mat-expansion-panel-header [collapsedHeight]="'75px'" class="p-6 items-center">
                                 <div class="w-full flex flex-col mr-5" *ngIf="!chapter.editMode">
                                     <div class="text-sm text-gray-500">
@@ -95,8 +89,14 @@
                             </mat-expansion-panel-header>
 
                             <!-- Inside Expansion Panel -->
-                            <div class="bg-white rounded-md">
-                                <mat-tab-group>
+                            <div class="bg-white rounded-md" matExpansionPanelContent>
+                                 <div class="space-y-4 animate-pulse" *ngIf="chapter.isLoading">
+                                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                 </div>
+                                <mat-tab-group *ngIf="!chapter.isLoading">
                                     <mat-tab label="{{ 'chapters.tab_lesson_plan' | transloco}}">
                                         <div class="mt-4 px-2 pb-2">
                                             <mat-accordion class="space-y-4"> <!-- multi -->
@@ -118,7 +118,7 @@
                                                         <button [disabled]="!phase.content || phase?.content?.trim().length === 0"
                                                             matTooltip="{{ 'common.save' | transloco}}"
                                                             class="rounded-md w-fit self-end" mat-flat-button
-                                                            [color]="'primary'" (click)="updateChapterPhase(chapter)">
+                                                            [color]="'primary'" (click)="updateChapterPhase(chapter, phase)">
                                                             <mat-icon class="icon-size-5"
                                                                 [svgIcon]="'mat_outline:check'"></mat-icon>
                                                         </button>
