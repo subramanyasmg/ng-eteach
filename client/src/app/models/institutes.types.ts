@@ -6,7 +6,7 @@ export interface IInstitutes {
     subdomain: string;
     address: string;
     admin_name: string;
-    admin_email: string;
+    email: string;
     phone: string;
     status?: string;
     curriculum: number;

@@ -177,6 +177,9 @@ export class PublishersListComponent
 
         if (this.mode === 2) {
             this.patchFormValues(selectedItem);
+            this.entityForm.get('email')?.disable();
+        } else {
+            this.entityForm.get('email')?.enable();
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',

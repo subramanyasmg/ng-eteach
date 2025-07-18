@@ -202,9 +202,13 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     openDialog(mode, selectedItem = null) {
         this.mode = mode;
-
         if (this.mode === 2) {
             this.patchFormValues(selectedItem);
+            this.entityForm.get('subdomain')?.disable();
+            this.entityForm.get('adminEmail')?.disable();
+        } else {
+            this.entityForm.get('subdomain')?.enable();
+            this.entityForm.get('adminEmail')?.enable();
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '600px',
@@ -223,7 +227,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             noOfLicense: data.total_licenses,
             adminName: data.admin_name,
             instituteAddress: data.address,
-            adminEmail: data.admin_email,
+            adminEmail: data.email,
             subdomain: data.subdomain,
             expiresOn: data.license_end,
             status: data.status,
@@ -246,7 +250,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             total_licenses: formValues.noOfLicense,
             address: formValues.instituteAddress,
             admin_name: formValues.adminName,
-            admin_email: formValues.adminEmail,
+            email: formValues.adminEmail,
             subdomain: formValues.subdomain,
             license_end: formValues.expiresOn,
             curriculum: formValues.curriculum,
@@ -274,7 +278,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             total_licenses: formValues.noOfLicense,
             address: formValues.instituteAddress,
             admin_name: formValues.adminName,
-            admin_email: formValues.adminEmail,
+            email: formValues.adminEmail,
             subdomain: formValues.subdomain,
             license_end: formValues.expiresOn,
             curriculum: Number(formValues.curriculum),

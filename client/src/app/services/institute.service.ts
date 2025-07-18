@@ -81,7 +81,7 @@ export class InstituteService {
                     .post(`${this.apiUrl}createInstitute`, {
                         school_name: request.name,
                         admin_name: request.admin_name,
-                        email: request.admin_email,
+                        email: request.email,
                         phone: request.phone,
                         address: request.address,
                         publisher_id: request.publisher_id,
