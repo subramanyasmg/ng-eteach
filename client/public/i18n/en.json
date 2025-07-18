@@ -16,6 +16,12 @@
         "manageTeachers": "Manage Teachers",
         "schoolStructure": "School Structure"
     },
+    "superadmin_dashboard": {
+        "subtext": "Overview of the company",
+        "total_publishers": "Total Publishers",
+        "total_institutes": "Total Institutes",
+        "total_licenses": "Total Licenses"
+    },
     "common": {
         "search": "Search",
         "actions": "Actions",

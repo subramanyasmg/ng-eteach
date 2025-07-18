@@ -1,14 +1,207 @@
 <div
-    class="absolute inset-0 flex min-w-0 flex-col overflow-y-auto"
-    cdkScrollable
+    class="flex min-w-0 flex-auto flex-col bg-gray-100 sm:absolute sm:inset-0 dark:bg-transparent"
 >
-    <!-- Main -->
-    <div class="flex-auto p-6 sm:p-10">
-        <!-- CONTENT GOES HERE -->
-        <div
-            class="h-400 max-h-400 min-h-400 rounded-2xl border-2 border-dashed border-gray-300"
-        >
-                    <p>{{ 'welcome-back'| transloco  }}</p>
+    <!-- Header -->
+    <div
+        class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8"
+    >
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ 'navigation.dashboard' | transloco }}
+            </div>
+            <div class="text-secondary text-xl">
+                {{ 'superadmin_dashboard.subtext' | transloco }}
+            </div>
+        </div>
+    </div>
 
+    <div class="-mt-px flex-auto p-4 pt-0 sm:p-6 overflow-y-auto">
+        <div
+            class="grid w-full min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4 "
+        >
+            <div
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow"
+            >
+                <div class="flex items-center justify-center text-center">
+                    <div
+                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
+                    >
+                        {{
+                            'superadmin_dashboard.total_publishers' | transloco
+                        }}
+                    </div>
+                </div>
+                <div class="mt-2 flex flex-col items-center">
+                    <div
+                        class="text-7xl font-bold leading-none tracking-tight text-blue-500 sm:text-8xl"
+                    >
+                        10
+                    </div>
+                    <div
+                        class="text-secondary mt-5 flex w-full items-baseline justify-center"
+                    >
+                        <div class="text-lg font-semibold">+32.5%</div>
+                        <div class="ml-1.5 truncate text-md font-medium">
+                            from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow"
+            >
+                <div class="flex items-start justify-center">
+                    <div
+                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
+                    >
+                        {{
+                            'superadmin_dashboard.total_institutes' | transloco
+                        }}
+                    </div>
+                    <div class="-mr-3 -mt-2 ml-2"></div>
+                </div>
+                <div class="mt-2 flex flex-col items-center">
+                    <div
+                        class="text-7xl font-bold leading-none tracking-tight text-amber-500 sm:text-8xl"
+                    >
+                        250
+                    </div>
+                    <div
+                        class="text-secondary mt-5 flex w-full items-baseline justify-center"
+                    >
+                        <div class="text-lg font-semibold">+50.5%</div>
+                        <div class="ml-1.5 truncate text-md font-medium">
+                            from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow"
+            >
+                <div class="flex items-start justify-center">
+                    <div
+                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
+                    >
+                        {{ 'superadmin_dashboard.total_licenses' | transloco }}
+                    </div>
+                    <div class="-mr-3 -mt-2 ml-2"></div>
+                </div>
+                <div class="mt-2 flex flex-col items-center">
+                    <div
+                        class="text-7xl font-bold leading-none tracking-tight text-green-500 sm:text-8xl"
+                    >
+                        2800
+                    </div>
+                    <div
+                        class="text-secondary mt-5 flex w-full items-baseline justify-center"
+                    >
+                        <div class="text-lg font-semibold">+12.5%</div>
+                        <div class="ml-1.5 truncate text-md font-medium">
+                            from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow sm:col-span-2 md:col-span-4 lg:col-span-2"
+            >
+                <div
+                    class="flex flex-col items-start justify-between sm:flex-row"
+                >
+                    <div
+                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
+                    >
+                        Institutes Onboarded
+                    </div>
+                    <div class="mt-3 sm:ml-2 sm:mt-0">
+                        <mat-button-toggle-group
+                            value="this-week"
+                            #githubIssuesWeekSelector="matButtonToggleGroup"
+                        >
+                            <mat-button-toggle value="last-week"
+                                >Last Week</mat-button-toggle
+                            >
+                            <mat-button-toggle value="this-week"
+                                >This Week</mat-button-toggle
+                            >
+                        </mat-button-toggle-group>
+                    </div>
+                </div>
+                <div class="mt-6 flex flex-auto flex-col">
+                    <apx-chart
+                        class="h-80 w-full flex-auto"
+                        [chart]="chartInstitutesOnboarded.chart"
+                        [colors]="chartInstitutesOnboarded.colors"
+                        [dataLabels]="chartInstitutesOnboarded.dataLabels"
+                        [grid]="chartInstitutesOnboarded.grid"
+                        [labels]="chartInstitutesOnboarded.labels"
+                        [legend]="chartInstitutesOnboarded.legend"
+                        [plotOptions]="chartInstitutesOnboarded.plotOptions"
+                        [series]="
+                            chartInstitutesOnboarded.series[
+                                githubIssuesWeekSelector.value
+                            ]
+                        "
+                        [states]="chartInstitutesOnboarded.states"
+                        [stroke]="chartInstitutesOnboarded.stroke"
+                        [tooltip]="chartInstitutesOnboarded.tooltip"
+                        [xaxis]="chartInstitutesOnboarded.xaxis"
+                        [yaxis]="chartInstitutesOnboarded.yaxis"
+                    ></apx-chart>
+                </div>
+            </div>
+             <div
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow sm:col-span-2 md:col-span-4 lg:col-span-2"
+            >
+                <div
+                    class="flex flex-col items-start justify-between sm:flex-row"
+                >
+                    <div
+                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
+                    >
+                        Teachers Onboarded
+                    </div>
+                    <div class="mt-3 sm:ml-2 sm:mt-0">
+                        <mat-button-toggle-group
+                            value="this-month"
+                            #teacherOnboardedMonthSelector="matButtonToggleGroup"
+                        >
+                            <mat-button-toggle value="last-month"
+                                >Last Month</mat-button-toggle
+                            >
+                            <mat-button-toggle value="this-month"
+                                >This Month</mat-button-toggle
+                            >
+                        </mat-button-toggle-group>
+                    </div>
+                </div>
+                <div class="mt-6 flex flex-auto flex-col">
+                    <apx-chart
+                        class="h-80 w-full flex-auto"
+                        [chart]="chartTeachersOnboarded.chart"
+                        [colors]="chartTeachersOnboarded.colors"
+                        [dataLabels]="chartTeachersOnboarded.dataLabels"
+                        [grid]="chartTeachersOnboarded.grid"
+                        [labels]="chartTeachersOnboarded.labels"
+                        [legend]="chartTeachersOnboarded.legend"
+                        [plotOptions]="chartTeachersOnboarded.plotOptions"
+                        [series]="
+                            chartTeachersOnboarded.series[
+                                teacherOnboardedMonthSelector.value
+                            ]
+                        "
+                        [states]="chartTeachersOnboarded.states"
+                        [stroke]="chartTeachersOnboarded.stroke"
+                        [tooltip]="chartTeachersOnboarded.tooltip"
+                        [xaxis]="chartTeachersOnboarded.xaxis"
+                        [yaxis]="chartTeachersOnboarded.yaxis"
+                    ></apx-chart>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
