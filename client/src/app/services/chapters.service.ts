@@ -99,11 +99,11 @@ export class ChaptersService {
                     })
                     .pipe(
                         mergeMap((response: any) => {
-                            if (!response.status) {
+                            if (response.status !== 200) {
                                 return throwError(
                                     () =>
                                         new Error(
-                                            'Something went wrong while adding'
+                                           response.message ?? 'Something went wrong while adding'
                                         )
                                 );
                             }
@@ -140,7 +140,7 @@ export class ChaptersService {
                     .pipe(
                         delay(300),
                         map((response: any) => {
-                            if (response.status) {
+                            if (response.status === 200) {
                                 // Replace the old item with updated item
                                 const updatedList = [...items];
                                 updatedList[index] = response?.data;
@@ -173,7 +173,7 @@ export class ChaptersService {
                     .delete(`${this.apiUrl}deleteChapter/${id}`)
                     .pipe(
                         map((response: any) => {
-                            if (response?.status && index !== -1) {
+                            if (response?.status === 200 && index !== -1) {
                                 // Remove item from the list
                                 items.splice(index, 1);
 
