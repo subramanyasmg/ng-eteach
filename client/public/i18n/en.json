@@ -22,6 +22,11 @@
         "total_institutes": "Total Institutes",
         "total_licenses": "Total Licenses"
     },
+    "insadmin_dashboard": {
+        "subtext": "Overview of the Institute",
+        "total_grades": "Total Grades",
+        "total_teachers": "Total Teachers"
+    },
     "common": {
         "search": "Search",
         "actions": "Actions",
@@ -222,10 +227,5 @@
         "success_add": "Teacher has been added to your institute. An email has been sent to her email to verify",
         "success_update": "Teacher updated successfully!",
         "success_delete": "Teacher deleted successfully!"
-    },
-    "dashboard": {
-        "title": "Dashboard",
-        "page_subtext": "Overview of the institute",
-        "institute_profile": "Institute profile"
     }
 }

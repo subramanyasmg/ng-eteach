@@ -1,21 +1,88 @@
-<div class="bg-gray-100 flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
+<div
+    class="flex min-w-0 flex-auto flex-col bg-gray-100 sm:absolute sm:inset-0 dark:bg-transparent"
+>
     <!-- Header -->
-    <div class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+    <div
+        class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8"
+    >
         <div class="min-w-0 flex-1">
             <!-- Title -->
             <div class="text-4xl font-extrabold tracking-tight">
-                {{ 'dashboard.title' | transloco }}
+                {{ 'navigation.dashboard' | transloco }}
             </div>
-            <div class="text-xl text-secondary">
-                {{ 'dashboard.page_subtext' | transloco }}
+            <div class="text-secondary text-xl">
+                {{ 'insadmin_dashboard.subtext' | transloco }}
             </div>
-        </div>
-        <!-- Actions -->
-        <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
-
-            <button class="ml-4 rounded-md" mat-flat-button [color]="'primary'">
-                {{ 'dashboard.institute_profile' | transloco }}
-            </button>
         </div>
     </div>
+
+    <div class="-mt-px flex-auto p-4 pt-0 sm:p-6 overflow-y-auto">
+        <div
+            class="grid w-full min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4 "
+        >
+            <div
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow"
+            >
+                <div class="flex items-center justify-center text-center">
+                    <div
+                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
+                    >
+                        {{
+                            'insadmin_dashboard.total_grades' | transloco
+                        }}
+                    </div>
+                </div>
+                <div class="mt-2 flex flex-col items-center">
+                    <div
+                        class="text-7xl font-bold leading-none tracking-tight text-blue-500 sm:text-8xl"
+                    >
+                        10
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow"
+            >
+                <div class="flex items-start justify-center">
+                    <div
+                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
+                    >
+                        {{
+                            'insadmin_dashboard.total_teachers' | transloco
+                        }}
+                    </div>
+                    <div class="-mr-3 -mt-2 ml-2"></div>
+                </div>
+                <div class="mt-2 flex flex-col items-center">
+                    <div
+                        class="text-7xl font-bold leading-none tracking-tight text-amber-500 sm:text-8xl"
+                    >
+                        250
+                    </div>
+                </div>
+            </div>
+
+             <div
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow sm:col-span-2 md:col-span-4 lg:col-span-4"
+            >
+                <div
+                    class="flex flex-col items-start justify-between sm:flex-row"
+                >
+                    <div
+                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
+                    >
+                       School Hierarchy
+                    </div>
+                </div>
+                <div class="mt-6 flex flex-auto flex-col">
+                      <p-organizationChart [value]="data" [collapsible]="true"></p-organizationChart>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
 </div>

@@ -34,9 +34,19 @@ import { teacherReducer } from './state/teachers/teacher.reducer';
 import { TeacherEffects } from './state/teachers/teacher.effects';
 import { publisherReducer } from './state/publishers/publishers.reducer';
 import { PublisherEffects } from './state/publishers/publishers.effects';
+import { providePrimeNG } from 'primeng/config';
+import Material from '@primeuix/themes/material';
 
 export const appConfig: ApplicationConfig = {
     providers: [
+        providePrimeNG({
+            theme: {
+                preset: Material,
+                 options: {
+                    darkModeSelector: false || 'none'
+                }
+            }
+        }),
         provideStore(),
         provideAnimations(),
         provideHttpClient(),
