@@ -54,6 +54,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 import { IPublisher } from 'app/models/publisher.types';
 import { CurriculumService } from 'app/services/curriculum.service';
+import { subdomainAvailabilityValidator } from './subdomaincheck.validator';
+import { InstituteService } from 'app/services/institute.service';
 
 @Component({
     selector: 'app-institutes',
@@ -92,7 +94,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dataSource = new MatTableDataSource<IInstitutes>();
     displayedColumns: string[] = [
-        'name',
+        'institute_name',
         'createdOn',
         'expiresOn',
         'noOfLicense',
@@ -119,7 +121,8 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         private _cdr: ChangeDetectorRef,
         private titleService: BreadcrumbService,
         private curriculumService: CurriculumService,
-        private translocoService: TranslocoService
+        private translocoService: TranslocoService,
+        private instituteService: InstituteService
     ) {
         this.titleService.setBreadcrumb([
             { label: this.translocoService.translate('navigation.users'), url: '/institute' },
@@ -144,7 +147,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             ],
             adminName: ['', [Validators.required]],
             adminEmail: ['', [Validators.required, Validators.email]],
-            subdomain: ['', [Validators.required]],
+            subdomain: ['', [Validators.required], [subdomainAvailabilityValidator(this.instituteService)]],
             expiresOn: ['', [Validators.required]],
             status: ['', [Validators.required]],
             curriculum: ['', [Validators.required]],
@@ -199,9 +202,13 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     openDialog(mode, selectedItem = null) {
         this.mode = mode;
-
         if (this.mode === 2) {
             this.patchFormValues(selectedItem);
+            this.entityForm.get('subdomain')?.disable();
+            this.entityForm.get('adminEmail')?.disable();
+        } else {
+            this.entityForm.get('subdomain')?.enable();
+            this.entityForm.get('adminEmail')?.enable();
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '600px',
@@ -220,7 +227,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             noOfLicense: data.total_licenses,
             adminName: data.admin_name,
             instituteAddress: data.address,
-            adminEmail: data.admin_email,
+            adminEmail: data.email,
             subdomain: data.subdomain,
             expiresOn: data.license_end,
             status: data.status,
@@ -243,7 +250,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             total_licenses: formValues.noOfLicense,
             address: formValues.instituteAddress,
             admin_name: formValues.adminName,
-            admin_email: formValues.adminEmail,
+            email: formValues.adminEmail,
             subdomain: formValues.subdomain,
             license_end: formValues.expiresOn,
             curriculum: formValues.curriculum,
@@ -271,7 +278,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             total_licenses: formValues.noOfLicense,
             address: formValues.instituteAddress,
             admin_name: formValues.adminName,
-            admin_email: formValues.adminEmail,
+            email: formValues.adminEmail,
             subdomain: formValues.subdomain,
             license_end: formValues.expiresOn,
             curriculum: Number(formValues.curriculum),

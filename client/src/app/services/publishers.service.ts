@@ -62,11 +62,11 @@ export class PublisherService {
                     .post(`${this.apiUrl}createPublisher`, { ...request})
                     .pipe(
                         mergeMap((response: any) => {
-                            if (!response.status) {
+                            if (response.status !== 200) {
                                 return throwError(
                                     () =>
                                         new Error(
-                                            'Something went wrong while adding'
+                                           response.message ?? 'Something went wrong while adding'
                                         )
                                 );
                             }
@@ -101,7 +101,7 @@ export class PublisherService {
                     .put(`${this.apiUrl}updatePublisher/${id}`, { ...data })
                     .pipe(
                         map((response: any) => {
-                            if (response?.status) {
+                            if (response?.status === 200) {
                                 // Replace the old item with updated item
                                 const updatedList = [...items];
                                 updatedList[index] = response?.data;
@@ -134,7 +134,7 @@ export class PublisherService {
                     .delete(`${this.apiUrl}deletePublisher/${id}`)
                     .pipe(
                         map((response: any) => {
-                            if (response?.status && index !== -1) {
+                            if (response?.status === 200 && index !== -1) {
                                 // Remove item from the list
                                 items.splice(index, 1);
 

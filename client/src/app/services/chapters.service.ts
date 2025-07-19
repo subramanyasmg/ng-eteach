@@ -20,28 +20,26 @@ export class ChaptersService {
     private _items: BehaviorSubject<IChapters[] | null> = new BehaviorSubject(
         null
     );
+    private _phases: BehaviorSubject<any[] | null> =
+        new BehaviorSubject(null);
     private _item: BehaviorSubject<IChapters | null> = new BehaviorSubject(
         null
     );
     private apiUrl = 'api/superadmin/';
 
-    /**
-     * Constructor
-     */
     constructor(private _httpClient: HttpClient) {}
 
-    /**
-     * Getter for single item
-     */
+
     get item$(): Observable<IChapters> {
         return this._item.asObservable();
     }
 
-    /**
-     * Getter for all items
-     */
     get items$(): Observable<IChapters[]> {
         return this._items.asObservable();
+    }
+
+    get phases$(): Observable<IChapters[]> {
+        return this._phases.asObservable();
     }
 
     getAll(subjectId: string) {
@@ -58,24 +56,48 @@ export class ChaptersService {
             );
     }
 
+    // getPhases() {
+    //     return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
+    //         map((response: any) => {
+    //             if (response?.status) {
+    //                 this._items.next(response.data);
+    //             } else {
+    //                 throw new Error(
+    //                     'Something went wrong while fetching phases'
+    //                 );
+    //             }
+    //         }),
+    //         catchError((error) => {
+    //             console.error('Error fetching phases:', error);
+    //             return throwError(
+    //                 () => new Error(error.message || 'Unknown error')
+    //             );
+    //         })
+    //     );
+    // }
+
+    getChapterDetails(subjectId, chapterId) {
+        return this._httpClient
+            .get(`${this.apiUrl}getAllChapterDetails/${subjectId}/${chapterId}`);
+    }
+
+    createLessonPlan(request) {
+        return this._httpClient.post<boolean>(
+            `${this.apiUrl}createLessonPlan`,
+            { ...request }
+        )
+    }
+
     getPhases() {
-        return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
-            map((response: any) => {
-                if (response?.status) {
-                    return response;
-                } else {
-                    throw new Error(
-                        'Something went wrong while fetching phases'
-                    );
-                }
-            }),
-            catchError((error) => {
-                console.error('Error fetching phases:', error);
-                return throwError(
-                    () => new Error(error.message || 'Unknown error')
-                );
-            })
-        );
+        return this._httpClient
+            .get(`${this.apiUrl}getPhases`)
+            .pipe(
+                tap((response: any) => {
+                    if (response.status) {
+                        this._phases.next(response.data);
+                    }
+                })
+            );
     }
 
     create(subjectId: string, request: IChapters): Observable<any> {
@@ -89,11 +111,11 @@ export class ChaptersService {
                     })
                     .pipe(
                         mergeMap((response: any) => {
-                            if (!response.status) {
+                            if (response.status !== 200) {
                                 return throwError(
                                     () =>
                                         new Error(
-                                            'Something went wrong while adding'
+                                           response.message ?? 'Something went wrong while adding'
                                         )
                                 );
                             }
@@ -130,7 +152,7 @@ export class ChaptersService {
                     .pipe(
                         delay(300),
                         map((response: any) => {
-                            if (response.status) {
+                            if (response.status === 200) {
                                 // Replace the old item with updated item
                                 const updatedList = [...items];
                                 updatedList[index] = response?.data;
@@ -163,7 +185,7 @@ export class ChaptersService {
                     .delete(`${this.apiUrl}deleteChapter/${id}`)
                     .pipe(
                         map((response: any) => {
-                            if (response?.status && index !== -1) {
+                            if (response?.status === 200 && index !== -1) {
                                 // Remove item from the list
                                 items.splice(index, 1);
 

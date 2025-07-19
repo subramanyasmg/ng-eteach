@@ -98,11 +98,11 @@ export class TeachersService {
                 return of(mockResponse).pipe(
                     delay(300), // Simulate API delay
                     mergeMap((response: any) => {
-                        if (!response.status) {
+                        if (response.status !== 200) {
                             return throwError(
                                 () =>
                                     new Error(
-                                        'Something went wrong while adding'
+                                        response.message ?? 'Something went wrong while adding'
                                     )
                             );
                         }
