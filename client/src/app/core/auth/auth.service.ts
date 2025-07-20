@@ -86,7 +86,7 @@ export class AuthService {
                 // Store the user on the user service
                 this._userService.user = response.user;
 
-                 localStorage.setItem(
+                 sessionStorage.setItem(
                             'user', JSON.stringify(response.user));
 
                 // Return a new observable with the response
@@ -187,7 +187,7 @@ export class AuthService {
             return of(false);
         }
 
-        let user = JSON.parse(localStorage.getItem('user'));
+        let user = JSON.parse(sessionStorage.getItem('user'));
         if (user) {
             this._userService.user = user;
         } else {
