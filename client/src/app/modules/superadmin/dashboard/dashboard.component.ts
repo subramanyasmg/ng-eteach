@@ -73,7 +73,7 @@ export class DashboardComponent implements OnInit {
         this.titleService.setBreadcrumb([
             {
                 label: this.translocoService.translate('navigation.platform'),
-                url: '/dashboard',
+                url: 'dashboard',
             },
             {
                 label: this.translocoService.translate('navigation.dashboard'),

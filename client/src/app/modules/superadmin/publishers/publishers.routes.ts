@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { PublishersComponent } from './publishers.component';
-import { CurriculumListComponent } from '../curriculum/curriculum-list/curriculum-list.component';
+import { CurriculumListComponent } from '../curriculum/curriculum-list.component';
 import { GradesListComponent } from '../grades/grades.component';
 import { SubjectsListComponent } from '../subjects/subjects.component';
 import { ChaptersListComponent } from '../chapters/chapters.component';

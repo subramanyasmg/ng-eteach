@@ -167,21 +167,21 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
                             label: this.translocoService.translate(
                                 'navigation.curriculum'
                             ),
-                            url: '/manage-publishers',
+                            url: 'manage-publishers',
                         },
                         {
                             label: this.translocoService.translate(
                                 'navigation.managePublishers'
                             ),
-                            url: '/manage-publishers',
+                            url: 'manage-publishers',
                         },
                         {
                             label: publisher.publication_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum`,
+                            url: `manage-publishers/${this.publisherId}/curriculum`,
                         },
                         {
                             label: curriculum.curriculum_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
+                            url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
                         },
                         { label: grade.grade_name, url: '' },
                     ]);

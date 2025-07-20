@@ -12,4 +12,8 @@
         height: auto !important;
         min-height: 160px !important;
     }
+    .ql-editor.readonly {
+        background-color: #f9f9f9;
+        cursor: not-allowed;
+    }
 }

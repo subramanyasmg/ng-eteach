@@ -36,8 +36,8 @@
 
 
             <div class="p-4 overflow-x-auto">
-                <table *ngIf="dataSource?.data?.length > 0 else noData" mat-table [dataSource]="dataSource" matSort
-                    class="w-full rounded-lg border border-gray-300 overflow-hidden shadow-sm">
+                <table mat-table [dataSource]="dataSource" matSort
+                    class="w-full rounded-lg border border-gray-300 overflow-hidden shadow-sm" [hidden]="dataSource.data.length === 0">
 
                     <ng-container matColumnDef="name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'teachers.table_name' | transloco }}
@@ -132,9 +132,13 @@
                     </tr>
                 </table>
 
-                <mat-paginator *ngIf="dataSource?.data?.length > 0" class="z-10 border-b mt-5 bg-white rounded-md"
+                <mat-paginator [ngClass]="{ 'hidden': dataSource.data.length === 0 }"  class="z-10 border-b mt-5 bg-white rounded-md"
                     [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons>
                 </mat-paginator>
+
+                <ng-container *ngIf="dataSource.data.length === 0">
+                    <ng-container *ngTemplateOutlet="noData"></ng-container>
+                </ng-container>
 
             </div>
         </div>

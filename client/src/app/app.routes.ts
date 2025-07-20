@@ -19,12 +19,12 @@ export const appRoutes: Route[] = [
     // After the user signs in, the sign-in page will redirect the user to the 'signed-in-redirect'
     // path. Below is another redirection for that path to redirect the user to the desired
     // location. This is a small convenience to keep all main routes together here on this file.
-    {path: 'signed-in-redirect', pathMatch : 'full', redirectTo: 'dashboard'},
-    {path: 'institute-admin-signed-in-redirect', pathMatch: 'full', redirectTo: '/institute/dashboard'},
+    {path: 'signed-in-redirect', pathMatch : 'full', redirectTo: '/admin/dashboard'},
+    {path: 'institute-admin-signed-in-redirect', pathMatch: 'full', redirectTo: '/dashboard'},
 
-    // Auth routes for super admin portal
+    // Auth routes for admin portal
     {
-        path: '',
+        path: 'admin',
         canActivate: [NoAuthGuard],
         canActivateChild: [NoAuthGuard],
         component: LayoutComponent,
@@ -32,6 +32,7 @@ export const appRoutes: Route[] = [
             layout: 'empty'
         },
         children: [
+            {path: '', pathMatch: 'full', redirectTo: 'sign-in'},
             {path: 'confirmation-required', loadChildren: () => import('app/modules/auth/confirmation-required/confirmation-required.routes')},
             {path: 'forgot-password', loadChildren: () => import('app/modules/auth/forgot-password/forgot-password.routes')},
             {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.routes')},
@@ -39,9 +40,9 @@ export const appRoutes: Route[] = [
             {path: 'sign-up', loadChildren: () => import('app/modules/auth/sign-up/sign-up.routes')}
         ]
     },
-    // Auth routes for super admin portal
+    // Auth routes for institute admin portal
     {
-        path: 'institute',
+        path: '',
         canActivate: [NoAuthGuard],
         canActivateChild: [NoAuthGuard],
         component: LayoutComponent,
@@ -54,7 +55,7 @@ export const appRoutes: Route[] = [
         ]
     },
     {
-        path: 'institute/create-password-success',
+        path: 'create-password-success',
         loadChildren: () =>
             import('app/modules/auth/institute-admin/create-password-success/create-password-success.routes'),
     },
@@ -86,9 +87,9 @@ export const appRoutes: Route[] = [
         ]
     },
 
-    // Super Admin routes
+    // Admin routes
     {
-        path: '',
+        path: 'admin',
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
         component: LayoutComponent,
@@ -97,14 +98,13 @@ export const appRoutes: Route[] = [
         },
         children: [
             {path: 'dashboard', canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN },loadChildren: () => import('app/modules/superadmin/dashboard/dashboard.routes')},
-            // {path: 'curriculum', canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN },loadChildren: () => import('app/modules/superadmin/curriculum/curriculum.routes')},
             {path: 'manage-publishers',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN }, loadChildren: () => import('app/modules/superadmin/publishers/publishers.routes')},
             {path: 'manage-institute',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN }, loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
         ]
     },
     // Institute Admin routes
     {
-        path: 'institute',
+        path: '',
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
         component: LayoutComponent,

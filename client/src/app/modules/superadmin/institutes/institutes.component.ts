@@ -95,7 +95,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     dataSource = new MatTableDataSource<IInstitutes>();
     displayedColumns: string[] = [
         'institute_name',
-        'createdOn',
+        'createdAt',
         'expiresOn',
         'noOfLicense',
         'subdomain',
@@ -125,7 +125,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         private instituteService: InstituteService
     ) {
         this.titleService.setBreadcrumb([
-            { label: this.translocoService.translate('navigation.users'), url: '/institute' },
+            { label: this.translocoService.translate('navigation.users'), url: 'manage-institute' },
             { label: this.translocoService.translate('navigation.manageInstitute'), url: '' },
         ]);
     }
@@ -147,7 +147,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             ],
             adminName: ['', [Validators.required]],
             adminEmail: ['', [Validators.required, Validators.email]],
-            subdomain: ['', [Validators.required], [subdomainAvailabilityValidator(this.instituteService)]],
+            subdomain: ['', [Validators.required]],
             expiresOn: ['', [Validators.required]],
             status: ['', [Validators.required]],
             curriculum: ['', [Validators.required]],
@@ -202,14 +202,21 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     openDialog(mode, selectedItem = null) {
         this.mode = mode;
+        const subdomainControl = this.entityForm.get('subdomain');
+
         if (this.mode === 2) {
-            this.patchFormValues(selectedItem);
-            this.entityForm.get('subdomain')?.disable();
+            subdomainControl?.clearAsyncValidators();
+            subdomainControl?.disable();
             this.entityForm.get('adminEmail')?.disable();
+            this.patchFormValues(selectedItem);
         } else {
-            this.entityForm.get('subdomain')?.enable();
+            subdomainControl?.setAsyncValidators([subdomainAvailabilityValidator(this.instituteService)]);
+            subdomainControl?.enable();
             this.entityForm.get('adminEmail')?.enable();
         }
+
+        subdomainControl?.updateValueAndValidity();
+
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '600px',
         });
@@ -221,9 +228,10 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     patchFormValues(data: IInstitutes) {
+        console.log(data);
         this.entityForm.patchValue({
             id: data.id,
-            name: data.name,
+            name: data.institute_name,
             noOfLicense: data.total_licenses,
             adminName: data.admin_name,
             instituteAddress: data.address,
@@ -231,7 +239,8 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             subdomain: data.subdomain,
             expiresOn: data.license_end,
             status: data.status,
-            curriculum: data.publisher_id,
+            publisher: data.publisher_id,
+            curriculum: data.curriculum_id
            // accountType: data.account_type
         });
     }
@@ -246,14 +255,14 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         const formValues = this.entityForm.value;
         this.entityForm.disable();
         const requestObj: IInstitutes = {
-            name: formValues.name,
+            institute_name: formValues.name,
             total_licenses: formValues.noOfLicense,
             address: formValues.instituteAddress,
             admin_name: formValues.adminName,
             email: formValues.adminEmail,
             subdomain: formValues.subdomain,
             license_end: formValues.expiresOn,
-            curriculum: formValues.curriculum,
+            curriculum_id: formValues.curriculum,
             publisher_id: formValues.publisher,
             account_type: 'k12',
             phone: formValues.phone
@@ -274,14 +283,14 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         const formValues = this.entityForm.value;
         const requestObj: IInstitutes = {
             id: formValues.id,
-            name: formValues.name,
+            institute_name: formValues.name,
             total_licenses: formValues.noOfLicense,
             address: formValues.instituteAddress,
             admin_name: formValues.adminName,
             email: formValues.adminEmail,
             subdomain: formValues.subdomain,
             license_end: formValues.expiresOn,
-            curriculum: Number(formValues.curriculum),
+            curriculum_id: Number(formValues.curriculum),
             account_type: 'k12',
             phone: formValues.phone
         };

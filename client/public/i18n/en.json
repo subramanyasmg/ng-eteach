@@ -22,6 +22,11 @@
         "total_institutes": "Total Institutes",
         "total_licenses": "Total Licenses"
     },
+    "insadmin_dashboard": {
+        "subtext": "Overview of the Institute",
+        "total_grades": "Total Grades",
+        "total_teachers": "Total Teachers"
+    },
     "common": {
         "search": "Search",
         "actions": "Actions",
@@ -190,7 +195,10 @@
         "success_add": "Chapter has been added successfully!",
         "success_update": "Chapter updated successfully!",
         "success_delete": "Chapter deleted successfully!",
-        "preview_not_available": "Preview not available for this file type."
+        "preview_not_available": "Preview not available for this file type.",
+        "no_phases_available": "No Phases available for Lesson Plans",
+        "phase_server_error": "Oh no! Server error occured while fetching Phases for Lesson Plans",
+        "lesson_plan_update_success": "Lesson plan updated successfully!"
     },
     "teachers": {
         "page_subtext": "You can add upto {{count}} teachers in your subscription plan",
@@ -222,10 +230,5 @@
         "success_add": "Teacher has been added to your institute. An email has been sent to her email to verify",
         "success_update": "Teacher updated successfully!",
         "success_delete": "Teacher deleted successfully!"
-    },
-    "dashboard": {
-        "title": "Dashboard",
-        "page_subtext": "Overview of the institute",
-        "institute_profile": "Institute profile"
     }
 }

@@ -79,13 +79,13 @@ export class InstituteService {
 
                 return this._httpClient
                     .post(`${this.apiUrl}createInstitute`, {
-                        school_name: request.name,
+                        school_name: request.institute_name,
                         admin_name: request.admin_name,
                         email: request.email,
                         phone: request.phone,
                         address: request.address,
                         publisher_id: request.publisher_id,
-                        curriculum_id: request.curriculum,
+                        curriculum_id: request.curriculum_id,
                         subdomain: request.subdomain,
                         account_type: 'k12',
                         total_licenses: request.total_licenses,

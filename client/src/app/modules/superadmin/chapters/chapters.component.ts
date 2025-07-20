@@ -181,25 +181,25 @@ export class ChaptersListComponent implements OnInit {
                             label: this.translocoService.translate(
                                 'navigation.curriculum'
                             ),
-                            url: '/manage-publishers',
+                            url: 'manage-publishers',
                         },
                         {
                             label: this.translocoService.translate(
                                 'navigation.managePublishers'
                             ),
-                            url: '/manage-publishers',
+                            url: 'manage-publishers',
                         },
                         {
                             label: publisher.publication_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum`,
+                            url: `manage-publishers/${this.publisherId}/curriculum`,
                         },
                         {
                             label: curriculum.curriculum_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
+                            url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
                         },
                         {
                             label: grade.grade_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
+                            url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
                         },
                         { label: subject.subject_name, url: '' },
                     ]);
@@ -227,24 +227,41 @@ export class ChaptersListComponent implements OnInit {
             });
     }
 
+    get filteredChapterList() {
+        if (!this.query) {
+            return this.chapterList;
+        }
+
+        const lowerQuery = this.query.toLowerCase();
+
+        return this.chapterList.filter(chapter =>
+            chapter.title?.toLowerCase().includes(lowerQuery)
+        );
+    }
+
     getAllPhases() {
         this._chapterService.phases$.subscribe(
             (response: any) => {
                 if (response) {
                     this.phases = response.map((el: any) => ({
                         label: el.name,
-                        content: '',
+                        content: null,
                         id: el.id,
+                        edit: false
                     }));
                 } else {
                     this._snackBar.showError(
-                        'No Phases available for Lesson Plans'
+                        this.translocoService.translate(
+                            'chapters.no_phases_available'
+                        )
                     );
                 }
             },
             (error) => {
                 this._snackBar.showError(
-                    'Oh no! Server error occured while fetching Phases for Lesson Plans'
+                    this.translocoService.translate(
+                        'chapters.phase_server_error'
+                    )
                 );
             }
         );
@@ -259,8 +276,19 @@ export class ChaptersListComponent implements OnInit {
         this._chapterService.getChapterDetails(this.subjectId, chapter.id).subscribe({
             next: (response: any) => {
                 console.log('response', response);
+                console.log('chapter', chapter);
                 // chapter.data = data;
                 chapter.isLoading = false;
+
+                const lessonPlansFromApi = response?.data?.[0]?.lesson_plans ?? [];
+                 chapter.lessonPlan.forEach(lesson => {
+                    // Find the corresponding lesson_plan from API where phase_id matches lesson.id
+                    const matchingLesson = lessonPlansFromApi.find(lp => lp.phase_id === lesson.id);
+
+                    if (matchingLesson) {
+                        lesson.content = matchingLesson.content_text || '';
+                    }
+                });
             },
             error: (error: any) => {
                  chapter.isLoading = false;
@@ -341,7 +369,9 @@ export class ChaptersListComponent implements OnInit {
                 console.log('response', response);
                 if (response.status === 200) {
                     this._snackBar.showSuccess(
-                        `Lesson plan created successfully!`
+                       this.translocoService.translate(
+                            'chapters.lesson_plan_update_success'
+                        )
                     );
                 }
             },

@@ -9,6 +9,11 @@
             <!-- Title -->
             <div class="text-4xl font-extrabold tracking-tight">
                 {{ gradeName }}
+                <mat-icon
+                    *ngIf="!gradeName"
+                    svgIcon="feather:loader"
+                    class="animate-spin ml-2 icon-size-10"
+                ></mat-icon>
             </div>
             <div class="text-secondary text-xl">
                 {{ 'subjects.page_subtext' | transloco }}

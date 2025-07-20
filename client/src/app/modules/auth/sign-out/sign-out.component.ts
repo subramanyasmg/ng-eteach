@@ -47,9 +47,9 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
             .subscribe((user: User) => {
 
                 if (user.type === USER_TYPES.INSTITUTE_ADMIN) {
-                    this.signOutURL = 'institute/sign-in';
-                } else if (user.type === USER_TYPES.SUPER_ADMIN) {
                     this.signOutURL = 'sign-in';
+                } else if (user.type === USER_TYPES.SUPER_ADMIN) {
+                    this.signOutURL = 'admin/sign-in';
                 }
                 // Redirect after the countdown
                 timer(1000, 1000)
