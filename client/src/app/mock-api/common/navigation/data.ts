@@ -71,7 +71,7 @@ export const instituteAdmin: FuseNavigationItem[] = [
                 title: 'navigation.dashboard',
                 type: 'basic',
                icon : 'mat_outline:grid_view',
-                link: '/institute/dashboard',
+                link: '/dashboard',
             }
         ],
     },
@@ -85,14 +85,14 @@ export const instituteAdmin: FuseNavigationItem[] = [
                 title: 'navigation.manageTeachers',
                 type: 'basic',
                 icon : 'heroicons_outline:academic-cap',
-                link: '/institute/teachers',
+                link: '/teachers',
             },
             {
                 id: 'subscriptions',
                 title: 'navigation.subscriptions',
                 type: 'basic',
                icon : 'heroicons_outline:ticket',
-                link: '/institute/subscriptions',
+                link: '/subscriptions',
             }
         ],
     },
@@ -106,14 +106,14 @@ export const instituteAdmin: FuseNavigationItem[] = [
                 title: 'navigation.manageCurriculum',
                 type: 'basic',
                icon : 'heroicons_outline:book-open',
-                link: '/institute/curriculum',
+                link: '/curriculum',
             },
             {
                 id: 'school',
                 title: 'navigation.schoolStructure',
                 type: 'basic',
                icon : 'heroicons_outline:wrench-screwdriver',
-                link: '/institute/school',
+                link: '/school',
             }
         ],
     }
