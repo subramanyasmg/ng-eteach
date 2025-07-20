@@ -63,7 +63,7 @@
         <div class="flex flex-auto flex-col overflow-hidden sm:overflow-y-auto">
             <div class="overflow-x-auto p-4">
                 <table
-                    *ngIf="dataSource?.data?.length > 0; else noData"
+                    [hidden]="dataSource.data.length === 0"
                     mat-table
                     [dataSource]="dataSource"
                     matSort
@@ -85,7 +85,7 @@
                         </td>
                     </ng-container>
 
-                    <ng-container matColumnDef="createdOn">
+                    <ng-container matColumnDef="createdAt">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>
                             {{ 'institute.header_created_on' | transloco }}
                         </th>
@@ -180,13 +180,17 @@
                 </table>
 
                 <mat-paginator
-                    *ngIf="dataSource?.data?.length > 0"
+                     [ngClass]="{ 'hidden': dataSource.data.length === 0 }"
                     class="z-10 mt-5 rounded-md border-b bg-white"
                     [pageSize]="10"
                     [pageSizeOptions]="[5, 10, 25, 50]"
                     showFirstLastButtons
                 >
                 </mat-paginator>
+
+                 <ng-container *ngIf="dataSource.data.length === 0">
+                    <ng-container *ngTemplateOutlet="noData"></ng-container>
+                </ng-container>
             </div>
         </div>
     </div>
