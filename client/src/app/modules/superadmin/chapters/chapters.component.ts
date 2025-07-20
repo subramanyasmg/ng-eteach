@@ -181,25 +181,25 @@ export class ChaptersListComponent implements OnInit {
                             label: this.translocoService.translate(
                                 'navigation.curriculum'
                             ),
-                            url: '/manage-publishers',
+                            url: 'manage-publishers',
                         },
                         {
                             label: this.translocoService.translate(
                                 'navigation.managePublishers'
                             ),
-                            url: '/manage-publishers',
+                            url: 'manage-publishers',
                         },
                         {
                             label: publisher.publication_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum`,
+                            url: `manage-publishers/${this.publisherId}/curriculum`,
                         },
                         {
                             label: curriculum.curriculum_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
+                            url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
                         },
                         {
                             label: grade.grade_name,
-                            url: `/manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
+                            url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
                         },
                         { label: subject.subject_name, url: '' },
                     ]);

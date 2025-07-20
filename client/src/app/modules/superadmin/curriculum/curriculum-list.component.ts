@@ -43,7 +43,7 @@ import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors'
 import * as PublisherActions from 'app/state/publishers/publishers.actions';
 import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 import { filter, map, Observable, Subject, take, tap } from 'rxjs';
-import { ICurriculum } from '../../../../models/curriculum.types';
+import { ICurriculum } from '../../../models/curriculum.types';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -129,13 +129,13 @@ export class CurriculumListComponent
                             label: this.translocoService.translate(
                                 'navigation.curriculum'
                             ),
-                            url: '/manage-publishers',
+                            url: 'manage-publishers',
                         },
                         {
                             label: this.translocoService.translate(
                                 'navigation.managePublishers'
                             ),
-                            url: '/manage-publishers',
+                            url: 'manage-publishers',
                         },
                         { label: publisher.publication_name, url: '' },
                     ]);

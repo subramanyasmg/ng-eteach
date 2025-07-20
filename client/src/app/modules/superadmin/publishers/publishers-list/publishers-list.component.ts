@@ -108,7 +108,7 @@ export class PublishersListComponent
         this.titleService.setBreadcrumb([
             {
                 label: this.translocoService.translate('navigation.curriculum'),
-                url: '/manage-publishers',
+                url: 'manage-publishers',
             },
             {
                 label: this.translocoService.translate(

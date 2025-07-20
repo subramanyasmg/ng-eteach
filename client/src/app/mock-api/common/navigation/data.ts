@@ -12,7 +12,7 @@ export const superAdmin: FuseNavigationItem[] = [
                 title: 'navigation.dashboard',
                 type: 'basic',
                icon : 'mat_outline:grid_view',
-                link: '/dashboard',
+                link: '/admin/dashboard',
             }
         ],
     },
@@ -26,14 +26,14 @@ export const superAdmin: FuseNavigationItem[] = [
                 title: 'navigation.manageInstitute',
                 type: 'basic',
                 icon : 'heroicons_outline:academic-cap',
-                link: '/manage-institute',
+                link: '/admin/manage-institute',
             },
             {
                 id: 'subscriptions',
                 title: 'navigation.subscriptions',
                 type: 'basic',
                icon : 'heroicons_outline:ticket',
-                link: '/subscriptions',
+                link: '/admin/subscriptions',
             }
         ],
     },
@@ -47,7 +47,7 @@ export const superAdmin: FuseNavigationItem[] = [
                 title: 'navigation.managePublishers',
                 type: 'basic',
                 icon : 'heroicons_outline:book-open',
-                link: '/manage-publishers',
+                link: '/admin/manage-publishers',
             }
             // {
             //     id: 'curriculum',

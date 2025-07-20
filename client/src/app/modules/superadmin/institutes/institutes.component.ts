@@ -125,7 +125,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         private instituteService: InstituteService
     ) {
         this.titleService.setBreadcrumb([
-            { label: this.translocoService.translate('navigation.users'), url: '/institute' },
+            { label: this.translocoService.translate('navigation.users'), url: 'manage-institute' },
             { label: this.translocoService.translate('navigation.manageInstitute'), url: '' },
         ]);
     }
