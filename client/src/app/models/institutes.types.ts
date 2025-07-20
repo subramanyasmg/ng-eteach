@@ -1,6 +1,6 @@
 export interface IInstitutes {
     id?: number;
-    name: string;
+    institute_name: string;
     license_end: string;
     total_licenses: number;
     subdomain: string;
@@ -9,7 +9,7 @@ export interface IInstitutes {
     email: string;
     phone: string;
     status?: string;
-    curriculum: number;
+    curriculum_id: number;
     publisher_id?: number;
     account_type: string;
     createdOn?: string;

@@ -474,7 +474,6 @@
                 <mat-label>{{
                     'institute.label_publisher' | transloco
                 }}</mat-label>
-
                 <mat-select [formControlName]="'publisher'">
                     <mat-option
                         *ngFor="let publisher of publisherList$ | async"
