@@ -5,6 +5,8 @@ import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
 import { PrivilegeGuard } from './core/auth/guards/privilege.guard';
 import { USER_TYPES } from './constants/usertypes';
+import { SuperadminGuard } from './core/auth/guards/superadmin.guard';
+import { TenantGuard } from './core/auth/guards/tenant.guard';
 
 // @formatter:off
 /* eslint-disable max-len */
@@ -25,7 +27,7 @@ export const appRoutes: Route[] = [
     // Auth routes for admin portal
     {
         path: 'admin',
-        canActivate: [NoAuthGuard],
+        canActivate: [SuperadminGuard, NoAuthGuard],
         canActivateChild: [NoAuthGuard],
         component: LayoutComponent,
         data: {
@@ -43,7 +45,7 @@ export const appRoutes: Route[] = [
     // Auth routes for institute admin portal
     {
         path: '',
-        canActivate: [NoAuthGuard],
+        canActivate: [TenantGuard, NoAuthGuard],
         canActivateChild: [NoAuthGuard],
         component: LayoutComponent,
         data: {
