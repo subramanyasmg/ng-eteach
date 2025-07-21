@@ -15,7 +15,7 @@ export class SuperadminGuard implements CanActivate {
 
   canActivate(): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     if (!this.subdomainService.isMainDomain()) {
-      return this.router.parseUrl('/sign-in');
+      return this.router.parseUrl('/admin/sign-in');
     }
     return true;
   }
