@@ -19,12 +19,12 @@ export class AppComponent {
         const path = window.location.pathname;
         
         // Redirect to home if trying to access superadmin with subdomain
-        if (subdomain && (path.startsWith('/admin') || path.startsWith('/home')) ) {
+        if (subdomain && (path === '/admin/sign-in' || path.startsWith('/home')) )  {
           this.router.navigate(['/sign-in']);
         }
         
         // Redirect to home if trying to access tenant sign-in without subdomain
-        if (!subdomain && path === '/admin/sign-in') {
+        if (!subdomain && (path.startsWith('/home'))) {
           this.router.navigate(['/sign-in']);
         }
       }
