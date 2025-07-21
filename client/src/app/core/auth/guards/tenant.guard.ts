@@ -12,10 +12,10 @@ export class TenantGuard implements CanActivate {
   ) {}
 
   canActivate(): boolean {
-    if (this.subdomainService.isMainDomain()) {
-      this.router.navigate(['/home']);
-      return false;
-    }
+    // if (this.subdomainService.isMainDomain()) {
+    // //   this.router.navigate(['/home']);
+    //   return false;
+    // }
     return true;
   }
 }
