@@ -143,6 +143,7 @@
         "header_created_on": "Created On",
         "header_modified_on": "Modified On",
         "header_subject_count": "Number of Subjects",
+        "header_sections_count": "Number of Sections",
         "empty_state_line1": "It looks like you haven’t added any grade information under this curriculum.",
         "empty_state_line2": "Add grade information by clicking the (+) button on the to right",
         "button_add_grade": "Add New Grade",
@@ -230,5 +231,24 @@
         "success_add": "Teacher has been added to your institute. An email has been sent to her email to verify",
         "success_update": "Teacher updated successfully!",
         "success_delete": "Teacher deleted successfully!"
+    },
+    "school_structure": {
+        "page_title": "My School Structure",
+        "page_subtext": "Modify your school structure",
+        "subject_page_subtext": "Add subject information under this grade",
+        "no_subjects_available": "No Subjects Available",
+        "sections": "Sections",
+        "add_new_section": "Add New Section",
+        "label_section_name": "Section Name",
+        "error_section_name_required": "Section Name is mandatory",
+        "empty_state_title": "It looks like you haven’t added any section information under this grade.",
+        "empty_state_description": "Add section information by clicking the (+) button on the top right",
+        "button_edit_section": "Edit Section Name",
+        "button_delete_section": "Delete Section",
+        "success_add": "Section successfully added",
+        "success_update": "Section successfully updated",
+        "success_delete": "Section successfully deleted",
+        "no_subjects_added_for_section": "No subjects added for this section",
+        "select_subject_placeholder": "Select Subjects"
     }
 }

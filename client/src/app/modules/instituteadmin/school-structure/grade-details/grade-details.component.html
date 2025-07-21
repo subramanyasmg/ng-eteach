@@ -1,0 +1,252 @@
+<div
+    class="flex min-w-0 flex-auto flex-col bg-gray-100 sm:absolute sm:inset-0 sm:overflow-hidden dark:bg-transparent"
+>
+    <!-- Header -->
+    <div
+        class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8"
+    >
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ gradeName }}
+                <mat-icon
+                    *ngIf="!gradeName"
+                    svgIcon="feather:loader"
+                    class="ml-2 animate-spin icon-size-10"
+                ></mat-icon>
+            </div>
+            <div class="text-secondary text-xl">
+                {{ 'school_structure.subject_page_subtext' | transloco }}
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-auto overflow-hidden">
+        <div
+            class="flex flex-auto flex-col gap-3 overflow-hidden px-6 py-1 sm:overflow-y-auto md:px-8"
+        >
+            <div class="text-3xl font-extrabold tracking-tight">
+                {{ 'navigation.subjects' | transloco }}
+            </div>
+            <div class="bg-card flex flex-wrap gap-3 rounded-md p-4 shadow">
+                <ng-container *ngIf="isSubjectsLoading; else subjectsContent">
+                    <p-skeleton width="4rem" height="2rem"></p-skeleton>
+                    <p-skeleton width="4rem" height="2rem"></p-skeleton>
+                    <p-skeleton width="4rem" height="2rem"></p-skeleton>
+                </ng-container>
+                <ng-template #subjectsContent>
+                    <ng-container *ngIf="subjects$ | async as subjects">
+                        <ng-container
+                            *ngIf="subjects.length > 0; else noSubjects"
+                        >
+                            <mat-chip
+                                *ngFor="let el of subjects"
+                                class="w-fit"
+                                [selectable]="false"
+                                [removable]="false"
+                            >
+                                {{ el.subject_name }}
+                            </mat-chip>
+                        </ng-container>
+                    </ng-container>
+                </ng-template>
+                <ng-template #noSubjects>
+                    <p class="text-yellow-500">
+                        {{
+                            'school_structure.no_subjects_available' | transloco
+                        }}
+                    </p>
+                </ng-template>
+            </div>
+            <div class="mt-2 flex justify-between">
+                <div class="text-3xl  font-extrabold tracking-tight">
+                    {{ 'school_structure.sections' | transloco }}
+                </div>
+                <button class="ml-4 rounded-md" mat-flat-button [disabled]="isSubjectsLoading" [color]="'primary'" (click)="openAddSectionModal()">
+                    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                </button>
+            </div>
+            <ng-container *ngIf="sectionList?.length > 0; else noData">
+                 <mat-accordion>
+                    <mat-expansion-panel *ngFor="let section of sectionList; let i = index; trackBy: trackByFn"
+                        class="rounded-xl mb-4">
+                        <mat-expansion-panel-header [collapsedHeight]="'75px'" class="p-6 items-center">
+                            <div class="w-full flex flex-col mr-5" *ngIf="!section.editMode">
+                                <div class="flex items-center gap-2 justify-between w-full">
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-2 text-2xl font-semibold">
+                                            {{ section.section_name }}
+                                        </div>
+                                        <div class="flex items-center gap-2 ml-3 mr-auto">
+                                            <button [matTooltip]="'school_structure.button_edit_section' | transloco"
+                                                class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-stroked-button
+                                                (click)="toggleEditSection(section); $event.stopPropagation()">
+                                                <mat-icon class="icon-size-5" [svgIcon]="'mat_outline:edit'"></mat-icon>
+                                            </button>
+                                            <button [matTooltip]="'school_structure.button_delete_section' | transloco"
+                                                class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                                mat-stroked-button
+                                                (click)="deleteItem(section); $event.stopPropagation()">
+                                                <mat-icon class="icon-size-5"
+                                                    [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                       <mat-icon svgIcon="feather:book" class="icon-size-4"></mat-icon> Subjects: {{ section?.subjects?.length }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-full flex flex-col mr-5" *ngIf="section.editMode">
+                                <div class="flex items-center gap-2 justify-between w-full">
+                                    <mat-form-field class="w-full" [subscriptSizing]="'dynamic'">
+                                        <input required autofocus [ngModel]="section.section_name"
+                                            (ngModelChange)="onSectionNameModelChange($event, section)"
+                                            (keydown)="$event.stopPropagation()" (click)="$event.stopPropagation()"
+                                            matInput
+                                            [placeholder]="'school_structure.label_section_name' | transloco" />
+                                        <mat-error>{{ 'school_structure.error_section_name_required' |
+                                            transloco}}</mat-error>
+                                    </mat-form-field>
+                                    <div class="flex items-center gap-2 ml-3 mr-auto">
+                                        <button matTooltip="{{ 'common.cancel' | transloco}}"
+                                            class="border-none bg-gray-100 max-w-[20px] min-w-[20px] rounded-md"
+                                            mat-stroked-button
+                                            (click)="toggleEditSection(section);$event.stopPropagation()">
+                                            <mat-icon class="icon-size-5"
+                                                [svgIcon]="'mat_outline:close'"></mat-icon>
+                                        </button>
+                                        <button [disabled]="newSectionName.trim().length === 0"
+                                            matTooltip="{{ 'common.save' | transloco}}"
+                                            class="max-w-[20px] min-w-[20px] rounded-md" mat-flat-button
+                                            [color]="'primary'"
+                                            (click)="updateSectionName(section); $event.stopPropagation()">
+                                            <mat-icon class="icon-size-5"
+                                                [svgIcon]="'mat_outline:check'"></mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-expansion-panel-header>
+
+                        <div class="bg-white rounded-md" matExpansionPanelContent>
+                            <mat-form-field class="w-full" floatLabel="always" [subscriptSizing]="'dynamic'">
+                                <mat-select [multiple]="true" [(ngModel)]="subjectForSections"
+                                    [placeholder]="'school_structure.select_subject_placeholder' | transloco">
+                                    <mat-option *ngFor="let el of subjects$ | async" [value]="el">
+                                        {{ el.subject_name }}
+                                    </mat-option>
+                                </mat-select>
+                                <button mat-icon-button matSuffix (click)="addSubjectToSection(section); $event.stopPropagation()">
+                                    <mat-icon class="text-blue-500 font-bold">add</mat-icon>
+                                </button>
+                            </mat-form-field>
+
+                            <table mat-table [dataSource]="section.subjects">
+    
+                                <ng-container matColumnDef="subjectName">
+                                    <th mat-header-cell *matHeaderCellDef> Subject Name </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.subject_name ?? '-'}} </td>
+                                </ng-container>
+    
+                                <ng-container matColumnDef="teacher">
+                                    <th mat-header-cell *matHeaderCellDef> Teacher </th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <div *ngIf="element.teacher else assignTeacher">{{ element.teacher }}</div>
+                                        <ng-template #assignTeacher>
+                                            Not Assigned
+                                        </ng-template>
+                                    </td>
+                                </ng-container>
+    
+                                <ng-container matColumnDef="chapters">
+                                    <th mat-header-cell *matHeaderCellDef> Chapters </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.chapters ?? '-'}} </td>
+                                </ng-container>
+    
+                                <ng-container matColumnDef="completion">
+                                    <th mat-header-cell *matHeaderCellDef> Completion % </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.completion ?? '-'}} </td>
+                                </ng-container>
+    
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                                <tr class="mat-row" *matNoDataRow>
+                                    <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                                        <div class="p-6 text-center text-xl tracking-tight">
+                                            {{ 'school_structure.no_subjects_added_for_section' | transloco }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+
+
+                    </mat-expansion-panel>
+                 </mat-accordion>
+            </ng-container>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #EntityDialog let-data="data">
+    <div class="flex max-h-160 flex-auto flex-col overflow-hidden">
+        <!-- Header -->
+        <div
+            class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
+            <div class="text-lg font-medium">{{'school_structure.add_new_section' | transloco}}</div>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Card form -->
+    <form class="flex w-full flex-0 flex-col items-start overflow-y-auto max-h-96 space-y-3 p-4 mt-3"
+        [formGroup]="entityForm">
+
+        <div class="flex w-full">
+            <mat-form-field class="w-full" floatLabel="always">
+                <mat-label>{{ 'school_structure.label_section_name' | transloco }}</mat-label>
+                <input matInput [formControlName]="'name'" [placeholder]="'e.g. Section 1'" required maxlength="200" />
+                @if (entityForm.get('name').hasError('required')) {
+                <mat-error>{{ 'school_structure.error_section_name_required' | transloco }} </mat-error>
+                }
+            </mat-form-field>
+        </div>
+    </form>
+
+    <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
+
+        <button mat-button (click)="matDialogRef.close()"> {{ 'common.cancel' | transloco }}</button>
+        <button class="ml-3 px-6" mat-flat-button [color]="'primary'" (click)="addSection()"
+            [disabled]="entityForm.invalid || entityForm.disabled">
+            @if (!entityForm.disabled) {
+            <span>  {{ 'common.save' | transloco }} </span>
+            }
+            @if (entityForm.disabled) {
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            }
+        </button>
+    </div>
+
+</ng-template>
+
+<ng-template #noData>
+    <div class="p-8 text-center text-4xl tracking-tight">
+        <div class="w-full flex justify-center">
+            <img src="images/no-data.svg" alt="{{ 'common.noDataAvailable' | transloco}}" class="w-90" />
+        </div>
+        <div class="mt-5 text-center text-4xl font-extrabold">
+            {{ 'common.noDataAvailable' | transloco}}
+        </div>
+        <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
+            {{ 'school_structure.empty_state_title' | transloco}} <br> {{ 'school_structure.empty_state_description' | transloco}}
+        </div>
+
+    </div>
+</ng-template>

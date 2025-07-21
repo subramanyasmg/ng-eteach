@@ -1,0 +1,101 @@
+<div class="bg-gray-100 flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
+    <!-- Header -->
+    <div class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ 'school_structure.page_title' | transloco }}
+            </div>
+             <div class="text-xl text-secondary">
+               {{ 'school_structure.page_subtext' | transloco }}
+            </div>
+        </div>
+        <!-- Actions -->
+        <div class="mt-6 flex flex-wrap shrink-0 items-center sm:ml-4 sm:mt-0">
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [(ngModel)]="query" (ngModelChange)="applyFilter()" [autocomplete]="'off'"
+                    [placeholder]="'common.search' | transloco" />
+            </mat-form-field>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-auto overflow-hidden">
+
+        <div class="flex flex-auto flex-col overflow-hidden sm:overflow-y-auto">
+
+
+            <div class="p-4 overflow-x-auto">
+                <table mat-table [dataSource]="dataSource" matSort
+                    class="w-full rounded-lg border border-gray-300 overflow-hidden shadow-sm" [hidden]="dataSource.data.length === 0">
+
+                    <ng-container matColumnDef="grade_name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_name' | transloco }}</th>
+                        <td mat-cell *matCellDef="let element"><a class="text-primary" [routerLink]="element.id + '/sections'">{{ element.grade_name }}</a></td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="createdAt">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_created_on' | transloco }}</th>
+                        <td mat-cell *matCellDef="let element">{{ element.createdAt | date }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="updatedAt">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_modified_on' | transloco }}</th>
+                        <td mat-cell *matCellDef="let element">{{ element.updatedAt | date }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="subject_count">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_subject_count' | transloco }}</th>
+                        <td mat-cell *matCellDef="let element">{{ element.subject_count ?? '0' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="section_count">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_sections_count' | transloco }}</th>
+                        <td mat-cell *matCellDef="let element">{{ element.section_count ?? '0' }}</td>
+                    </ng-container>
+
+
+                    <!-- Header & Row Declarations -->
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+                    <!-- No Records Message -->
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                            <div class="p-6 text-center text-xl tracking-tight">
+                                {{ 'common.noRecordsFound' | transloco }} <span class="font-semibold">"{{ query }}"</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <mat-paginator  [ngClass]="{ 'hidden': dataSource.data.length === 0 }"  class="z-10 border-b mt-5 bg-white rounded-md"
+                    [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons>
+                </mat-paginator>
+
+                 <ng-container *ngIf="dataSource.data.length === 0">
+                    <ng-container *ngTemplateOutlet="noData"></ng-container>
+                </ng-container>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #noData>
+    <div class="p-8 text-center text-4xl tracking-tight">
+        <div class="w-full flex justify-center">
+            <img src="images/no-data.svg" alt="No data" class="w-90" />
+        </div>
+        <div class="mt-5 text-center text-4xl font-extrabold">
+           {{ 'common.noDataAvailable' | transloco }}
+        </div>
+        <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
+          {{ 'grades.empty_state_line1' | transloco }}
+        </div>
+
+    </div>
+</ng-template>
+
