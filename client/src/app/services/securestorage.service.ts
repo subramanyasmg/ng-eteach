@@ -6,7 +6,7 @@ import * as CryptoJS from 'crypto-js';
 })
 export class SecureSessionStorageService {
 
-    private secretKey: string = "SECRET_KEY";
+    private secretKey: string = "9f1d5e32acdb4e66b95ffae38c879d4e1aa23a0e3c98f26cfa8b2fda7bb1b999";
 
     constructor() {}
 
