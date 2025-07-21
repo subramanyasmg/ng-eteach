@@ -102,6 +102,8 @@ export class GradeDetailsComponent implements OnInit {
     isSubjectsLoading = true;
     newSectionName: string = '';
     sectionList: ISections[];
+    subjectForSections = [];
+    displayedColumns: string[] = ['subjectName', 'teacher', 'chapters', 'completion'];
 
     constructor(
         private route: ActivatedRoute,
@@ -236,6 +238,33 @@ export class GradeDetailsComponent implements OnInit {
         }
     }
 
+    addSubjectToSection(section: ISections) {
+        const existingSubjectIds = new Set(section.subjects.map(s => s.id));
+
+        const duplicates = this.subjectForSections.filter(el => existingSubjectIds.has(el.id));
+        const newSubjects = this.subjectForSections
+            .filter(el => !existingSubjectIds.has(el.id))
+            .map(el => ({
+                id: el.id,
+                subject_name: el.subject_name,
+                teacher: null,
+                chapters: 0,
+                completion: 0
+            }));
+
+        // Add new subjects to the section
+        section.subjects = [...section.subjects, ...newSubjects];
+
+        // Clear selected subjects
+        this.subjectForSections = [];
+
+        // Notify if there were duplicates
+        if (duplicates.length > 0) {
+            const duplicateNames = duplicates.map(d => d.subject_name).join(', ');
+            this._snackBar.showError(`Subjects already added: ${duplicateNames}`);
+        }
+    }
+
     handleAPIResponse() {
         this.actions$
             .pipe(
@@ -304,7 +333,7 @@ export class GradeDetailsComponent implements OnInit {
                     if (action.type === SectionActions.addSectionSuccess.type) {
                         this._snackBar.showSuccess(
                             this.translocoService.translate(
-                                'curriculum.success_add'
+                                'school_structure.success_add'
                             )
                         );
                     } else if (
@@ -312,7 +341,7 @@ export class GradeDetailsComponent implements OnInit {
                     ) {
                         this._snackBar.showSuccess(
                             this.translocoService.translate(
-                                'curriculum.success_update'
+                                'school_structure.success_update'
                             )
                         );
                     } else if (
@@ -320,7 +349,7 @@ export class GradeDetailsComponent implements OnInit {
                     ) {
                         this._snackBar.showSuccess(
                             this.translocoService.translate(
-                                'curriculum.success_delete'
+                                'school_structure.success_delete'
                             )
                         );
                     }

@@ -60,12 +60,23 @@ export class SectionsService {
     create(gradeId, request): Observable<any> {
         return this.items$.pipe(
             take(1),
-            switchMap((item) =>
-                this._httpClient
-                    .post(`${this.apiUrl}createSection`, {
-                        ...request,
-                        grade_id: gradeId,
-                    })
+            switchMap((existingItems) => {
+                const items = existingItems ?? [];
+
+                // this._httpClient
+                //     .post(`${this.apiUrl}createSection`, {
+                //         ...request,
+                //         grade_id: gradeId,
+                //     })
+                const mockResponse = {
+                    status: 200,
+                    data: {
+                        id: Date.now().toString(),
+                        section_name: request.section_name,
+                        subjects:[]
+                    } as ISections,
+                };
+                 return of(mockResponse)
                     .pipe(
                         mergeMap((response: any) => {
                             if (response.status !== 200) {
@@ -80,13 +91,13 @@ export class SectionsService {
 
                             this._items.next([
                                 response?.data as ISections,
-                                ...item,
+                                ...items,
                             ]);
 
                             return of(response);
                         })
-                    )
-            )
+                    );
+            })
         );
     }
 

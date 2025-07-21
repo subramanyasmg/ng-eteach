@@ -241,9 +241,14 @@
         "add_new_section": "Add New Section",
         "label_section_name": "Section Name",
         "error_section_name_required": "Section Name is mandatory",
-        "empty_state_title": "It looks like you haven’t added any section information under this subject.",
-        "empty_state_description": "Add section information by clicking the (+) button on the to right",
+        "empty_state_title": "It looks like you haven’t added any section information under this grade.",
+        "empty_state_description": "Add section information by clicking the (+) button on the top right",
         "button_edit_section": "Edit Section Name",
         "button_delete_section": "Delete Section",
+        "success_add": "Section successfully added",
+        "success_update": "Section successfully updated",
+        "success_delete": "Section successfully deleted",
+        "no_subjects_added_for_section": "No subjects added for this section",
+        "select_subject_placeholder": "Select Subjects"
     }
 }
