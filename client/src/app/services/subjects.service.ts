@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { USER_TYPES } from 'app/constants/usertypes';
 import {
     BehaviorSubject,
     Observable,
@@ -13,7 +14,8 @@ import {
     throwError,
 } from 'rxjs';
 import { ISubjects } from '../models/subject.types';
-import { USER_TYPES } from 'app/constants/usertypes';
+import { SecureSessionStorageService } from './securestorage.service';
+import { User } from 'app/core/user/user.types';
 
 @Injectable({ providedIn: 'root' })
 export class SubjectsService {
@@ -28,7 +30,10 @@ export class SubjectsService {
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient) {}
+    constructor(
+        private _httpClient: HttpClient,
+        private _secureStorageService: SecureSessionStorageService
+    ) {}
 
     /**
      * Getter for single item
@@ -45,7 +50,7 @@ export class SubjectsService {
     }
 
     getAll(gradeId: string) {
-        let user = JSON.parse(sessionStorage.getItem('user'));
+        let user = this._secureStorageService.getItem<User>('user');
         switch (user.type) {
             case USER_TYPES.INSTITUTE_ADMIN:
                 this.apiUrl = 'api/insadmin/';
@@ -56,7 +61,7 @@ export class SubjectsService {
             default:
                 throw new Error('Unsupported user type');
         }
-        
+
         return this._httpClient
             .get(`${this.apiUrl}getAllSubjects/${gradeId}`)
             .pipe(
@@ -77,7 +82,7 @@ export class SubjectsService {
                 this._httpClient
                     .post(`${this.apiUrl}createSubject`, {
                         grade_id: request.grade_id,
-                        name: request.subject_name
+                        name: request.subject_name,
                     })
                     .pipe(
                         mergeMap((response: any) => {
@@ -85,7 +90,8 @@ export class SubjectsService {
                                 return throwError(
                                     () =>
                                         new Error(
-                                           response.message ?? 'Something went wrong while adding'
+                                            response.message ??
+                                                'Something went wrong while adding'
                                         )
                                 );
                             }
@@ -118,23 +124,26 @@ export class SubjectsService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateSubject/${id}`, { ...data }).pipe(
-                    delay(300),
-                    map((response: any) => {
-                        if (response.status === 200) {
-                            // Replace the old item with updated item
-                            const updatedList = [...items];
-                            updatedList[index] = response?.data;
+                    .put(`${this.apiUrl}updateSubject/${id}`, { ...data })
+                    .pipe(
+                        delay(300),
+                        map((response: any) => {
+                            if (response.status === 200) {
+                                // Replace the old item with updated item
+                                const updatedList = [...items];
+                                updatedList[index] = response?.data;
 
-                            // Emit new state
-                            this._items.next(updatedList);
+                                // Emit new state
+                                this._items.next(updatedList);
 
-                            return response;
-                        } else {
-                            return throwError(() => new Error('Update failed'));
-                        }
-                    })
-                );
+                                return response;
+                            } else {
+                                return throwError(
+                                    () => new Error('Update failed')
+                                );
+                            }
+                        })
+                    );
             })
         );
     }

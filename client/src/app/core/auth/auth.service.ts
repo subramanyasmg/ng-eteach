@@ -3,16 +3,17 @@ import { inject, Injectable } from '@angular/core';
 import { USER_TYPES } from 'app/constants/usertypes';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { UserService } from 'app/core/user/user.service';
+import { SecureSessionStorageService } from 'app/services/securestorage.service';
 import * as CryptoJS from 'crypto-js';
 import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+import { User } from '../user/user.types';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private _authenticated: boolean = false;
     private _httpClient = inject(HttpClient);
     private _userService = inject(UserService);
-
-    private _baseUrl = '/api/superadmin/';
+    private _secureStorageService = inject(SecureSessionStorageService);
 
     // -----------------------------------------------------------------------------------------------------
     // @ Accessors
@@ -22,11 +23,11 @@ export class AuthService {
      * Setter & getter for access token
      */
     set accessToken(token: string) {
-        sessionStorage.setItem('accessToken', token);
+        this._secureStorageService.setItem('accessToken', token);
     }
 
     get accessToken(): string {
-        return sessionStorage.getItem('accessToken') ?? '';
+        return this._secureStorageService.getItem('accessToken') ?? '';
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -86,8 +87,8 @@ export class AuthService {
                 // Store the user on the user service
                 this._userService.user = response.user;
 
-                 sessionStorage.setItem(
-                            'user', JSON.stringify(response.user));
+                 this._secureStorageService.setItem(
+                            'user', response.user);
 
                 // Return a new observable with the response
                 return of(response);
@@ -137,8 +138,9 @@ export class AuthService {
      * Sign out
      */
     signOut(): Observable<any> {
-        // Remove the access token from the local storage
-        sessionStorage.removeItem('accessToken');
+        // Remove the access token and user from the local storage
+        this._secureStorageService.removeItem('accessToken');
+        this._secureStorageService.removeItem('user');
 
         // Set the authenticated flag to false
         this._authenticated = false;
@@ -187,7 +189,7 @@ export class AuthService {
             return of(false);
         }
 
-        let user = JSON.parse(sessionStorage.getItem('user'));
+        let user = this._secureStorageService.getItem<User>('user');
         if (user) {
             this._userService.user = user;
         } else {

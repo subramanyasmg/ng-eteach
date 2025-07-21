@@ -15,6 +15,8 @@ import {
     throwError,
 } from 'rxjs';
 import { IGrades } from '../models/grades.types';
+import { SecureSessionStorageService } from './securestorage.service';
+import { User } from 'app/core/user/user.types';
 
 @Injectable({ providedIn: 'root' })
 export class GradesService {
@@ -29,7 +31,8 @@ export class GradesService {
      */
     constructor(
         private _httpClient: HttpClient,
-        private _userService: UserService
+        private _userService: UserService,
+        private _secureStorageService: SecureSessionStorageService
     ) {}
 
     /**
@@ -47,7 +50,7 @@ export class GradesService {
     }
 
     getAll(curriculumId: string) {
-        let user = JSON.parse(sessionStorage.getItem('user'));
+        let user = this._secureStorageService.getItem<User>('user');
         switch (user.type) {
             case USER_TYPES.INSTITUTE_ADMIN:
                 this.apiUrl = 'api/insadmin/';
