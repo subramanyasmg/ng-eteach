@@ -113,7 +113,7 @@ export const instituteAdmin: FuseNavigationItem[] = [
                 title: 'navigation.schoolStructure',
                 type: 'basic',
                icon : 'heroicons_outline:wrench-screwdriver',
-                link: '/school',
+                link: '/school-structure',
             }
         ],
     }

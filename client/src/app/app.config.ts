@@ -36,6 +36,8 @@ import { publisherReducer } from './state/publishers/publishers.reducer';
 import { PublisherEffects } from './state/publishers/publishers.effects';
 import { providePrimeNG } from 'primeng/config';
 import Material from '@primeuix/themes/material';
+import { sectionsReducer } from './state/sections/sections.reducer';
+import { SectionsEffects } from './state/sections/sections.effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -174,6 +176,8 @@ export const appConfig: ApplicationConfig = {
         provideState('chapters', chaptersReducer),
         provideEffects(ChaptersEffects),
         provideState('teachers', teacherReducer),
-        provideEffects(TeacherEffects)
+        provideEffects(TeacherEffects),
+        provideState('sections', sectionsReducer),
+        provideEffects(SectionsEffects)
     ],
 };
