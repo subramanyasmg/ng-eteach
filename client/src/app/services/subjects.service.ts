@@ -13,6 +13,7 @@ import {
     throwError,
 } from 'rxjs';
 import { ISubjects } from '../models/subject.types';
+import { USER_TYPES } from 'app/constants/usertypes';
 
 @Injectable({ providedIn: 'root' })
 export class SubjectsService {
@@ -44,6 +45,18 @@ export class SubjectsService {
     }
 
     getAll(gradeId: string) {
+        let user = JSON.parse(sessionStorage.getItem('user'));
+        switch (user.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+                this.apiUrl = 'api/insadmin/';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+                this.apiUrl = 'api/superadmin/';
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+        
         return this._httpClient
             .get(`${this.apiUrl}getAllSubjects/${gradeId}`)
             .pipe(
