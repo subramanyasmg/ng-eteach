@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { USER_TYPES } from 'app/constants/usertypes';
+import { User } from 'app/core/user/user.types';
 import {
     BehaviorSubject,
     Observable,
-    catchError,
     delay,
     map,
     mergeMap,
@@ -14,21 +15,35 @@ import {
     throwError,
 } from 'rxjs';
 import { IChapters } from '../models/chapters.types';
+import { SecureSessionStorageService } from './securestorage.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChaptersService {
     private _items: BehaviorSubject<IChapters[] | null> = new BehaviorSubject(
         null
     );
-    private _phases: BehaviorSubject<any[] | null> =
-        new BehaviorSubject(null);
+    private _phases: BehaviorSubject<any[] | null> = new BehaviorSubject(null);
     private _item: BehaviorSubject<IChapters | null> = new BehaviorSubject(
         null
     );
     private apiUrl = 'api/superadmin/';
 
-    constructor(private _httpClient: HttpClient) {}
-
+    constructor(
+        private _httpClient: HttpClient,
+        private _secureStorageService: SecureSessionStorageService
+    ) {
+        let user = this._secureStorageService.getItem<User>('user');
+        switch (user.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+                this.apiUrl = 'api/insadmin/';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+                this.apiUrl = 'api/superadmin/';
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+    }
 
     get item$(): Observable<IChapters> {
         return this._item.asObservable();
@@ -43,6 +58,8 @@ export class ChaptersService {
     }
 
     getAll(subjectId: string) {
+        
+
         return this._httpClient
             .get(`${this.apiUrl}getAllChapters/${subjectId}`)
             .pipe(
@@ -56,48 +73,27 @@ export class ChaptersService {
             );
     }
 
-    // getPhases() {
-    //     return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
-    //         map((response: any) => {
-    //             if (response?.status) {
-    //                 this._items.next(response.data);
-    //             } else {
-    //                 throw new Error(
-    //                     'Something went wrong while fetching phases'
-    //                 );
-    //             }
-    //         }),
-    //         catchError((error) => {
-    //             console.error('Error fetching phases:', error);
-    //             return throwError(
-    //                 () => new Error(error.message || 'Unknown error')
-    //             );
-    //         })
-    //     );
-    // }
-
     getChapterDetails(subjectId, chapterId) {
-        return this._httpClient
-            .get(`${this.apiUrl}getAllChapterDetails/${subjectId}/${chapterId}`);
+        return this._httpClient.get(
+            `${this.apiUrl}getAllChapterDetails/${subjectId}/${chapterId}`
+        );
     }
 
     createLessonPlan(request) {
         return this._httpClient.post<boolean>(
             `${this.apiUrl}createLessonPlan`,
             { ...request }
-        )
+        );
     }
 
     getPhases() {
-        return this._httpClient
-            .get(`${this.apiUrl}getPhases`)
-            .pipe(
-                tap((response: any) => {
-                    if (response.status) {
-                        this._phases.next(response.data);
-                    }
-                })
-            );
+        return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
+            tap((response: any) => {
+                if (response.status) {
+                    this._phases.next(response.data);
+                }
+            })
+        );
     }
 
     create(subjectId: string, request: IChapters): Observable<any> {
@@ -115,7 +111,8 @@ export class ChaptersService {
                                 return throwError(
                                     () =>
                                         new Error(
-                                           response.message ?? 'Something went wrong while adding'
+                                            response.message ??
+                                                'Something went wrong while adding'
                                         )
                                 );
                             }

@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { USER_TYPES } from 'app/constants/usertypes';
+import { UserService } from 'app/core/user/user.service';
 import {
     BehaviorSubject,
     Observable,
@@ -13,6 +15,8 @@ import {
     throwError,
 } from 'rxjs';
 import { IGrades } from '../models/grades.types';
+import { SecureSessionStorageService } from './securestorage.service';
+import { User } from 'app/core/user/user.types';
 
 @Injectable({ providedIn: 'root' })
 export class GradesService {
@@ -25,7 +29,11 @@ export class GradesService {
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient) {}
+    constructor(
+        private _httpClient: HttpClient,
+        private _userService: UserService,
+        private _secureStorageService: SecureSessionStorageService
+    ) {}
 
     /**
      * Getter for single item
@@ -42,6 +50,18 @@ export class GradesService {
     }
 
     getAll(curriculumId: string) {
+        let user = this._secureStorageService.getItem<User>('user');
+        switch (user.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+                this.apiUrl = 'api/insadmin/';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+                this.apiUrl = 'api/superadmin/';
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+
         return this._httpClient
             .get(`${this.apiUrl}getAllGrades/${curriculumId}`)
             .pipe(
@@ -66,12 +86,12 @@ export class GradesService {
                     })
                     .pipe(
                         mergeMap((response: any) => {
-                            
                             if (response.status !== 200) {
                                 return throwError(
                                     () =>
                                         new Error(
-                                           response.message ?? 'Something went wrong while adding'
+                                            response.message ??
+                                                'Something went wrong while adding'
                                         )
                                 );
                             }
@@ -95,7 +115,9 @@ export class GradesService {
                 const items = existingItems ?? [];
 
                 // Find the item to update
-                const index = items.findIndex((item) => Number(item.id) === Number(data.id));
+                const index = items.findIndex(
+                    (item) => Number(item.id) === Number(data.id)
+                );
 
                 if (index === -1) {
                     // Simulate failure if item not found
@@ -104,7 +126,11 @@ export class GradesService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateGrade`, { name: data.grade_name, curriculum_id: curriculumId, id: Number(data.id) })
+                    .put(`${this.apiUrl}updateGrade`, {
+                        name: data.grade_name,
+                        curriculum_id: curriculumId,
+                        id: Number(data.id),
+                    })
                     .pipe(
                         delay(300),
                         map((response: any) => {

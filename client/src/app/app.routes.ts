@@ -114,6 +114,7 @@ export const appRoutes: Route[] = [
         children: [
             {path: 'dashboard',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/dashboard/dashboard.routes')},
             {path: 'teachers',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/teachers/teachers.routes')},
+             {path: 'curriculum',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/curriculum/curriculum.routes')},
         ]
     },
     {
