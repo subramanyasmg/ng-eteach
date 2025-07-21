@@ -1,1 +1,247 @@
-<p>chapters works!</p>
+<div class="bg-gray-100 flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
+    <!-- Header -->
+    <div class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ subjectName }}
+                <mat-icon
+                    *ngIf="!subjectName"
+                    svgIcon="feather:loader"
+                    class="animate-spin ml-2 icon-size-10"
+                ></mat-icon>
+            </div>
+        </div>
+        <!-- Actions -->
+        <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [(ngModel)]="query" [autocomplete]="'off'"
+                    [placeholder]="'common.search' | transloco" />
+            </mat-form-field>
+
+        </div>
+    </div>
+    <div class="flex flex-auto overflow-hidden">
+
+        <div class="flex px-5 py-1 flex-auto flex-col gap-3 overflow-hidden sm:overflow-y-auto">
+           
+            <ng-container *ngIf="filteredChapterList?.length > 0; else noData">
+                <mat-accordion>
+                    <mat-expansion-panel *ngFor="let chapter of filteredChapterList; let i = index; trackBy: trackByFn"
+                        class="rounded-xl mb-4"  (opened)="onChapterExpand(chapter, i)">
+                        <mat-expansion-panel-header [collapsedHeight]="'75px'" class="p-6 items-center">
+                            <div class="w-full flex flex-col mr-5">
+                                <div class="text-sm text-gray-500">
+                                    {{ 'chapters.chapter_no' | transloco:{num:i + 1} }}
+                                </div>
+                                <div class="flex items-center gap-2 justify-between w-full">
+                                    <div class="flex items-center gap-2 text-2xl font-semibold">
+                                        {{ chapter.title }}
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-expansion-panel-header>
+
+                        <!-- Inside Expansion Panel -->
+                        <div class="bg-white rounded-md" matExpansionPanelContent>
+                                <div class="space-y-4 animate-pulse" *ngIf="chapter.isLoading">
+                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                                <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                </div>
+                            <mat-tab-group *ngIf="!chapter.isLoading">
+                                <mat-tab label="{{ 'chapters.tab_lesson_plan' | transloco}}">
+                                    <div class="mt-4 px-2 pb-2">
+                                        <mat-accordion class="space-y-4"> <!-- multi -->
+                                            <mat-expansion-panel *ngFor="let phase of chapter.lessonPlan; let index = index">
+                                                <mat-expansion-panel-header>
+                                                    <mat-panel-title class="text-2xl">
+                                                        Phase {{ (index + 1) + ' - ' + phase.label
+                                                        }} 
+                                                    </mat-panel-title>
+                                                </mat-expansion-panel-header>
+                                                <div class="p-2 flex flex-col gap-2">
+                                                    
+                                                    <div class="w-full">
+                                                        <quill-view  [content]="phase.content ?? 'No content available'" format="html" theme="snow" [sanitize]="true"></quill-view>
+                                                        
+                                                    </div>
+                                                </div>
+                                            </mat-expansion-panel>
+                                        </mat-accordion>
+                                    </div>
+
+                                </mat-tab>
+
+                                <mat-tab label="{{ 'chapters.tab_text_book' | transloco}}">
+                                    <div class="mt-4 flex flex-col gap-2">
+                                        <div class="w-full border-2 border-dashed border-blue-500 rounded-lg p-5 text-center cursor-pointer transition hover:bg-blue-50"
+                                            (drop)="onFileDrop(chapter, $event, 1)"
+                                            (dragover)="onDragOver(chapter,$event, 1)"
+                                            (dragleave)="onDragLeave(chapter,$event, 1)"
+                                            (click)="fileInput1.click()">
+                                            <!-- Cloud Upload Icon -->
+                                            <div class="flex flex-col items-center justify-center">
+                                                <mat-icon class="icon-size-10 text-gray-400"
+                                                    svgIcon="mat_outline:cloud_upload"></mat-icon>
+                                                <div class="mt-3 text-base text-gray-700 font-medium">{{
+                                                    'chapters.upload_drag_drop' | transloco}}</div>
+                                                <div class="text-sm text-blue-500 font-medium">{{
+                                                    'chapters.upload_browse' | transloco}}</div>
+                                            </div>
+                                            <input type="file" #fileInput1 hidden
+                                                (change)="onFileSelected(chapter,$event, 1)"
+                                                accept="application/pdf" />
+                                        </div>
+
+                                        <!-- Uploaded Files Preview -->
+                                        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                            <div *ngFor="let file of chapter.textBook; let i = index"
+                                                class="bg-gray-100 p-4 rounded-lg flex flex-col items-start gap-2 relative">
+                                                <div class="w-full flex justify-between items-center">
+                                                    <div class="text-lg text-gray-600 font-semibold"> {{
+                                                        file.name.split('.').pop()?.toUpperCase() }}</div>
+                                                    <div>
+                                                        <button mat-icon-button color="primary"
+                                                            matTooltip="{{ 'chapters.button_preview_file' | transloco}}"
+                                                            class="bg-white rounded-full shadow-sm"
+                                                            (click)="previewFile(file)">
+                                                            <mat-icon
+                                                                [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                                        </button>
+                                                        <button mat-icon-button color="warn"
+                                                            (click)="removeFile(chapter, i, 1)"
+                                                            matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
+                                                            class="bg-white rounded-full shadow-sm ml-2">
+                                                            <mat-icon
+                                                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="text-sm text-gray-800 break-words w-full truncate">{{
+                                                    file.name }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </mat-tab>
+
+                                <mat-tab label="{{ 'chapters.tab_reference_materials' | transloco}}">
+                                    <div class="mt-4 flex flex-col gap-2">
+
+                                        <div class="w-full border-2 border-dashed border-blue-500 rounded-lg p-5 text-center cursor-pointer transition hover:bg-blue-50"
+                                            (drop)="onFileDrop(chapter, $event, 2)"
+                                            (dragover)="onDragOver(chapter,$event, 2)"
+                                            (dragleave)="onDragLeave(chapter,$event, 2)"
+                                            (click)="fileInput2.click()">
+                                            <!-- Cloud Upload Icon -->
+                                            <div class="flex flex-col items-center justify-center">
+                                                <mat-icon class="icon-size-10 text-gray-400"
+                                                    svgIcon="mat_outline:cloud_upload"></mat-icon>
+                                                <div class="mt-3 text-base text-gray-700 font-medium">{{
+                                                    'chapters.upload_drag_drop' | transloco}}</div>
+                                                <div class="text-sm text-blue-500 font-medium">{{
+                                                    'chapters.upload_browse' | transloco}}</div>
+                                            </div>
+                                            <input type="file" #fileInput2 hidden multiple
+                                                (change)="onFileSelected(chapter,$event, 2)"
+                                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.odt,.jpg,.jpeg,.png,.gif,.svg,.webp,.mp4,.mkv,.mp3,.wav,.avi,.mov,.wmv,.flv" />
+                                        </div>
+
+                                        <!-- Uploaded Files Preview -->
+                                        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                            <div *ngFor="let file of chapter.referenceMaterials; let i = index"
+                                                class="bg-gray-100 p-4 rounded-lg flex flex-col items-start gap-2 relative">
+                                                <div class="w-full flex justify-between items-center">
+                                                    <div class="text-lg text-gray-600 font-semibold"> {{
+                                                        file.name.split('.').pop()?.toUpperCase() }}</div>
+                                                    <div>
+                                                        <button mat-icon-button color="primary"
+                                                            matTooltip="{{ 'chapters.button_preview_file' | transloco}}"
+                                                            class="bg-white rounded-full shadow-sm"
+                                                            (click)="previewFile(file)">
+                                                            <mat-icon
+                                                                [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                                        </button>
+                                                        <button mat-icon-button color="warn"
+                                                            (click)="removeFile(chapter, i, 2)"
+                                                            matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
+                                                            class="bg-white rounded-full shadow-sm ml-2">
+                                                            <mat-icon
+                                                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                        </button>
+                                                    </div>
+
+                                                </div>
+                                                <div class="text-sm text-gray-800 break-words w-full truncate">{{
+                                                    file.name }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </mat-tab>
+                            </mat-tab-group>
+                        </div>
+                    </mat-expansion-panel>
+                </mat-accordion>
+
+            </ng-container>
+           
+
+        </div>
+    </div>
+
+</div>
+
+<ng-template #noData>
+    <div class="p-8 text-center text-4xl tracking-tight">
+        <div class="w-full flex justify-center">
+            <img src="images/no-data.svg" alt="{{ 'common.noDataAvailable' | transloco}}" class="w-90" />
+        </div>
+        <div class="mt-5 text-center text-4xl font-extrabold">
+            {{ 'common.noDataAvailable' | transloco}}
+        </div>
+        <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
+            {{ 'chapters.empty_state_title' | transloco}} <br> {{ 'chapters.empty_state_description' | transloco}}
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #filePreviewModal let-data>
+    <div class="flex max-h-160 flex-auto flex-col overflow-hidden">
+        <!-- Header -->
+        <div
+            class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
+            <div class="text-lg font-medium">{{ data?.name }}</div>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+    <mat-dialog-content class="w-full max-h-[80vh] overflow-auto">
+        <div class="w-full flex p-4 justify-center items-center">
+            <img *ngIf="isImageFile(data.type)" [src]="data.url" alt="Preview"
+                class="max-w-full rounded shadow" />
+
+            <iframe *ngIf="isPdfFile(data.type)" [src]="data.url" width="100%" height="600px"
+                class="rounded border"></iframe>
+
+            <video *ngIf="isVideoFile(data.type)" [src]="data.url" controls width="100%" class="rounded"></video>
+
+            <audio *ngIf="isAudioFile(data.type)" [src]="data.url" controls class="w-full mt-4"></audio>
+
+            <div
+                *ngIf="!isSupportedFile(data.type)"
+                class="text-center text-gray-500 text-lg"
+            >
+                <mat-icon class="icon-size-8 mb-2 text-gray-400">block</mat-icon><br />
+               {{ 'chapters.preview_not_available' | transloco }}
+            </div>
+        </div>
+    </mat-dialog-content>
+    <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
+        <button mat-button (click)="matDialogRef.close()">{{ 'common.cancel' | transloco }}</button>
+    </div>
+</ng-template>
