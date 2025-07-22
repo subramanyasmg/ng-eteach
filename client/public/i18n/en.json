@@ -14,7 +14,8 @@
         "grades": "Grades",
         "subjects": "Subjects",
         "manageTeachers": "Manage Teachers",
-        "schoolStructure": "School Structure"
+        "schoolStructure": "School Structure",
+        "manageClasses": "Manage Classes"
     },
     "superadmin_dashboard": {
         "subtext": "Overview of the company",

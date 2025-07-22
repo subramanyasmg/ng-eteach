@@ -118,3 +118,35 @@ export const instituteAdmin: FuseNavigationItem[] = [
         ],
     }
 ];
+
+
+export const teacher: FuseNavigationItem[] = [
+    {
+        id   : 'platform',
+        title: 'navigation.platform',
+        type : 'group',
+        children: [
+            {
+                id: 'dashboards',
+                title: 'navigation.dashboard',
+                type: 'basic',
+               icon : 'mat_outline:grid_view',
+                link: '/my-dashboard',
+            }
+        ],
+    },
+    {
+        id   : 'classes',
+        title: 'navigation.curriculum',
+        type : 'group',
+        children: [
+            {
+                id: 'curriculum',
+                title: 'navigation.manageClasses',
+                type: 'basic',
+               icon : 'heroicons_outline:book-open',
+                link: '/manage-classes',
+            }
+        ],
+    }
+];

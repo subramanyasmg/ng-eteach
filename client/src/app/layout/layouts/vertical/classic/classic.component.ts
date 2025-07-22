@@ -15,6 +15,7 @@ import { UserComponent } from 'app/layout/common/user/user.component';
 import {
     instituteAdmin,
     superAdmin,
+    teacher,
 } from 'app/mock-api/common/navigation/data';
 import { Subject, takeUntil } from 'rxjs';
 import { BreadcrumbComponent } from '../../../common/breadcrumb/breadcrumb.component';
@@ -79,6 +80,9 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
                     break;
                     case USER_TYPES.SUPER_ADMIN: {
                         this.navigationData = superAdmin;
+                    }
+                    case USER_TYPES.TEACHER: {
+                        this.navigationData = teacher;
                     }
                     break;
                     default:

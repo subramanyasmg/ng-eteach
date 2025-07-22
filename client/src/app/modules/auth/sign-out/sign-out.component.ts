@@ -46,7 +46,7 @@ export class AuthSignOutComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((user: User) => {
 
-                if (user.type === USER_TYPES.INSTITUTE_ADMIN) {
+                if (user.type === USER_TYPES.INSTITUTE_ADMIN || user.type === USER_TYPES.TEACHER) {
                     this.signOutURL = 'sign-in';
                 } else if (user.type === USER_TYPES.SUPER_ADMIN) {
                     this.signOutURL = 'admin/sign-in';

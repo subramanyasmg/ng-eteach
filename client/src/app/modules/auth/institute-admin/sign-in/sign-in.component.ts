@@ -13,7 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
 import { USER_TYPES } from 'app/constants/usertypes';
@@ -45,8 +45,8 @@ export class InstituteAdminSignInComponent implements OnInit {
     };
     signInForm: UntypedFormGroup;
     showAlert: boolean = false;
-    schoolLogo = "images/school-logo.jpg";
-    schoolName = "Dhirubhai Ambani International School";
+    schoolLogo = 'images/school-logo.jpg';
+    schoolName = 'Dhirubhai Ambani International School';
     schoolCover = 'images/school.png';
 
     /**
@@ -69,11 +69,8 @@ export class InstituteAdminSignInComponent implements OnInit {
     ngOnInit(): void {
         // Create the form
         this.signInForm = this._formBuilder.group({
-            email: [
-                '',
-                [Validators.required, Validators.email],
-            ],
-            password: ['', Validators.required]
+            email: ['', [Validators.required, Validators.email]],
+            password: ['', Validators.required],
         });
     }
 
@@ -97,24 +94,32 @@ export class InstituteAdminSignInComponent implements OnInit {
         this.showAlert = false;
 
         // Sign in
-        this._authService.signIn(this.signInForm.value, USER_TYPES.INSTITUTE_ADMIN).subscribe(
-            (response) => {
-                // Set the redirect url.
-                // The '/signed-in-redirect' is a dummy url to catch the request and redirect the user
-                // to the correct page after a successful sign in. This way, that url can be set via
-                // routing file and we don't have to touch here.
-                const redirectURL =
-                    this._activatedRoute.snapshot.queryParamMap.get(
-                        'redirectURL'
-                    ) || '/institute-admin-signed-in-redirect';
+        this._authService
+            .signIn(this.signInForm.value, USER_TYPES.INSTITUTE_ADMIN)
+            .subscribe(
+                (response) => {
+                    let redirectURL = '';
 
-                // Navigate to the redirect url
-                this._router.navigateByUrl(redirectURL);
-            },
-            (response) => {
-                this.handleLoginError();
-            }
-        );
+                    if (response?.user?.type === USER_TYPES.INSTITUTE_ADMIN) {
+                        redirectURL =
+                            this._activatedRoute.snapshot.queryParamMap.get(
+                                'redirectURL'
+                            ) || '/institute-admin-signed-in-redirect';
+                    }
+                    if (response?.user?.type === USER_TYPES.TEACHER) {
+                        redirectURL =
+                            this._activatedRoute.snapshot.queryParamMap.get(
+                                'redirectURL'
+                            ) || '/teacher-signed-in-redirect';
+                    }
+
+                    // Navigate to the redirect url
+                    this._router.navigateByUrl(redirectURL);
+                },
+                (response) => {
+                    this.handleLoginError();
+                }
+            );
     }
 
     handleLoginError(message = 'Wrong Email ID or Password') {
