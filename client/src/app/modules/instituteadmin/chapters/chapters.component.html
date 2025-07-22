@@ -65,9 +65,8 @@
                                                 </mat-expansion-panel-header>
                                                 <div class="p-2 flex flex-col gap-2">
                                                     
-                                                    <div class="w-full">
-                                                        <quill-view  [content]="phase.content ?? 'No content available'" format="html" theme="snow" [sanitize]="true"></quill-view>
-                                                        
+                                                    <div class="w-full" (copy)="$event.preventDefault()" (contextmenu)="$event.preventDefault()">
+                                                        <quill-view  [content]="phase.content ?? 'No content available'" class="no-copy" format="html" theme="snow" [sanitize]="true"></quill-view>
                                                     </div>
                                                 </div>
                                             </mat-expansion-panel>
