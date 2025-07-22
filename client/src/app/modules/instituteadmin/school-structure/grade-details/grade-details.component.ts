@@ -50,6 +50,7 @@ import * as SubjectActions from 'app/state/subjects/subjects.actions';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
 import { QuillModule } from 'ngx-quill';
 import { SkeletonModule } from 'primeng/skeleton';
+import { SelectModule } from 'primeng/select';
 import { filter, map, Observable, take, tap } from 'rxjs';
 
 @Component({
@@ -83,6 +84,7 @@ import { filter, map, Observable, take, tap } from 'rxjs';
         MatChipsModule,
         SkeletonModule,
         QuillModule,
+        SelectModule
     ],
     templateUrl: './grade-details.component.html',
     styleUrl: './grade-details.component.scss',
@@ -104,6 +106,16 @@ export class GradeDetailsComponent implements OnInit {
     sectionList: ISections[];
     subjectForSections = [];
     displayedColumns: string[] = ['subjectName', 'teacher', 'chapters', 'completion'];
+
+
+
+     teachers: any[] | undefined = [
+        { name: 'Teacher 1', id: '1' },
+        { name: 'Teacher 2', id: '2' },
+        { name: 'Teacher 3', id: '3' },
+        { name: 'Teacher 4', id: '4' },
+        { name: 'Teacher 5', id: '5' }
+    ];
 
     constructor(
         private route: ActivatedRoute,
@@ -263,6 +275,11 @@ export class GradeDetailsComponent implements OnInit {
             const duplicateNames = duplicates.map(d => d.subject_name).join(', ');
             this._snackBar.showError(`Subjects already added: ${duplicateNames}`);
         }
+    }
+    
+    onTeacherAssign(event, subjectForSection) {
+        console.log(event, subjectForSection);
+        subjectForSection.teacher.edit = false;
     }
 
     handleAPIResponse() {

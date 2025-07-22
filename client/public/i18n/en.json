@@ -249,6 +249,8 @@
         "success_update": "Section successfully updated",
         "success_delete": "Section successfully deleted",
         "no_subjects_added_for_section": "No subjects added for this section",
-        "select_subject_placeholder": "Select Subjects"
+        "select_subject_placeholder": "Select Subjects",
+        "assign_teacher_label": "Assign a Teacher",
+        "add_selected_subjects_tooltip": "Add selected subjects to this section"
     }
 }
