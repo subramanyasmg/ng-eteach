@@ -66,7 +66,6 @@ import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
         MatTabsModule,
         MatTableModule,
         CommonModule,
-        ReactiveFormsModule,
         PipesModule,
         MatSortModule,
         MatSelectModule,
