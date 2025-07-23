@@ -23,6 +23,7 @@ export const appRoutes: Route[] = [
     // location. This is a small convenience to keep all main routes together here on this file.
     {path: 'signed-in-redirect', pathMatch : 'full', redirectTo: '/admin/dashboard'},
     {path: 'institute-admin-signed-in-redirect', pathMatch: 'full', redirectTo: '/dashboard'},
+    {path: 'teacher-signed-in-redirect', pathMatch: 'full', redirectTo: '/my-dashboard'},
 
     // Auth routes for admin portal
     {
@@ -118,6 +119,20 @@ export const appRoutes: Route[] = [
             {path: 'teachers',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/teachers/teachers.routes')},
             {path: 'curriculum',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/curriculum/curriculum.routes')},
             {path: 'school-structure',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/school-structure/school-structure.routes')}
+        ]
+    },
+    // Institute Admin routes
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        component: LayoutComponent,
+        resolve: {
+            initialData: initialDataResolver
+        },
+        children: [
+            {path: 'my-dashboard',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.TEACHER }, loadChildren: () => import('app/modules/teacher/dashboard/dashboard.routes')},
+            {path: 'manage-classes',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.TEACHER }, loadChildren: () => import('app/modules/teacher/manage-classes/manage-classes.routes')}
         ]
     },
     {

@@ -122,9 +122,12 @@
                                                 </mat-expansion-panel-header>
                                                 <div class="p-2 flex flex-col gap-2">
                                                     
-                                                    <div class="w-full">
-                                                        <quill-view *ngIf="!phase.edit" [content]="phase.content ?? 'No content available'" format="html" theme="snow" [sanitize]="true"></quill-view>
-                                                        <quill-editor *ngIf="phase.edit"
+                                                    <div class="w-full" *ngIf="!phase.edit" (copy)="$event.preventDefault()" (contextmenu)="$event.preventDefault()">
+                                                        <quill-view [content]="phase.content ?? 'No content available'" 
+                                                        format="html" class="no-copy" theme="snow" [sanitize]="true"></quill-view>
+                                                    </div>
+                                                    <div class="w-full" *ngIf="phase.edit">
+                                                        <quill-editor 
                                                             id="quill-editor"
                                                             class="w-full"
                                                             [(ngModel)]="phase.content"

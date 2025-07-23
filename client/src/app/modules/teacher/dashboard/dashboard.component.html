@@ -1,0 +1,38 @@
+<div class="flex min-w-0 flex-auto flex-col bg-gray-100 sm:absolute sm:inset-0 dark:bg-transparent">
+    <!-- Header -->
+    <div class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ 'navigation.dashboard' | transloco }}
+            </div>
+            <div class="text-secondary text-xl">
+                {{ 'insadmin_dashboard.subtext' | transloco }}
+            </div>
+        </div>
+    </div>
+
+    <div class="-mt-px flex-auto p-4 pt-0 sm:p-6 overflow-y-auto">
+        <div class="grid w-full min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div *ngFor="let card of cardDataList"
+                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow mb-4">
+                <div class="flex">
+                    <div class="text-2xl font-bold leading-6 tracking-tight">
+                        {{ card.grade }} - {{ card.section }} - {{ card.subject }}
+                    </div>
+                </div>
+                <div class="mt-5 flex flex-row items-center justify-between">
+                    <div class="text-5xl font-extrabold leading-none tracking-tight">
+                        {{ card.completed }}/{{ card.total }} <br>
+                        <div class="mt-2 truncate text-lg text-secondary font-medium">
+                            {{ 'school_structure.chapters_completed_label' | transloco }}
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <app-circle-progress [progress]="card.progress"></app-circle-progress>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -17,3 +17,8 @@
         cursor: not-allowed;
     }
 }
+
+.no-copy {
+    user-select: none;     /* Prevent text selection */
+    pointer-events: none;  /* Disable interaction like copying */
+}

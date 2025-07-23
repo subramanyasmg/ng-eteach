@@ -1,0 +1,10 @@
+<svg width="60" height="60">
+    <circle class="progress-background" cx="30" cy="30" r="22"></circle>
+
+    <circle class="progress-bar" cx="30" cy="30" r="22" [attr.stroke-dasharray]="circumferenceValue"
+        [attr.stroke-dashoffset]="dashOffset"></circle>
+
+    <text x="30" y="35" text-anchor="middle" class="progress-text">
+        {{ progress }}%
+    </text>
+</svg>

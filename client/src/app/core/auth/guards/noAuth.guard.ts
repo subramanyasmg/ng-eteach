@@ -24,6 +24,8 @@ export const NoAuthGuard: CanActivateFn | CanActivateChildFn = (
                     return of(router.parseUrl('/signed-in-redirect'));
                 } else if (user?.type === USER_TYPES.INSTITUTE_ADMIN) {
                     return of(router.parseUrl('/institute-admin-signed-in-redirect'));
+                } else if (user?.type === USER_TYPES.TEACHER) {
+                    return of(router.parseUrl('/teacher-signed-in-redirect'));
                 }
             }
 
