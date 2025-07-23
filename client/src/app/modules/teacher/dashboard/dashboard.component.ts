@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
-import { TranslocoModule } from '@jsverse/transloco';
-import { CircleProgressComponent } from '../circle-progress/circle-progress.component';
 import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { CircleProgressComponent } from '../circle-progress/circle-progress.component';
 
 @Component({
     selector: 'app-dashboard',
@@ -52,4 +54,22 @@ export class DashboardComponent {
             },
         },
     ];
+
+    constructor(
+        private titleService: BreadcrumbService,
+        private _router: Router,
+
+        private translocoService: TranslocoService
+    ) {
+        this.titleService.setBreadcrumb([
+            {
+                label: this.translocoService.translate('navigation.platform'),
+                url: 'my-dashboard',
+            },
+            {
+                label: this.translocoService.translate('navigation.dashboard'),
+                url: '',
+            },
+        ]);
+    }
 }
