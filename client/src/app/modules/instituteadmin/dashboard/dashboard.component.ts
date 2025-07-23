@@ -2,7 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslocoModule } from '@jsverse/transloco';
+import { Router } from '@angular/router';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { OrganizationChartModule } from 'primeng/organizationchart';
 
 @Component({
@@ -87,4 +89,22 @@ export class DashboardComponent {
             ],
         },
     ];
+
+    constructor(
+            private titleService: BreadcrumbService,
+            private _router: Router,
+    
+            private translocoService: TranslocoService
+        ) {
+            this.titleService.setBreadcrumb([
+                {
+                    label: this.translocoService.translate('navigation.platform'),
+                    url: 'dashboard',
+                },
+                {
+                    label: this.translocoService.translate('navigation.dashboard'),
+                    url: '',
+                },
+            ]);
+        }
 }

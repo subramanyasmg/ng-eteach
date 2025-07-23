@@ -257,6 +257,15 @@
     },
     "classes": {
         "subtext": "Overview of the assigned classes",
-        "empty_state_title": "You have no classes assigned yet."
+        "empty_state_title": "You have no classes assigned yet.",
+        "chapterlist_page_subtext": "Overview of the section and progress",
+        "no_chapters_available": "No Chapters Available",
+        "heading_chapter_name": "Chapter Name",
+        "heading_status":"Status",
+        "heading_completion":"Completion %",
+        "chapter_details_page_subtext": "Overview of the section and progress",
+        "status_in_progress":"In Progress",
+        "status_completed": "Completed",
+        "status_not_started": "Not Started"
     }
 }

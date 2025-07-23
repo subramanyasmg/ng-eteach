@@ -81,6 +81,7 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
                     case USER_TYPES.SUPER_ADMIN: {
                         this.navigationData = superAdmin;
                     }
+                    break;
                     case USER_TYPES.TEACHER: {
                         this.navigationData = teacher;
                     }

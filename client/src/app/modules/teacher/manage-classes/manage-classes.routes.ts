@@ -3,6 +3,8 @@ import { ManageClassesComponent } from './manage-classes.component';
 import { ClassesComponent } from './classes/classes.component';
 import { ChaptersComponent } from './chapters/chapters.component';
 import { ChapterDetailsComponent } from './chapter-details/chapter-details.component';
+import { inject } from '@angular/core';
+import { ChaptersService } from 'app/services/chapters.service';
 
 export default [
     {
@@ -15,13 +17,14 @@ export default [
             },
             {
                 path: ':id/chapters',
-                component: ChaptersComponent,
-                children: [
-                    {
-                        path: ':id/details',
-                        component: ChapterDetailsComponent
-                    }
-                ]
+                component: ChaptersComponent
+            },
+            {
+                path: ':id/chapters/:cid/details',
+                component: ChapterDetailsComponent,
+                resolve: {
+                    phases: () => inject(ChaptersService).getPhases()
+                }
             }
         ]
     },
