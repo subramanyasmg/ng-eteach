@@ -31,8 +31,7 @@ export class ChaptersService {
     constructor(
         private _httpClient: HttpClient,
         private _secureStorageService: SecureSessionStorageService
-    ) {
-    }
+    ) {}
 
     get item$(): Observable<IChapters> {
         return this._item.asObservable();
@@ -47,7 +46,6 @@ export class ChaptersService {
     }
 
     getAll(subjectId: string) {
-        
         let user = this._secureStorageService.getItem<User>('user');
         switch (user?.type) {
             case USER_TYPES.INSTITUTE_ADMIN:
@@ -99,7 +97,7 @@ export class ChaptersService {
             default:
                 throw new Error('Unsupported user type');
         }
-        
+
         return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
             tap((response: any) => {
                 if (response.status) {
@@ -208,5 +206,26 @@ export class ChaptersService {
                     );
             })
         );
+    }
+
+    uploadTextbook(file: File, chapterId: number): Observable<any> {
+        let user = this._secureStorageService.getItem<User>('user');
+        switch (user?.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+            case USER_TYPES.TEACHER:
+                this.apiUrl = 'api/insadmin/';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+                this.apiUrl = 'api/superadmin/';
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('chapter_id', chapterId.toString());
+
+        return this._httpClient.post(`${this.apiUrl}textbook`, formData);
     }
 }

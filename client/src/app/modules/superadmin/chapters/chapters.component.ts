@@ -234,7 +234,7 @@ export class ChaptersListComponent implements OnInit {
 
         const lowerQuery = this.query.toLowerCase();
 
-        return this.chapterList.filter(chapter =>
+        return this.chapterList.filter((chapter) =>
             chapter.title?.toLowerCase().includes(lowerQuery)
         );
     }
@@ -247,7 +247,7 @@ export class ChaptersListComponent implements OnInit {
                         label: el.name,
                         content: null,
                         id: el.id,
-                        edit: false
+                        edit: false,
                     }));
                 } else {
                     this._snackBar.showError(
@@ -273,30 +273,35 @@ export class ChaptersListComponent implements OnInit {
 
     onChapterExpand(chapter: IChapters, index: number): void {
         chapter.isLoading = true;
-        this._chapterService.getChapterDetails(this.subjectId, chapter.id).subscribe({
-            next: (response: any) => {
-                console.log('response', response);
-                console.log('chapter', chapter);
-                // chapter.data = data;
-                chapter.isLoading = false;
+        this._chapterService
+            .getChapterDetails(this.subjectId, chapter.id)
+            .subscribe({
+                next: (response: any) => {
+                    console.log('response', response);
+                    console.log('chapter', chapter);
+                    // chapter.data = data;
+                    chapter.isLoading = false;
 
-                const lessonPlansFromApi = response?.data?.[0]?.lesson_plans ?? [];
-                 chapter.lessonPlan.forEach(lesson => {
-                    // Find the corresponding lesson_plan from API where phase_id matches lesson.id
-                    const matchingLesson = lessonPlansFromApi.find(lp => lp.phase_id === lesson.id);
+                    const lessonPlansFromApi =
+                        response?.data?.[0]?.lesson_plans ?? [];
+                    chapter.lessonPlan.forEach((lesson) => {
+                        // Find the corresponding lesson_plan from API where phase_id matches lesson.id
+                        const matchingLesson = lessonPlansFromApi.find(
+                            (lp) => lp.phase_id === lesson.id
+                        );
 
-                    if (matchingLesson) {
-                        lesson.content = matchingLesson.content_text || '';
-                    }
-                });
-            },
-            error: (error: any) => {
-                 chapter.isLoading = false;
-                 this._snackBar.showError(
-                    `Error: ${error?.message || 'Something went wrong.'}`
-                );
-            }
-        });
+                        if (matchingLesson) {
+                            lesson.content = matchingLesson.content_text || '';
+                        }
+                    });
+                },
+                error: (error: any) => {
+                    chapter.isLoading = false;
+                    this._snackBar.showError(
+                        `Error: ${error?.message || 'Something went wrong.'}`
+                    );
+                },
+            });
     }
 
     get chapters(): FormArray {
@@ -361,15 +366,15 @@ export class ChaptersListComponent implements OnInit {
         const requestObj = {
             chapter_id: chapter.id,
             phase_id: phase.id,
-            content_type: "TEXT",
-            content_text: phase.content
+            content_type: 'TEXT',
+            content_text: phase.content,
         };
         this._chapterService.createLessonPlan(requestObj).subscribe({
             next: (response: any) => {
                 console.log('response', response);
                 if (response.status === 200) {
                     this._snackBar.showSuccess(
-                       this.translocoService.translate(
+                        this.translocoService.translate(
                             'chapters.lesson_plan_update_success'
                         )
                     );
@@ -379,7 +384,7 @@ export class ChaptersListComponent implements OnInit {
                 this._snackBar.showError(
                     `Error: ${error?.message || 'Something went wrong.'}`
                 );
-            }
+            },
         });
     }
 
@@ -401,6 +406,23 @@ export class ChaptersListComponent implements OnInit {
         const input = event.target as HTMLInputElement;
         const files = Array.from(input.files || []);
         this.addFiles(chapter, files, type);
+
+        if (type === 1 && files.length > 0) {
+            this.uploadTextbookFile(files[0], +chapter.id); // assuming chapter has an `id`
+        }
+    }
+
+    uploadTextbookFile(file: File, chapterId: number) {
+        this._chapterService.uploadTextbook(file, chapterId).subscribe({
+            next: (res) => {
+                console.log('Upload success:', res);
+                // show success toast or update UI
+            },
+            error: (err) => {
+                console.error('Upload failed:', err);
+                // show error toast
+            },
+        });
     }
 
     addFiles(chapter: IChapters, files: File[], type) {
@@ -421,7 +443,10 @@ export class ChaptersListComponent implements OnInit {
             this.sanitizer.bypassSecurityTrustResourceUrl(objectUrl);
 
         this.matDialogRef = this._matDialog.open(this.filePreviewModal, {
-            width: '800px',
+            height: 'calc(100% - 30px)',
+            width: 'calc(100% - 30px)',
+            maxWidth: '100%',
+            maxHeight: '100%',
             data: {
                 name: file.name,
                 url: safeUrl,
