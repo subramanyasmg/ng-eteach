@@ -171,30 +171,32 @@
 
                                         <!-- Uploaded Files Preview -->
                                         <div class="mt-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                            <div *ngFor="let file of chapter.textBook; let i = index"
+                                            <div *ngIf="chapter.textBook"
                                                 class="bg-gray-100 p-4 rounded-lg flex flex-col items-start gap-2 relative">
                                                 <div class="w-full flex justify-between items-center">
                                                     <div class="text-lg text-gray-600 font-semibold"> {{
-                                                        file.name.split('.').pop()?.toUpperCase() }}</div>
+                                                       chapter?.textBook?.filename?.includes('.')
+                                                        ? chapter.textBook.filename.split('.').pop()?.toUpperCase()
+                                                        : 'UNKNOWN' }}</div>
                                                     <div>
                                                         <button mat-icon-button color="primary"
                                                             matTooltip="{{ 'chapters.button_preview_file' | transloco}}"
                                                             class="bg-white rounded-full shadow-sm"
-                                                            (click)="previewFile(file)">
+                                                            (click)="previewFile(chapter.textBook)">
                                                             <mat-icon
                                                                 [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                                         </button>
                                                         <button mat-icon-button color="warn"
-                                                            (click)="removeFile(chapter, i, 1)"
+                                                          
                                                             matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
                                                             class="bg-white rounded-full shadow-sm ml-2">
                                                             <mat-icon
                                                                 [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                                        </button>
+                                                        </button> <!--   (click)="removeFile(chapter, i, 1)" -->
                                                     </div>
                                                 </div>
                                                 <div class="text-sm text-gray-800 break-words w-full truncate">{{
-                                                    file.name }}</div>
+                                                    chapter.textBook.filename }}</div>
                                             </div>
                                         </div>
                                     </div>

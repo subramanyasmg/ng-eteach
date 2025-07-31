@@ -5,7 +5,6 @@ import { GradesListComponent } from '../grades/grades.component';
 import { SubjectsListComponent } from '../subjects/subjects.component';
 import { ChaptersListComponent } from '../chapters/chapters.component';
 import { PublishersListComponent } from './publishers-list/publishers-list.component';
-import { SubjectsService } from 'app/services/subjects.service';
 import { inject } from '@angular/core';
 import { ChaptersService } from 'app/services/chapters.service';
 

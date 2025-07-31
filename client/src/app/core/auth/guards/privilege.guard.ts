@@ -22,7 +22,7 @@ export class PrivilegeGuard implements CanActivate {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): Observable<boolean> {
-        const requiredUserType = route.data['userType'];
+        const allowedUserTypes = route.data['userType'];
 
         // Get the user from the UserService (as an observable)
         return this.userService.user$.pipe(
@@ -34,9 +34,8 @@ export class PrivilegeGuard implements CanActivate {
                     return false;
                 }
 
-                if (user.type !== requiredUserType) {
-                    // User doesn't match required role
-                    this.router.navigate(['/unauthorized']); // or a 403 page
+                if (!allowedUserTypes.includes(user.type)) {
+                    this.router.navigate(['/unauthorized']);
                     return false;
                 }
 

@@ -14,7 +14,7 @@ export class SubjectsEffects {
       ofType(SubjectActions.loadSubjects),
       mergeMap(({ gradeId }) =>
         this.service.getAll(gradeId).pipe(
-          map(response => SubjectActions.loadSubjectsSuccess({ gradeId, subjects: response.data })),
+          map(response => SubjectActions.loadSubjectsSuccess({ gradeId, subjects: response.data.rows })),
           catchError(error => of(SubjectActions.loadSubjectsFailure({ error })))
         )
       )

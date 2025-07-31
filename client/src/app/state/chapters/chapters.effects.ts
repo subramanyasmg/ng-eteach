@@ -14,7 +14,7 @@ export class ChaptersEffects {
       ofType(ChapterActions.loadChapters),
       mergeMap(({ subjectId }) =>
         this.service.getAll(subjectId).pipe(
-          map(response => ChapterActions.loadChaptersSuccess({ subjectId, chapters: response.data })),
+          map(response => ChapterActions.loadChaptersSuccess({ subjectId, chapters: response.data.rows })),
           catchError(error => of(ChapterActions.loadChaptersFailure({ error })))
         )
       )

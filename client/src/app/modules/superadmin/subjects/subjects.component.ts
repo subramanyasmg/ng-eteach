@@ -58,6 +58,9 @@ import {
 } from 'rxjs';
 import { ISubjects } from '../../../models/subject.types';
 import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
+import { UserService } from 'app/core/user/user.service';
+import { User } from 'app/core/user/user.types';
+import { USER_TYPES } from 'app/constants/usertypes';
 
 @Component({
     selector: 'app-subjects',
@@ -97,8 +100,8 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     dataSource = new MatTableDataSource<ISubjects>();
     displayedColumns: string[] = [
         'subject_name',
-        'createdAt',
-        'updatedAt',
+        'created_at',
+        'updated_at',
         'chapter_count',
         'actions',
     ];
@@ -111,6 +114,8 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
     gradeId;
     publisherId;
     gradeName: string;
+    user:User = null;
+    readonly USER_TYPES = USER_TYPES;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     separatorKeysCodes: number[] = [ENTER, COMMA];
 
@@ -123,83 +128,144 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
         private _matDialog: MatDialog,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
+        private _userService: UserService,
         private translocoService: TranslocoService,
         private titleService: BreadcrumbService
     ) {}
 
     ngOnInit(): void {
+         // Check if the User Type is Publisher or Super Admin
+        this._userService.user$.pipe(take(1)).subscribe((user: User) => {
+            this.user = user;
+
+            switch (this.user.type) {
+                case USER_TYPES.SUPER_ADMIN: {
+                    this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
+                    this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
+                    this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
+                    
+                    this.store.dispatch(PublisherActions.loadPublishers());
+                    this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
+
+                    this.store.dispatch(
+                        GradeActions.loadGrades({ curriculumId: this.curriculumId })
+                    );
+
+                    setTimeout(() => {
+                        combineLatest([
+                            this.store.select(selectAllPublishers),
+                            this.store.select(selectAllCurriculums(this.publisherId)),
+                            this.store.select(selectGradesByCurriculumId(this.curriculumId)),
+                        ])
+                            .pipe(
+                                take(1),
+                                map(([publishers, curriculums, grades]) => {
+                                    const publisher = publishers.find(
+                                        (p) => p.id === this.publisherId
+                                    );
+                                    const curriculum = curriculums.find(
+                                        (c) => c.id === this.curriculumId
+                                    );
+                                    const grade = grades?.find((g) => g.id === this.gradeId);
+                                    return { publisher, curriculum, grade };
+                                }),
+                                filter(({ publisher, curriculum, grade }) => !!publisher && !!curriculum && !!grade)
+                            )
+                            .subscribe(({ publisher, curriculum, grade }) => {
+                                this.gradeName = grade.grade_name;
+                                this.titleService.setBreadcrumb([
+                                    {
+                                        label: this.translocoService.translate(
+                                            'navigation.curriculum'
+                                        ),
+                                        url: 'manage-publishers',
+                                    },
+                                    {
+                                        label: this.translocoService.translate(
+                                            'navigation.managePublishers'
+                                        ),
+                                        url: 'manage-publishers',
+                                    },
+                                    {
+                                        label: publisher.publication_name,
+                                        url: `manage-publishers/${this.publisherId}/curriculum`,
+                                    },
+                                    {
+                                        label: curriculum.curriculum_name,
+                                        url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
+                                    },
+                                    { label: grade.grade_name, url: '' },
+                                ]);
+                            });
+                    }, 500);
+                    this.getAllSubjectsFromStore();
+                }
+                break;
+                case USER_TYPES.PUBLISHER_ADMIN:
+                case USER_TYPES.PUBLISHER_USER: {
+
+                    this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
+                    this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
+                    this.publisherId = this.user.id;
+                    
+                    this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
+
+                    this.store.dispatch(
+                        GradeActions.loadGrades({ curriculumId: this.curriculumId })
+                    );
+
+                    setTimeout(() => {
+                        combineLatest([
+                            this.store.select(selectAllCurriculums(this.publisherId)),
+                            this.store.select(selectGradesByCurriculumId(this.curriculumId)),
+                        ])
+                            .pipe(
+                                take(1),
+                                map(([ curriculums, grades]) => {
+                                    
+                                    const curriculum = curriculums.find(
+                                        (c) => c.id === this.curriculumId
+                                    );
+                                    const grade = grades?.find((g) => g.id === this.gradeId);
+                                    return { curriculum, grade };
+                                }),
+                                filter(({  curriculum, grade }) => !!curriculum && !!grade)
+                            )
+                            .subscribe(({ curriculum, grade }) => {
+                                this.gradeName = grade.grade_name;
+                                this.titleService.setBreadcrumb([
+                                    {
+                                        label: this.translocoService.translate(
+                                            'navigation.curriculum'
+                                        ),
+                                        url: 'manage-curriculum',
+                                    },
+                                    {
+                                        label: this.translocoService.translate(
+                                            'navigation.manageCurriculum'
+                                        ),
+                                        url: 'manage-curriculum',
+                                    },
+                                    {
+                                        label: curriculum.curriculum_name,
+                                        url: `manage-curriculum/${this.curriculumId}/grades`,
+                                    },
+                                    { label: grade.grade_name, url: '' },
+                                ]);
+                            });
+                    }, 500);
+
+                   this.getAllSubjectsFromStore();
+                }
+                break;
+            }
+        });
         
-        this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
-        this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
-        this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
-        
-         this.store.dispatch(PublisherActions.loadPublishers());
-        this.store.dispatch(CurriculumActions.loadCurriculums({publisherId: this.publisherId}));
-
-        this.store.dispatch(
-            GradeActions.loadGrades({ curriculumId: this.curriculumId })
-        );
-
-        setTimeout(() => {
-            combineLatest([
-                this.store.select(selectAllPublishers),
-                this.store.select(selectAllCurriculums(this.publisherId)),
-                this.store.select(selectGradesByCurriculumId(this.curriculumId)),
-            ])
-                .pipe(
-                    take(1),
-                    map(([publishers, curriculums, grades]) => {
-                        const publisher = publishers.find(
-                            (p) => p.id === this.publisherId
-                        );
-                        const curriculum = curriculums.find(
-                            (c) => c.id === this.curriculumId
-                        );
-                        const grade = grades?.find((g) => g.id === this.gradeId);
-                        return { publisher, curriculum, grade };
-                    }),
-                    filter(({ publisher, curriculum, grade }) => !!publisher && !!curriculum && !!grade)
-                )
-                .subscribe(({ publisher, curriculum, grade }) => {
-                    this.gradeName = grade.grade_name;
-                    this.titleService.setBreadcrumb([
-                        {
-                            label: this.translocoService.translate(
-                                'navigation.curriculum'
-                            ),
-                            url: 'manage-publishers',
-                        },
-                        {
-                            label: this.translocoService.translate(
-                                'navigation.managePublishers'
-                            ),
-                            url: 'manage-publishers',
-                        },
-                        {
-                            label: publisher.publication_name,
-                            url: `manage-publishers/${this.publisherId}/curriculum`,
-                        },
-                        {
-                            label: curriculum.curriculum_name,
-                            url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
-                        },
-                        { label: grade.grade_name, url: '' },
-                    ]);
-                });
-        }, 500);
-
-
         this.entityForm = this._formBuilder.group({
             id: [''],
             name: [''],
             subjects: [[]],
         });
-
-        this.list$ = this.store.select(selectSubjectsByGradeId(this.gradeId));
-
-        this.store.dispatch(
-            SubjectActions.loadSubjects({ gradeId: this.gradeId })
-        );
 
         this.handleAPIResponse();
 
@@ -208,6 +274,14 @@ export class SubjectsListComponent implements OnInit, AfterViewInit, OnDestroy {
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
         });
+    }
+
+    getAllSubjectsFromStore() {
+        this.list$ = this.store.select(selectSubjectsByGradeId(this.gradeId));
+
+        this.store.dispatch(
+            SubjectActions.loadSubjects({ gradeId: this.gradeId })
+        );
     }
 
     get subjects() {

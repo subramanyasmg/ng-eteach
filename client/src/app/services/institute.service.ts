@@ -45,7 +45,7 @@ export class InstituteService {
     }
 
     getAll() {
-        return this._httpClient.get(`${this.apiUrl}getAllInstitutes`).pipe(
+        return this._httpClient.get(`${this.apiUrl}organization`).pipe(
             tap((response: any) => {
                 if (response?.status) {
                     this._items.next(response.data as IInstitutes[]);
@@ -78,8 +78,8 @@ export class InstituteService {
                 const items = existingItems ?? [];
 
                 return this._httpClient
-                    .post(`${this.apiUrl}createInstitute`, {
-                        school_name: request.institute_name,
+                    .post(`${this.apiUrl}organization`, {
+                        institute_name: request.institute_name,
                         admin_name: request.admin_name,
                         email: request.email,
                         phone: request.phone,
@@ -87,7 +87,6 @@ export class InstituteService {
                         publisher_id: request.publisher_id,
                         curriculum_id: request.curriculum_id,
                         subdomain: request.subdomain,
-                        account_type: 'k12',
                         total_licenses: request.total_licenses,
                         license_end: request.license_end,
                     })

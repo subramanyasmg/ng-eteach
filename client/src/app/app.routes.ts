@@ -100,9 +100,10 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'dashboard', canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN },loadChildren: () => import('app/modules/superadmin/dashboard/dashboard.routes')},
-            {path: 'manage-publishers',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN }, loadChildren: () => import('app/modules/superadmin/publishers/publishers.routes')},
-            {path: 'manage-institute',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.SUPER_ADMIN }, loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
+            {path: 'dashboard', canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.SUPER_ADMIN, USER_TYPES.PUBLISHER_ADMIN, USER_TYPES.PUBLISHER_USER] },loadChildren: () => import('app/modules/superadmin/dashboard/dashboard.routes')},
+            {path: 'manage-publishers',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.SUPER_ADMIN] }, loadChildren: () => import('app/modules/superadmin/publishers/publishers.routes')},
+            {path: 'manage-institute',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.SUPER_ADMIN, USER_TYPES.PUBLISHER_ADMIN]}, loadChildren: () => import('app/modules/superadmin/institutes/institutes.routes')},
+            {path: 'manage-curriculum',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.PUBLISHER_ADMIN, USER_TYPES.PUBLISHER_USER] }, loadChildren: () => import('app/modules/superadmin/curriculum/curriculum/curriculum.routes')}
         ]
     },
     // Institute Admin routes
@@ -115,10 +116,10 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'dashboard',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/dashboard/dashboard.routes')},
-            {path: 'teachers',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/teachers/teachers.routes')},
-            {path: 'curriculum',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/curriculum/curriculum.routes')},
-            {path: 'school-structure',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.INSTITUTE_ADMIN }, loadChildren: () => import('app/modules/instituteadmin/school-structure/school-structure.routes')}
+            {path: 'dashboard',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.INSTITUTE_ADMIN] }, loadChildren: () => import('app/modules/instituteadmin/dashboard/dashboard.routes')},
+            {path: 'teachers',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.INSTITUTE_ADMIN] }, loadChildren: () => import('app/modules/instituteadmin/teachers/teachers.routes')},
+            {path: 'curriculum',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.INSTITUTE_ADMIN] }, loadChildren: () => import('app/modules/instituteadmin/curriculum/curriculum.routes')},
+            {path: 'school-structure',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.INSTITUTE_ADMIN] }, loadChildren: () => import('app/modules/instituteadmin/school-structure/school-structure.routes')}
         ]
     },
     // Institute Admin routes
@@ -131,8 +132,8 @@ export const appRoutes: Route[] = [
             initialData: initialDataResolver
         },
         children: [
-            {path: 'my-dashboard',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.TEACHER }, loadChildren: () => import('app/modules/teacher/dashboard/dashboard.routes')},
-            {path: 'manage-classes',  canActivate: [PrivilegeGuard],  data: { userType: USER_TYPES.TEACHER }, loadChildren: () => import('app/modules/teacher/manage-classes/manage-classes.routes')}
+            {path: 'my-dashboard',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.TEACHER] }, loadChildren: () => import('app/modules/teacher/dashboard/dashboard.routes')},
+            {path: 'manage-classes',  canActivate: [PrivilegeGuard],  data: { userType: [USER_TYPES.TEACHER] }, loadChildren: () => import('app/modules/teacher/manage-classes/manage-classes.routes')}
         ]
     },
     {

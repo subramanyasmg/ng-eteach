@@ -14,7 +14,7 @@ export class GradesEffects {
       ofType(GradeActions.loadGrades),
       mergeMap(({ curriculumId }) =>
         this.service.getAll(curriculumId).pipe(
-          map(response => GradeActions.loadGradesSuccess({ curriculumId, grades: response.data })),
+          map(response => GradeActions.loadGradesSuccess({ curriculumId, grades: response.data.rows })),
           catchError(error => of(GradeActions.loadGradesFailure({ error })))
         )
       )

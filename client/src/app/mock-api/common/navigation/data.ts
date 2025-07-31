@@ -60,6 +60,58 @@ export const superAdmin: FuseNavigationItem[] = [
     }
 ];
 
+export const publisher: FuseNavigationItem[] = [
+    {
+        id   : 'platform',
+        title: 'navigation.platform',
+        type : 'group',
+        children: [
+            {
+                id: 'dashboards',
+                title: 'navigation.dashboard',
+                type: 'basic',
+               icon : 'mat_outline:grid_view',
+                link: '/admin/dashboard',
+            }
+        ],
+    },
+    {
+        id   : 'users',
+        title: 'navigation.users',
+        type : 'group',
+        children: [
+            {
+                id: 'institute',
+                title: 'navigation.manageInstitute',
+                type: 'basic',
+                icon : 'heroicons_outline:academic-cap',
+                link: '/admin/manage-institute',
+            },
+            {
+                id: 'subscriptions',
+                title: 'navigation.subscriptions',
+                type: 'basic',
+               icon : 'heroicons_outline:ticket',
+                link: '/admin/subscriptions',
+            }
+        ],
+    },
+    {
+        id   : 'curriculum',
+        title: 'navigation.curriculum',
+        type : 'group',
+        children: [
+            {
+                id: 'curriculum',
+                title: 'navigation.manageCurriculum',
+                type: 'basic',
+               icon : 'heroicons_outline:book-open',
+                link: '/admin/manage-curriculum',
+            }
+        ],
+    }
+];
+
 export const instituteAdmin: FuseNavigationItem[] = [
     {
         id   : 'platform',

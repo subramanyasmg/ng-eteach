@@ -52,6 +52,8 @@ export class ChaptersService {
                 this.apiUrl = 'api/insadmin/';
                 break;
             case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
                 this.apiUrl = 'api/superadmin/';
                 break;
             default:
@@ -59,11 +61,11 @@ export class ChaptersService {
         }
 
         return this._httpClient
-            .get(`${this.apiUrl}getAllChapters/${subjectId}`)
+            .get(`${this.apiUrl}chapter/${subjectId}`)
             .pipe(
                 tap((response: any) => {
                     if (response?.status) {
-                        this._items.next(response.data as IChapters[]);
+                        this._items.next(response.data.rows as IChapters[]);
                     } else {
                         this._items.next([]);
                     }
@@ -79,7 +81,7 @@ export class ChaptersService {
 
     createLessonPlan(request) {
         return this._httpClient.post<boolean>(
-            `${this.apiUrl}createLessonPlan`,
+            `${this.apiUrl}lesson-plan`,
             { ...request }
         );
     }
@@ -92,13 +94,16 @@ export class ChaptersService {
                 this.apiUrl = 'api/insadmin/';
                 break;
             case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
                 this.apiUrl = 'api/superadmin/';
                 break;
             default:
                 throw new Error('Unsupported user type');
         }
 
-        return this._httpClient.get(`${this.apiUrl}getPhases`).pipe(
+    
+        return this._httpClient.get(`${this.apiUrl}five-phases`).pipe(
             tap((response: any) => {
                 if (response.status) {
                     this._phases.next(response.data);
@@ -112,7 +117,7 @@ export class ChaptersService {
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}createChapter`, {
+                    .post(`${this.apiUrl}chapter`, {
                         subject_id: subjectId,
                         title: request.title,
                     })
@@ -156,7 +161,7 @@ export class ChaptersService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateChapter/${id}`, { ...data })
+                    .put(`${this.apiUrl}updateChapter`, { ...data, subject_id: id })
                     .pipe(
                         delay(300),
                         map((response: any) => {
@@ -216,6 +221,8 @@ export class ChaptersService {
                 this.apiUrl = 'api/insadmin/';
                 break;
             case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
                 this.apiUrl = 'api/superadmin/';
                 break;
             default:

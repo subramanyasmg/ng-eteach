@@ -56,6 +56,8 @@ export class GradesService {
                 this.apiUrl = 'api/insadmin/';
                 break;
             case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
                 this.apiUrl = 'api/superadmin/';
                 break;
             default:
@@ -63,11 +65,11 @@ export class GradesService {
         }
 
         return this._httpClient
-            .get(`${this.apiUrl}getAllGrades/${curriculumId}`)
+            .get(`${this.apiUrl}grade/${curriculumId}`)
             .pipe(
                 tap((response: any) => {
                     if (response?.status) {
-                        this._items.next(response.data as IGrades[]);
+                        this._items.next(response.data.rows as IGrades[]);
                     } else {
                         this._items.next([]);
                     }
@@ -80,7 +82,7 @@ export class GradesService {
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}createGrade`, {
+                    .post(`${this.apiUrl}grade`, {
                         ...request,
                         curriculum_id: curriculumId,
                     })
