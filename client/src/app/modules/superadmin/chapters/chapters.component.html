@@ -22,7 +22,7 @@
             </mat-form-field>
 
 
-            <button class="ml-4 rounded-md" mat-flat-button [color]="'primary'" (click)="openDialog()">
+            <button class="ml-4 rounded-md" [disabled]="user.type === USER_TYPES.PUBLISHER_USER" mat-flat-button [color]="'primary'" (click)="openDialog()">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
             </button>
         </div>

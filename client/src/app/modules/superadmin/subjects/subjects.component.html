@@ -57,6 +57,7 @@
                 mat-flat-button
                 [color]="'primary'"
                 (click)="openDialog(1)"
+                [disabled]="user.type === USER_TYPES.PUBLISHER_USER"
             >
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
             </button>
