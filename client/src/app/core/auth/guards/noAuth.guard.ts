@@ -20,12 +20,23 @@ export const NoAuthGuard: CanActivateFn | CanActivateChildFn = (
             if (authenticated) {
                 const user = secureStorageService.getItem<User>('user');
 
-                if (user?.type === USER_TYPES.SUPER_ADMIN) {
-                    return of(router.parseUrl('/signed-in-redirect'));
-                } else if (user?.type === USER_TYPES.INSTITUTE_ADMIN) {
-                    return of(router.parseUrl('/institute-admin-signed-in-redirect'));
-                } else if (user?.type === USER_TYPES.TEACHER) {
-                    return of(router.parseUrl('/teacher-signed-in-redirect'));
+                switch (user?.type) {
+                    case USER_TYPES.SUPER_ADMIN:
+                    case USER_TYPES.PUBLISHER_ADMIN:
+                    case USER_TYPES.PUBLISHER_USER:
+                        return of(router.parseUrl('/signed-in-redirect'));
+
+                    case USER_TYPES.INSTITUTE_ADMIN:
+                        return of(
+                            router.parseUrl(
+                                '/institute-admin-signed-in-redirect'
+                            )
+                        );
+
+                    case USER_TYPES.TEACHER:
+                        return of(
+                            router.parseUrl('/teacher-signed-in-redirect')
+                        );
                 }
             }
 
