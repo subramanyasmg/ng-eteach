@@ -56,6 +56,8 @@ export class SubjectsService {
                 this.apiUrl = 'api/insadmin/';
                 break;
             case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
                 this.apiUrl = 'api/superadmin/';
                 break;
             default:
@@ -63,11 +65,11 @@ export class SubjectsService {
         }
 
         return this._httpClient
-            .get(`${this.apiUrl}getAllSubjects/${gradeId}`)
+            .get(`${this.apiUrl}subject/${gradeId}`)
             .pipe(
                 tap((response: any) => {
                     if (response?.status) {
-                        this._items.next(response.data as ISubjects[]);
+                        this._items.next(response.data.row as ISubjects[]);
                     } else {
                         this._items.next([]);
                     }
@@ -78,9 +80,12 @@ export class SubjectsService {
     create(gradeId: string, request: ISubjects): Observable<any> {
         return this.items$.pipe(
             take(1),
-            switchMap((item) =>
-                this._httpClient
-                    .post(`${this.apiUrl}createSubject`, {
+            switchMap((existingItems) => {
+
+                const items = existingItems ?? [];
+
+                return this._httpClient
+                    .post(`${this.apiUrl}subject`, {
                         grade_id: request.grade_id,
                         name: request.subject_name,
                     })
@@ -98,13 +103,13 @@ export class SubjectsService {
 
                             this._items.next([
                                 response.data as ISubjects,
-                                ...item,
+                                ...items,
                             ]);
 
                             return of(response);
                         })
                     )
-            )
+             })
         );
     }
 

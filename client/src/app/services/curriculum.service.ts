@@ -12,6 +12,9 @@ import {
     throwError,
 } from 'rxjs';
 import { ICurriculum } from '../models/curriculum.types';
+import { SecureSessionStorageService } from './securestorage.service';
+import { USER_TYPES } from 'app/constants/usertypes';
+import { User } from 'app/core/user/user.types';
 
 @Injectable({ providedIn: 'root' })
 export class CurriculumService {
@@ -26,7 +29,8 @@ export class CurriculumService {
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient) {}
+    constructor(private _httpClient: HttpClient, 
+        private _secureStorageService: SecureSessionStorageService) {}
 
     /**
      * Getter for single item
@@ -43,10 +47,24 @@ export class CurriculumService {
     }
 
     getAll(publisherId: string) {
-        return this._httpClient.get(`${this.apiUrl}getAllCurriculums/${publisherId}`).pipe(
+        let user = this._secureStorageService.getItem<User>('user');
+        switch (user.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+                this.apiUrl = 'api/insadmin/';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
+                this.apiUrl = 'api/superadmin/';
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+
+        return this._httpClient.get(`${this.apiUrl}curriculum/${publisherId}`).pipe(
             tap((response: any) => {
                 if (response?.status) {
-                    this._items.next(response.data as ICurriculum[]);
+                    this._items.next(response.data.rows as ICurriculum[]);
                 } else {
                     this._items.next([]);
                 }
@@ -59,7 +77,7 @@ export class CurriculumService {
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}createCurriculum`, { ...request, publisher_id: publisherId })
+                    .post(`${this.apiUrl}curriculum`, { ...request, publisher_id: publisherId })
                     .pipe(
                         mergeMap((response: any) => {
                             if (response.status !== 200) {

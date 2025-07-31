@@ -82,7 +82,7 @@ export class PublishersListComponent
     dataSource = new MatTableDataSource<IPublisher>();
     displayedColumns: string[] = [
         'publication_name',
-        'contact_name',
+        'name',
         'email',
         'phone',
         'actions',
@@ -141,6 +141,7 @@ export class PublishersListComponent
         this.handleAPIResponse();
 
         this.list$.subscribe((data) => {
+            console.log(data);
             this.dataSource = new MatTableDataSource(data); // reassign!
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
@@ -195,7 +196,7 @@ export class PublishersListComponent
         this.entityForm.patchValue({
             id: data.id,
             publication_name: data.publication_name,
-            contact_name: data.contact_name,
+            contact_name: data.name,
             email: data.email,
             phone: data.phone,
             address: data.address,
@@ -213,7 +214,7 @@ export class PublishersListComponent
         const formValues = this.entityForm.value;
         const requestObj: IPublisher = {
             publication_name: formValues.publication_name,
-            contact_name: formValues.contact_name,
+            name: formValues.contact_name,
             email: formValues.email,
             phone: formValues.phone,
             address: formValues.address,
@@ -235,7 +236,7 @@ export class PublishersListComponent
         const requestObj: IPublisher = {
             id: formValues.id,
             publication_name: formValues.publication_name,
-            contact_name: formValues.contact_name,
+            name: formValues.contact_name,
             email: formValues.email,
             phone: formValues.phone,
             address: formValues.address,

@@ -14,7 +14,7 @@ export class CurriculumEffects {
       ofType(CurriculumActions.loadCurriculums),
       mergeMap(({publisherId}) =>
         this.service.getAll(publisherId).pipe(
-          map(response => CurriculumActions.loadCurriculumsSuccess({ publisherId, curriculums: response.data })),
+          map(response => CurriculumActions.loadCurriculumsSuccess({ publisherId, curriculums: response.data.rows })),
           catchError(error => of(CurriculumActions.loadCurriculumsFailure({ error })))
         )
       )

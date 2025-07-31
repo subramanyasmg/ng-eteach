@@ -200,7 +200,9 @@
         "preview_not_available": "Preview not available for this file type.",
         "no_phases_available": "No Phases available for Lesson Plans",
         "phase_server_error": "Oh no! Server error occured while fetching Phases for Lesson Plans",
-        "lesson_plan_update_success": "Lesson plan updated successfully!"
+        "lesson_plan_update_success": "Lesson plan updated successfully!",
+        "textbook_upload_success": "Textbook uploaded successfully",
+        "textbook_upload_error": "Failed to upload the Textbook"
     },
     "teachers": {
         "page_subtext": "You can add upto {{count}} teachers in your subscription plan",

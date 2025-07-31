@@ -14,7 +14,7 @@ export class PublisherEffects {
       ofType(PublisherActions.loadPublishers),
       mergeMap(() =>
         this.service.getAll().pipe(
-          map(response => PublisherActions.loadPublishersSuccess({ publishers: response.publishers })),
+          map(response => PublisherActions.loadPublishersSuccess({ publishers: response.data })),
           catchError(error => of(PublisherActions.loadPublishersFailure({ error })))
         )
       )

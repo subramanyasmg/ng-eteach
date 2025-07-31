@@ -43,10 +43,10 @@ export class PublisherService {
     }
 
     getAll() {
-        return this._httpClient.get(`${this.apiUrl}getAllPublishers`).pipe(
+        return this._httpClient.get(`${this.apiUrl}publishers`).pipe(
             tap((response: any) => {
-                if (response?.status) {
-                    this._items.next(response.publishers as IPublisher[]);
+                if (response?.status === 200) {
+                    this._items.next(response.data as IPublisher[]);
                 } else {
                     this._items.next([]);
                 }
@@ -54,12 +54,13 @@ export class PublisherService {
         );
     }
 
-    create(request): Observable<any> {
+    create(request: IPublisher): Observable<any> {
+
         return this.items$.pipe(
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}createPublisher`, { ...request})
+                    .post(`${this.apiUrl}create-publisher`, { ...request})
                     .pipe(
                         mergeMap((response: any) => {
                             if (response.status !== 200) {

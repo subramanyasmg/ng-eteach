@@ -173,7 +173,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
 
                 // Direct service call
                 this.curriculumList$ = this.curriculumService.getAll(publisherId).pipe(
-                    map((response: any) => response.data ?? [])
+                    map((response: any) => response.data.rows ?? [])
                 );
             }
         });

@@ -14,6 +14,7 @@ import { UserService } from 'app/core/user/user.service';
 import { UserComponent } from 'app/layout/common/user/user.component';
 import {
     instituteAdmin,
+    publisher,
     superAdmin,
     teacher,
 } from 'app/mock-api/common/navigation/data';
@@ -80,6 +81,11 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
                     break;
                     case USER_TYPES.SUPER_ADMIN: {
                         this.navigationData = superAdmin;
+                    }
+                    break;
+                    case USER_TYPES.PUBLISHER_ADMIN: 
+                    case USER_TYPES.PUBLISHER_USER:{
+                        this.navigationData = publisher;
                     }
                     break;
                     case USER_TYPES.TEACHER: {

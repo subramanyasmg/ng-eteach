@@ -71,27 +71,36 @@ export class AuthService {
         let url = '';
 
         if (type === USER_TYPES.SUPER_ADMIN) {
-            url = '/api/superadmin/';
+            url = '/api/superadmin/publishers/login';
         } else if (type === USER_TYPES.INSTITUTE_ADMIN) {
             url = '/api/insadmin/';
         }
 
-        return this._httpClient.post(`${url}login`, credentials).pipe(
+        return this._httpClient.post(url, credentials).pipe(
             switchMap((response: any) => {
-                // Store the access token in the local storage
-                this.accessToken = response.accessToken;
-
-                // Set the authenticated flag to true
-                this._authenticated = true;
-
-                // Store the user on the user service
-                this._userService.user = response.user;
-
-                 this._secureStorageService.setItem(
-                            'user', response.user);
-
-                // Return a new observable with the response
-                return of(response);
+                console.log(response);
+                if (response.success && response.status === 200) {
+                    // Store the access token in the local storage
+                    this.accessToken = response.data.token;
+    
+                    // Set the authenticated flag to true
+                    this._authenticated = true;
+    
+                    // Store the user on the user service
+                    const user = {
+                        id: response.data.publisher.id,
+                        name:   response.data.publisher.name,
+                        email: response.data.publisher.email,
+                        type: response.data.publisher.role,
+                    };
+                    this._userService.user = user;
+    
+                     this._secureStorageService.setItem(
+                                'user', user);
+    
+                    // Return a new observable with the response
+                    return of(response);
+                }
             })
         );
     }

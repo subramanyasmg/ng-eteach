@@ -44,6 +44,9 @@ import * as PublisherActions from 'app/state/publishers/publishers.actions';
 import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 import { filter, map, Observable, Subject, take, tap } from 'rxjs';
 import { ICurriculum } from '../../../models/curriculum.types';
+import { UserService } from 'app/core/user/user.service';
+import { User } from 'app/core/user/user.types';
+import { USER_TYPES } from 'app/constants/usertypes';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -84,8 +87,8 @@ export class CurriculumListComponent
     dataSource = new MatTableDataSource<ICurriculum>();
     displayedColumns: string[] = [
         'curriculum_name',
-        'createdAt',
-        'updatedAt',
+        'created_at',
+        'updated_at',
         'actions',
     ];
     mode = null;
@@ -94,6 +97,8 @@ export class CurriculumListComponent
     entityForm: UntypedFormGroup;
     matDialogRef = null;
     publisherId;
+    user:User = null;
+    readonly USER_TYPES = USER_TYPES;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -105,47 +110,79 @@ export class CurriculumListComponent
         private store: Store,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
+        private _userService: UserService,
         private translocoService: TranslocoService,
         private titleService: BreadcrumbService
     ) {}
 
+    
     ngOnInit(): void {
-        this.store.dispatch(PublisherActions.loadPublishers());
-        this.publisherId = Number(this.route.snapshot.paramMap.get('id'));
 
-        if (this.publisherId) {
-            this.store
-                .select(selectAllPublishers)
-                .pipe(
-                    map((publishers) =>
-                        publishers.find((c) => c.id === this.publisherId)
-                    ),
-                    filter(Boolean),
-                    take(1)
-                )
-                .subscribe((publisher) => {
+        // Check if the User Type is Publisher or Super Admin
+        this._userService.user$.pipe(take(1)).subscribe((user: User) => {
+            this.user = user;
+
+            switch (this.user.type) {
+                case USER_TYPES.SUPER_ADMIN: {
+                    this.store.dispatch(PublisherActions.loadPublishers());
+                    this.publisherId = Number(this.route.snapshot.paramMap.get('id'));
+
+                    if (this.publisherId) {
+                        this.store
+                            .select(selectAllPublishers)
+                            .pipe(
+                                map((publishers) =>
+                                    publishers.find((c) => c.id === this.publisherId)
+                                ),
+                                filter(Boolean),
+                                take(1)
+                            )
+                            .subscribe((publisher) => {
+                                this.titleService.setBreadcrumb([
+                                    {
+                                        label: this.translocoService.translate(
+                                            'navigation.curriculum'
+                                        ),
+                                        url: 'manage-publishers',
+                                    },
+                                    {
+                                        label: this.translocoService.translate(
+                                            'navigation.managePublishers'
+                                        ),
+                                        url: 'manage-publishers',
+                                    },
+                                    { label: publisher.publication_name, url: '' },
+                                ]);
+                            });
+
+                        this.getAllCurriculums();
+                    }
+                }
+                break;
+                case USER_TYPES.PUBLISHER_ADMIN:
+                case USER_TYPES.PUBLISHER_USER: {
+
+                    this.publisherId = this.user.id
+
                     this.titleService.setBreadcrumb([
                         {
                             label: this.translocoService.translate(
                                 'navigation.curriculum'
                             ),
-                            url: 'manage-publishers',
+                            url: 'manage-curriculum',
                         },
                         {
                             label: this.translocoService.translate(
-                                'navigation.managePublishers'
+                                'navigation.manageCurriculum'
                             ),
-                            url: 'manage-publishers',
-                        },
-                        { label: publisher.publication_name, url: '' },
+                            url: ''
+                        }
                     ]);
-                });
-
-            this.list$ = this.store.select(
-                selectAllCurriculums(this.publisherId)
-            );
-            this.getAllCurriculums();
-        }
+                    this.getAllCurriculums();
+                }
+                break;
+            }
+        })
 
         this.entityForm = this._formBuilder.group({
             id: [''],
@@ -160,8 +197,12 @@ export class CurriculumListComponent
             this.dataSource.paginator = this.paginator;
         });
     }
-
+    
     getAllCurriculums() {
+        this.list$ = this.store.select(
+            selectAllCurriculums(this.publisherId)
+        );
+
         this.store.dispatch(
             CurriculumActions.loadCurriculums({ publisherId: this.publisherId })
         );
@@ -321,7 +362,6 @@ export class CurriculumListComponent
                                 'curriculum.success_add'
                             )
                         );
-                        this.getAllCurriculums();
                     } else if (
                         action.type ===
                         CurriculumActions.updateCurriculumSuccess.type
@@ -331,7 +371,6 @@ export class CurriculumListComponent
                                 'curriculum.success_update'
                             )
                         );
-                        this.getAllCurriculums();
                     } else if (
                         action.type ===
                         CurriculumActions.deleteCurriculumSuccess.type
