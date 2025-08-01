@@ -377,7 +377,6 @@ export class ChaptersListComponent implements OnInit {
                 next: (response: any) => {
                     console.log('response', response);
                     console.log('chapter', chapter);
-                    // chapter.data = data;
                     chapter.isLoading = false;
 
                     const lessonPlansFromApi =
