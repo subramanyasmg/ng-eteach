@@ -236,7 +236,45 @@ export class ChaptersService {
         return this._httpClient.post(`${this.apiUrl}textbook`, formData);
     }
 
+    uploadReferenceMaterial(files: File[], chapterId: number): Observable<any> {
+        let user = this._secureStorageService.getItem<User>('user');
+        switch (user?.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+            case USER_TYPES.TEACHER:
+                this.apiUrl = 'api/insadmin/';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
+                this.apiUrl = 'api/superadmin/';
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+
+        const formData = new FormData();
+        if (files.length > 1) {
+            for (const file of files) {
+                formData.append('files', file); // same key for multiple files
+            }
+        } else {
+            formData.append('file', files[0]);
+        }
+        formData.append('chapter_id', chapterId.toString());
+
+        if (files.length > 1) {
+            return this._httpClient.post(`${this.apiUrl}referenceMaterials/upload-multiple`, formData);
+        } else {
+             return this._httpClient.post(`${this.apiUrl}referenceMaterials`, formData);
+        }
+
+    }
+
     deleteTextbook(id) {
-        return this._httpClient.delete(`${this.apiUrl}files/${id}`);
+        return this._httpClient.delete(`${this.apiUrl}textbook/${id}`);
+    }
+
+    deleteReferenceMaterial(id) {
+        return this._httpClient.delete(`${this.apiUrl}referenceMaterials/${id}`);
     }
 }

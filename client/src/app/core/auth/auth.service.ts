@@ -73,7 +73,7 @@ export class AuthService {
         if (type === USER_TYPES.SUPER_ADMIN) {
             url = '/api/superadmin/publishers/login';
         } else if (type === USER_TYPES.INSTITUTE_ADMIN) {
-            url = '/api/insadmin/';
+            url = '/api/insadmin/login';
         }
 
         return this._httpClient.post(url, credentials).pipe(
