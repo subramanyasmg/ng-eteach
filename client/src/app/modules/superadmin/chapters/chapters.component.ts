@@ -381,7 +381,8 @@ export class ChaptersListComponent implements OnInit {
                     chapter.isLoading = false;
 
                     const lessonPlansFromApi =
-                        response?.data?.[0]?.lesson_plans ?? [];
+                        response?.data?.lesson_plans ?? [];
+
                     chapter.lessonPlan.forEach((lesson) => {
                         // Find the corresponding lesson_plan from API where phase_id matches lesson.id
                         const matchingLesson = lessonPlansFromApi.find(
@@ -392,6 +393,9 @@ export class ChaptersListComponent implements OnInit {
                             lesson.content = matchingLesson.content_text || '';
                         }
                     });
+
+                    // textbook
+                    chapter.textBook = response?.data?.textbooks[0];
                 },
                 error: (error: any) => {
                     chapter.isLoading = false;
@@ -460,7 +464,6 @@ export class ChaptersListComponent implements OnInit {
     }
 
     updateChapterPhase(chapter: IChapters, phase) {
-        console.log(chapter, phase);
         const requestObj = {
             chapter_id: chapter.id,
             phase_id: phase.id,
@@ -469,7 +472,6 @@ export class ChaptersListComponent implements OnInit {
         };
         this._chapterService.createLessonPlan(requestObj).subscribe({
             next: (response: any) => {
-                console.log('response', response);
                 if (response.status === 200) {
                     this._snackBar.showSuccess(
                         this.translocoService.translate(
@@ -513,10 +515,16 @@ export class ChaptersListComponent implements OnInit {
         this._chapterService.uploadTextbook(file, +chapter.id).subscribe({
             next: (res) => {
                 console.log('Upload success:', res);
-                this.addFiles(chapter, [res.file], 1);
-                this._snackBar.showSuccess( this.translocoService.translate(
-                    'chapters.textbook_upload_success'
-                ));
+                if (res.success && res.status === 200) {
+                    this.addFiles(chapter, [res.file], 1);
+                    this._snackBar.showSuccess( this.translocoService.translate(
+                        'chapters.textbook_upload_success'
+                    ));
+                } else {
+                    this._snackBar.showError(this.translocoService.translate(
+                    'chapters.textbook_upload_error'
+                ) + ' - ' +res.message);
+                }
             },
             error: (err) => {
                 console.error('Upload failed:', err);
@@ -524,6 +532,48 @@ export class ChaptersListComponent implements OnInit {
                     'chapters.textbook_upload_error'
                 ));
             },
+        });
+    }
+
+    deleteTextbook(chapter:IChapters) {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title: this.translocoService.translate(
+                'chapters.deleteTBConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'chapters.deleteTBConfirmationMessage'
+            ),
+            actions: {
+                confirm: {
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
+                },
+            },
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            if (result === 'confirmed') {
+                this._chapterService.deleteTextbook(chapter.textBook.id).subscribe({
+                next: (res) => {
+                    console.log('Delete success:', res);
+                    chapter.textBook = null;
+                    this._snackBar.showSuccess( this.translocoService.translate(
+                        'chapters.textbook_delete_success'
+                    ));
+                },
+                error: (err) => {
+                    console.error('Delete failed:', err);
+                    this._snackBar.showError( this.translocoService.translate(
+                        'chapters.textbook_delete_error'
+                    ));
+                },
+            });
+                
+            }
         });
     }
 
@@ -538,6 +588,10 @@ export class ChaptersListComponent implements OnInit {
         type == 1
             ? chapter.textBook.splice(index, 1)
             : chapter.referenceMaterials.splice(index, 1);
+    }
+
+    deleteReferenceMaterial(chapter:IChapters, file) {
+        
     }
 
     previewFile(file: any): void {

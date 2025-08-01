@@ -278,7 +278,6 @@ export class GradeDetailsComponent implements OnInit {
     }
     
     onTeacherAssign(event, subjectForSection) {
-        console.log(event, subjectForSection);
         subjectForSection.teacher.edit = false;
     }
 

@@ -191,8 +191,9 @@
                                                             matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
                                                             class="bg-white rounded-full shadow-sm ml-2">
                                                             <mat-icon
-                                                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                                        </button> <!--   (click)="removeFile(chapter, i, 1)" -->
+                                                                [svgIcon]="'heroicons_outline:trash'" 
+                                                                (click)="deleteTextbook(chapter)"></mat-icon>
+                                                        </button>
                                                     </div>
                                                 </div>
                                                 <div class="text-sm text-gray-800 break-words w-full truncate">{{
@@ -240,7 +241,7 @@
                                                                 [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                                         </button>
                                                         <button mat-icon-button color="warn"
-                                                            (click)="removeFile(chapter, i, 2)"
+                                                            (click)="deleteReferenceMaterial(chapter, file)"
                                                             matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
                                                             class="bg-white rounded-full shadow-sm ml-2">
                                                             <mat-icon

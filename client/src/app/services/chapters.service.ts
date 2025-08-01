@@ -75,7 +75,7 @@ export class ChaptersService {
 
     getChapterDetails(subjectId, chapterId) {
         return this._httpClient.get(
-            `${this.apiUrl}getAllChapterDetails/${subjectId}/${chapterId}`
+            `${this.apiUrl}get-chapter/${chapterId}`
         );
     }
 
@@ -234,5 +234,9 @@ export class ChaptersService {
         formData.append('chapter_id', chapterId.toString());
 
         return this._httpClient.post(`${this.apiUrl}textbook`, formData);
+    }
+
+    deleteTextbook(id) {
+        return this._httpClient.delete(`${this.apiUrl}files/${id}`);
     }
 }

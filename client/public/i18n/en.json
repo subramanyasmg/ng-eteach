@@ -202,7 +202,11 @@
         "phase_server_error": "Oh no! Server error occured while fetching Phases for Lesson Plans",
         "lesson_plan_update_success": "Lesson plan updated successfully!",
         "textbook_upload_success": "Textbook uploaded successfully",
-        "textbook_upload_error": "Failed to upload the Textbook"
+        "textbook_upload_error": "Failed to upload the Textbook",
+         "textbook_delete_success": "Textbook deleted successfully",
+        "textbook_delete_error": "Failed to delete the Textbook",
+        "deleteTBConfirmationTitle": "Are you sure you want to delete this Textbook?",
+        "deleteTBConfirmationMessage": "Taking this action will permanently delete it. Are you sure about taking this action?"
     },
     "teachers": {
         "page_subtext": "You can add upto {{count}} teachers in your subscription plan",
