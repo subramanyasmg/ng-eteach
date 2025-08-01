@@ -381,7 +381,8 @@ export class ChaptersListComponent implements OnInit {
                     chapter.isLoading = false;
 
                     const lessonPlansFromApi =
-                        response?.data?.[0]?.lesson_plans ?? [];
+                        response?.data?.lesson_plans ?? [];
+
                     chapter.lessonPlan.forEach((lesson) => {
                         // Find the corresponding lesson_plan from API where phase_id matches lesson.id
                         const matchingLesson = lessonPlansFromApi.find(
@@ -392,6 +393,12 @@ export class ChaptersListComponent implements OnInit {
                             lesson.content = matchingLesson.content_text || '';
                         }
                     });
+
+                    // textbook
+                    chapter.textBook = response?.data?.textbooks[0];
+
+                    // reference materials
+                    chapter.referenceMaterials = response?.data?.reference_materials;
                 },
                 error: (error: any) => {
                     chapter.isLoading = false;
@@ -460,7 +467,6 @@ export class ChaptersListComponent implements OnInit {
     }
 
     updateChapterPhase(chapter: IChapters, phase) {
-        console.log(chapter, phase);
         const requestObj = {
             chapter_id: chapter.id,
             phase_id: phase.id,
@@ -469,7 +475,6 @@ export class ChaptersListComponent implements OnInit {
         };
         this._chapterService.createLessonPlan(requestObj).subscribe({
             next: (response: any) => {
-                console.log('response', response);
                 if (response.status === 200) {
                     this._snackBar.showSuccess(
                         this.translocoService.translate(
@@ -489,7 +494,18 @@ export class ChaptersListComponent implements OnInit {
     onFileDrop(chapter: IChapters, event: DragEvent, type) {
         event.preventDefault();
         const files = Array.from(event.dataTransfer?.files || []);
-        this.addFiles(chapter, files, type);
+        if (type === 1 && files.length > 0) {
+            this.uploadTextbookFile(files[0], chapter); 
+        }
+        if (type === 2 && files.length > 0) {
+            if (files.length > 10) {
+                this._snackBar.showError(this.translocoService.translate(
+                        'chapters.max_limit_reached'
+                    ));
+            } else {
+                this.uploadReferenceMaterialFiles(files, chapter);
+            }
+        }
     }
 
     onDragOver(chapter: IChapters, event: DragEvent, type) {
@@ -505,7 +521,16 @@ export class ChaptersListComponent implements OnInit {
         const files = Array.from(input.files || []);
 
         if (type === 1 && files.length > 0) {
-            this.uploadTextbookFile(files[0], chapter); // assuming chapter has an `id`
+            this.uploadTextbookFile(files[0], chapter); 
+        }
+        if (type === 2 && files.length > 0) {
+            if (files.length > 10) {
+                this._snackBar.showError(this.translocoService.translate(
+                        'chapters.max_limit_reached'
+                    ));
+            } else {
+                this.uploadReferenceMaterialFiles(files, chapter);
+            }
         }
     }
 
@@ -513,10 +538,16 @@ export class ChaptersListComponent implements OnInit {
         this._chapterService.uploadTextbook(file, +chapter.id).subscribe({
             next: (res) => {
                 console.log('Upload success:', res);
-                this.addFiles(chapter, [res.file], 1);
-                this._snackBar.showSuccess( this.translocoService.translate(
-                    'chapters.textbook_upload_success'
-                ));
+                if (res.success && res.status === 200) {
+                    this.addFiles(chapter, [res.file], 1);
+                    this._snackBar.showSuccess( this.translocoService.translate(
+                        'chapters.textbook_upload_success'
+                    ));
+                } else {
+                    this._snackBar.showError(this.translocoService.translate(
+                    'chapters.textbook_upload_error'
+                ) + ' - ' +res.message);
+                }
             },
             error: (err) => {
                 console.error('Upload failed:', err);
@@ -527,6 +558,72 @@ export class ChaptersListComponent implements OnInit {
         });
     }
 
+    uploadReferenceMaterialFiles(files: File[], chapter: IChapters) {
+        this._chapterService.uploadReferenceMaterial(files, +chapter.id).subscribe({
+            next: (res) => {
+                console.log('Upload success:', res);
+                if (res.success && res.status === 200) {
+                    this.addFiles(chapter, files.length === 1 ? [res.file]:res.files, 2);
+                    this._snackBar.showSuccess( this.translocoService.translate(
+                        'chapters.rm_upload_success'
+                    ));
+                } else {
+                    this._snackBar.showError(this.translocoService.translate(
+                    'chapters.rm_upload_error'
+                ) + ' - ' +res.message);
+                }
+            },
+            error: (err) => {
+                console.error('Upload failed:', err);
+                this._snackBar.showError( this.translocoService.translate(
+                    'chapters.rm_upload_error'
+                ));
+            },
+        });
+    }
+
+    deleteTextbook(chapter:IChapters) {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title: this.translocoService.translate(
+                'chapters.deleteTBConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'chapters.deletefileConfirmationMessage'
+            ),
+            actions: {
+                confirm: {
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
+                },
+            },
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            if (result === 'confirmed') {
+                this._chapterService.deleteTextbook(chapter.textBook.id).subscribe({
+                next: (res) => {
+                    console.log('Delete success:', res);
+                    chapter.textBook = null;
+                    this._snackBar.showSuccess( this.translocoService.translate(
+                        'chapters.textbook_delete_success'
+                    ));
+                },
+                error: (err) => {
+                    console.error('Delete failed:', err);
+                    this._snackBar.showError( this.translocoService.translate(
+                        'chapters.textbook_delete_error'
+                    ));
+                },
+            });
+                
+            }
+        });
+    }
+
     addFiles(chapter: IChapters, files, type) {
         console.log('files', files);
         type === 1
@@ -534,10 +631,46 @@ export class ChaptersListComponent implements OnInit {
             : chapter.referenceMaterials.push(...files);
     }
 
-    removeFile(chapter: IChapters, index: number, type) {
-        type == 1
-            ? chapter.textBook.splice(index, 1)
-            : chapter.referenceMaterials.splice(index, 1);
+    deleteReferenceMaterial(chapter:IChapters, file) {
+        // Open the confirmation dialog
+        const confirmation = this._fuseConfirmationService.open({
+            title: this.translocoService.translate(
+                'chapters.deleteRMConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'chapters.deletefileConfirmationMessage'
+            ),
+            actions: {
+                confirm: {
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
+                },
+            },
+        });
+
+        // Subscribe to the confirmation dialog closed action
+        confirmation.afterClosed().subscribe((result) => {
+            // If the confirm button pressed...
+            if (result === 'confirmed') {
+                this._chapterService.deleteReferenceMaterial(file.id).subscribe({
+                next: (res) => {
+                    console.log('Delete success:', res);
+                    chapter.referenceMaterials = chapter.referenceMaterials.filter(rmFile => Number(rmFile.id) !== Number(file.id));
+                    this._snackBar.showSuccess( this.translocoService.translate(
+                        'chapters.rm_delete_success'
+                    ));
+                },
+                error: (err) => {
+                    console.error('Delete failed:', err);
+                    this._snackBar.showError( this.translocoService.translate(
+                        'chapters.rm_delete_error'
+                    ));
+                },
+            });
+                
+            }
+        });
     }
 
     previewFile(file: any): void {

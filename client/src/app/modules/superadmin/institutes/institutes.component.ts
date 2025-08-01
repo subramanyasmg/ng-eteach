@@ -228,7 +228,6 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     patchFormValues(data: IInstitutes) {
-        console.log(data);
         this.entityForm.patchValue({
             id: data.id,
             name: data.institute_name,
