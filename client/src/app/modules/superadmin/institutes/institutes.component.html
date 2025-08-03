@@ -78,19 +78,19 @@
                             <span
                                 class="ml-2 inline-block h-2 w-2 rounded-full"
                                 [ngClass]="{
-                                    'bg-green-500': element.status === 'ACTIVE',
-                                    'bg-red-500': element.status === 'TRIAL',
+                                    'bg-green-500': element.email_verification_status !== 'PENDING',
+                                    'bg-red-500': element.email_verification_status === 'PENDING',
                                 }"
                             ></span>
                         </td>
                     </ng-container>
 
-                    <ng-container matColumnDef="createdAt">
+                    <ng-container matColumnDef="created_at">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>
                             {{ 'institute.header_created_on' | transloco }}
                         </th>
                         <td mat-cell *matCellDef="let element">
-                            {{ element.createdAt | date }}
+                            {{ element.created_at | date }}
                         </td>
                     </ng-container>
 
@@ -99,7 +99,7 @@
                             {{ 'institute.header_expires_on' | transloco }}
                         </th>
                         <td mat-cell *matCellDef="let element">
-                            {{ element.expiresOn | date }}
+                            {{ element.OrganizationLicense[0]?.license_end | date }}
                         </td>
                     </ng-container>
 
@@ -108,7 +108,7 @@
                             {{ 'institute.header_license_count' | transloco }}
                         </th>
                         <td mat-cell *matCellDef="let element">
-                            {{ element.noOfLicense }}
+                            {{ element.OrganizationLicense[0]?.total_licenses }}
                         </td>
                     </ng-container>
 
