@@ -54,7 +54,7 @@ export const appRoutes: Route[] = [
         },
         children: [
             {path: 'sign-in', loadChildren: () => import('app/modules/auth/institute-admin/sign-in/sign-in.routes')},
-            {path: 'create-password', loadChildren: () => import('app/modules/auth/institute-admin/create-password/create-password.routes')},
+            {path: 'verify-password', loadChildren: () => import('app/modules/auth/institute-admin/create-password/create-password.routes')},
         ]
     },
     {

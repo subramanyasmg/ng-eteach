@@ -219,12 +219,12 @@ export class AuthService {
         return of(true);
     }
 
-    createPassword(password: string): Observable<any> {
-        return this._httpClient.post('api/u/create-password-institute', password).pipe(
+    createInstituteAdminPassword(request): Observable<any> {
+        return this._httpClient.post('api/insadmin/verify-reset-password', request).pipe(
             switchMap((response: any) => {
                 // Return a new observable with the response
                 //return of(response);
-                return of(true);
+                return of(response);
             })
         );
     }

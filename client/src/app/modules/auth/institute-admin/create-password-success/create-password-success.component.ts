@@ -18,7 +18,7 @@ import { SnackBarService } from 'app/core/general/snackbar.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreatePasswordSuccessComponent {
-    domain = 'domainname.com';
+    domain = window.location.hostname;
 
     constructor( private _snackBar: SnackBarService) {
 
