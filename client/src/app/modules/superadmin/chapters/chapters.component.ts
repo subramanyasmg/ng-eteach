@@ -65,7 +65,6 @@ import { USER_TYPES } from 'app/constants/usertypes';
     imports: [
         MatProgressBarModule,
         MatFormFieldModule,
-        MatIconModule,
         MatInputModule,
         FormsModule,
         ReactiveFormsModule,

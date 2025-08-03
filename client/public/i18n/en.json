@@ -15,7 +15,18 @@
         "subjects": "Subjects",
         "manageTeachers": "Manage Teachers",
         "schoolStructure": "School Structure",
-        "manageClasses": "Manage Classes"
+        "manageClasses": "Manage Classes",
+        "editProfile": "Edit Profile",
+        "changePassword": "Change Password"
+    },
+    "profile": {
+        "password_label":"Password",
+        "cpasword_label":"Confirm Password",
+        "password_error_required":"Password is required",
+        "cpassword_error_required":"Confirm your password",
+        "password_mismatch":"Passwords must match",
+        "reset_password_btn":"Reset Password",
+        "password_change_success": "Password successfully changed. Please relogin!"
     },
     "superadmin_dashboard": {
         "subtext": "Overview of the company",

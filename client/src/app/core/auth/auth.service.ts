@@ -222,8 +222,29 @@ export class AuthService {
     createInstituteAdminPassword(request): Observable<any> {
         return this._httpClient.post('api/insadmin/verify-reset-password', request).pipe(
             switchMap((response: any) => {
-                // Return a new observable with the response
-                //return of(response);
+                return of(response);
+            })
+        );
+    }
+
+    resetProfilePassword(password: string): Observable<any> {
+        let apiurl = '';
+        let user = this._secureStorageService.getItem<User>('user');
+        switch (user.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+                apiurl = 'api/insadmin/change-password';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
+                apiurl = `api/superadmin/change-password`;
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+        
+        return this._httpClient.post(apiurl, password).pipe(
+            switchMap((response: any) => {
                 return of(response);
             })
         );

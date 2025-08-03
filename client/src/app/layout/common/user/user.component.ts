@@ -15,8 +15,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
+import { USER_TYPES } from 'app/constants/usertypes';
 import { UserService } from 'app/core/user/user.service';
 import { User } from 'app/core/user/user.types';
+import { SecureSessionStorageService } from 'app/services/securestorage.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -89,5 +91,21 @@ export class UserComponent implements OnInit, OnDestroy {
      */
     signOut(): void {
         this._router.navigate(['/sign-out']);
+    }
+
+    showEditProfile() {
+        switch (this.user.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+                this._router.navigate(['/edit-profile']);
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
+                this._router.navigate(['/admin/edit-profile']);
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+        
     }
 }
