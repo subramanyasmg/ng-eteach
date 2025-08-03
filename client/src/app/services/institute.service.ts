@@ -57,13 +57,12 @@ export class InstituteService {
     }
 
     checkSubdomainAvailability(subdomain: string): Observable<boolean> {
-        return this._httpClient.post<boolean>(
-            `${this.apiUrl}checkSubdomainAvailability`,
-            { subdomain }
+        return this._httpClient.get<boolean>(
+            `${this.apiUrl}check-subdomain/${subdomain}`
         ).pipe(
-            map(() => true), // Success => subdomain is available
+            map((response: any) => response.status), // Success => subdomain is available
             catchError(err => {
-                if (err.status === 400) {
+                if (err.status === 400 || err.status === 500) {
                     return of(false);
                 }
                 return throwError(() => err); // rethrow other errors

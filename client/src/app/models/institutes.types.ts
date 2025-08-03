@@ -13,4 +13,5 @@ export interface IInstitutes {
     publisher_id?: number;
     account_type: string;
     createdOn?: string;
+    OrganizationLicense?: any
 }
