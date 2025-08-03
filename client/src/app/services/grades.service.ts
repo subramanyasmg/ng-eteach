@@ -53,19 +53,19 @@ export class GradesService {
         let user = this._secureStorageService.getItem<User>('user');
         switch (user.type) {
             case USER_TYPES.INSTITUTE_ADMIN:
-                this.apiUrl = 'api/insadmin/';
+                this.apiUrl = 'api/insadmin/grade';
                 break;
             case USER_TYPES.SUPER_ADMIN:
             case USER_TYPES.PUBLISHER_ADMIN:
             case USER_TYPES.PUBLISHER_USER:
-                this.apiUrl = 'api/superadmin/';
+                this.apiUrl = `api/superadmin/grade/${curriculumId}`;
                 break;
             default:
                 throw new Error('Unsupported user type');
         }
 
         return this._httpClient
-            .get(`${this.apiUrl}grade/${curriculumId}`)
+            .get(this.apiUrl)
             .pipe(
                 tap((response: any) => {
                     if (response?.status) {

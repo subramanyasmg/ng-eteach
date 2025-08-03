@@ -78,7 +78,7 @@ export class AuthService {
 
         return this._httpClient.post(url, credentials).pipe(
             switchMap((response: any) => {
-                if (response.success && response.status === 200) {
+                if (response.success) { 
                     // Store the access token in the local storage
                     this.accessToken = response.data.token;
     
@@ -86,19 +86,30 @@ export class AuthService {
                     this._authenticated = true;
     
                     // Store the user on the user service
-                    const user = {
-                        id: response.data.publisher.id,
-                        name:   response.data.publisher.name,
-                        email: response.data.publisher.email,
-                        type: response.data.publisher.role,
-                    };
-                    this._userService.user = user;
+                    let user = {};
+                    if (type === USER_TYPES.INSTITUTE_ADMIN) {
+                        user = {
+                            id: response.data.user.id,
+                            name:   response.data.user.firstName,
+                            email: response.data.user.email,
+                            type: response.data.user.role,
+                        };
+                    } else if (type === USER_TYPES.SUPER_ADMIN) {
+                        user = {
+                            id: response.data.publisher.id,
+                            name:   response.data.publisher.name,
+                            email: response.data.publisher.email,
+                            type: response.data.publisher.role,
+                        };
+                    }
+                    this._userService.user = user as User;
+                    
     
                      this._secureStorageService.setItem(
                                 'user', user);
     
                     // Return a new observable with the response
-                    return of(response);
+                    return of(user);
                 }
             })
         );
@@ -208,12 +219,33 @@ export class AuthService {
         return of(true);
     }
 
-    createPassword(password: string): Observable<any> {
-        return this._httpClient.post('api/u/create-password-institute', password).pipe(
+    createInstituteAdminPassword(request): Observable<any> {
+        return this._httpClient.post('api/insadmin/verify-reset-password', request).pipe(
             switchMap((response: any) => {
-                // Return a new observable with the response
-                //return of(response);
-                return of(true);
+                return of(response);
+            })
+        );
+    }
+
+    resetProfilePassword(password: string): Observable<any> {
+        let apiurl = '';
+        let user = this._secureStorageService.getItem<User>('user');
+        switch (user.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+                apiurl = 'api/insadmin/change-password';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
+                apiurl = `api/superadmin/change-password`;
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+        
+        return this._httpClient.post(apiurl, password).pipe(
+            switchMap((response: any) => {
+                return of(response);
             })
         );
     }

@@ -1,0 +1,82 @@
+
+<div class="bg-gray-100 flex min-w-0 flex-auto flex-col dark:bg-transparent sm:absolute sm:inset-0 sm:overflow-hidden">
+    <!-- Header -->
+    <div class="bg-card border-b relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div class="min-w-0 flex-1">
+            <!-- Title -->
+            <div class="text-4xl font-extrabold tracking-tight">
+                {{ 'navigation.editProfile' | transloco }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+         <div class="max-w-2xl">
+            <div class="prose prose-sm max-w-3xl">
+                <h2 class="text-3xl">  {{ 'navigation.changePassword' | transloco }}</h2>
+                
+            </div>
+             <form
+                [formGroup]="resetPasswordForm" #signInNgForm="ngForm"
+                class="bg-card mt-4 flex flex-col overflow-hidden rounded-2xl px-8 pt-10 shadow"
+            >
+              
+                <!-- Password field -->
+                <mat-form-field class="w-full">
+                    <mat-label>{{ 'profile.password_label' | transloco }} </mat-label>
+                    <input id="password" matInput type="password" [formControlName]="'password'" #passwordField />
+                    <button mat-icon-button type="button" (click)="
+                            passwordField.type === 'password'
+                                ? (passwordField.type = 'text')
+                                : (passwordField.type = 'password')
+                        " matSuffix>
+                        @if (passwordField.type === 'password') {
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                        }
+                        @if (passwordField.type === 'text') {
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                        }
+                    </button>
+                    <mat-error> {{ 'profile.password_error_required' | transloco }}  </mat-error>
+                </mat-form-field>
+
+                <!-- Confirm Password field -->
+                <mat-form-field class="w-full">
+                    <mat-label>{{ 'profile.cpasword_label' | transloco }} </mat-label>
+                    <input id="cpassword" matInput type="password" [formControlName]="'cpassword'" #cpasswordField />
+                    <button mat-icon-button type="button" (click)="
+                            cpasswordField.type === 'password'
+                                ? (cpasswordField.type = 'text')
+                                : (cpasswordField.type = 'password')
+                        " matSuffix>
+                        @if (cpasswordField.type === 'password') {
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                        }
+                        @if (cpasswordField.type === 'text') {
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                        }
+                    </button>
+                    <mat-error *ngIf="resetPasswordForm.get('cpassword').hasError('required')"> {{ 'profile.cpassword_error_required' | transloco }} </mat-error>
+                    <mat-error *ngIf="resetPasswordForm.get('cpassword').hasError('mustMatch')">
+                       {{ 'profile.password_mismatch' | transloco }}
+                    </mat-error>
+                </mat-form-field>
+
+                <div
+                    class=" flex items-center justify-end  py-3"
+                >
+                    <button class="fuse-mat-button-large" mat-flat-button [color]="'primary'"
+                    [disabled]="resetPasswordForm.disabled || resetPasswordForm.invalid" (click)="resetPassword()">
+                    @if (!resetPasswordForm.disabled) {
+                    <span>  {{ 'profile.reset_password_btn' | transloco }} </span>
+                    }
+                    @if (resetPasswordForm.disabled) {
+                    <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                    }
+                </button>
+                </div>
+            </form>
+         </div>
+    </div>
+</div>

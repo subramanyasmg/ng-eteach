@@ -100,13 +100,13 @@ export class InstituteAdminSignInComponent implements OnInit {
                 (response) => {
                     let redirectURL = '';
 
-                    if (response?.user?.type === USER_TYPES.INSTITUTE_ADMIN) {
+                    if (response?.type === USER_TYPES.INSTITUTE_ADMIN) {
                         redirectURL =
                             this._activatedRoute.snapshot.queryParamMap.get(
                                 'redirectURL'
                             ) || '/institute-admin-signed-in-redirect';
                     }
-                    if (response?.user?.type === USER_TYPES.TEACHER) {
+                    if (response?.type === USER_TYPES.TEACHER) {
                         redirectURL =
                             this._activatedRoute.snapshot.queryParamMap.get(
                                 'redirectURL'

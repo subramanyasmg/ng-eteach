@@ -65,7 +65,6 @@ import { USER_TYPES } from 'app/constants/usertypes';
     imports: [
         MatProgressBarModule,
         MatFormFieldModule,
-        MatIconModule,
         MatInputModule,
         FormsModule,
         ReactiveFormsModule,
@@ -377,7 +376,6 @@ export class ChaptersListComponent implements OnInit {
                 next: (response: any) => {
                     console.log('response', response);
                     console.log('chapter', chapter);
-                    // chapter.data = data;
                     chapter.isLoading = false;
 
                     const lessonPlansFromApi =
@@ -726,6 +724,7 @@ export class ChaptersListComponent implements OnInit {
     openDialog() {
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',
+            disableClose: true
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {

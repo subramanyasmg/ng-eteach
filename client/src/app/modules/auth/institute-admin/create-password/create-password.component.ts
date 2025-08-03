@@ -47,6 +47,7 @@ export class CreatePasswordComponent implements OnInit {
     };
     resetPasswordForm: UntypedFormGroup;
     showAlert: boolean = false;
+    token;
 
     /**
      * Constructor
@@ -79,6 +80,13 @@ export class CreatePasswordComponent implements OnInit {
                 ),
             }
         );
+
+        this.token = this._activatedRoute.snapshot.queryParamMap.get('token');
+        console.log('Token:', this.token);
+        if (!this.token) {
+            alert('Invalid Token');
+            this._router.navigateByUrl('/home');
+        }
     }
 
     resetPassword(): void {
@@ -93,16 +101,23 @@ export class CreatePasswordComponent implements OnInit {
         // Hide the alert
         this.showAlert = false;
 
+        const requestObj = {
+            token: this.token,
+            newPassword: this.resetPasswordForm.value.password
+        };
+
         // Sign in
-        this._authService.createPassword(this.resetPasswordForm.value.password).subscribe(
+        this._authService.createInstituteAdminPassword(requestObj).subscribe(
             (response) => {
                 console.log(response);
-                this._router.navigateByUrl('/institute/create-password-success');
+                if (response.success && response.status === 200) {
+                    this._router.navigateByUrl('/create-password-success');
+                } else {
+                    this.handleError(response.message);
+                }
             },
             (response) => {
                 this.handleError();
-                //TEMPORARILY REDIRECTING. REMOVE IT LATER
-                this._router.navigateByUrl('/institute/create-password-success');
             }
         );
     }
