@@ -725,6 +725,7 @@ export class ChaptersListComponent implements OnInit {
     openDialog() {
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',
+            disableClose: true
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {
