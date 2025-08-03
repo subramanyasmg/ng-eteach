@@ -78,7 +78,7 @@ export class AuthService {
 
         return this._httpClient.post(url, credentials).pipe(
             switchMap((response: any) => {
-                if (response.success && response.status === 200) { 
+                if (response.success) { 
                     // Store the access token in the local storage
                     this.accessToken = response.data.token;
     
