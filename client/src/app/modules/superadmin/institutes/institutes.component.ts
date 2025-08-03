@@ -219,6 +219,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '600px',
+             disableClose: true
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {
@@ -231,12 +232,12 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         this.entityForm.patchValue({
             id: data.id,
             name: data.institute_name,
-            noOfLicense: data.total_licenses,
+            noOfLicense: data.OrganizationLicense[0]?.total_licenses,
             adminName: data.admin_name,
             instituteAddress: data.address,
             adminEmail: data.email,
             subdomain: data.subdomain,
-            expiresOn: data.license_end,
+            expiresOn: data.OrganizationLicense[0]?.license_end,
             status: data.status,
             publisher: data.publisher_id,
             curriculum: data.curriculum_id

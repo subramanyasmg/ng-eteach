@@ -1,0 +1,27 @@
+<div class="absolute inset-0">
+    <!-- Main -->
+    <div
+        class="flex h-full flex-auto flex-col items-center justify-center p-6 sm:p-10"
+    >
+        <!-- prettier-ignore -->
+        <div class="w-full max-w-xl flex justify-center">
+            <img src="images/404.svg" class="w-full max-h-120" alt="Page Not Found"/>
+        </div>
+        <div
+            class="mt-12 text-center text-4xl font-extrabold leading-tight tracking-tight sm:mt-24 md:text-7xl md:leading-none"
+        >
+            Ooops... 404!
+        </div>
+        <div
+            class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl"
+        >
+            The page you requested could not be found.
+        </div>
+        <a
+            class="mt-12 font-medium text-primary-500 underline"
+            [routerLink]="['/']"
+        >
+            Back to Home
+        </a>
+    </div>
+</div>

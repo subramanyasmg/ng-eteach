@@ -54,7 +54,7 @@ export const appRoutes: Route[] = [
         },
         children: [
             {path: 'sign-in', loadChildren: () => import('app/modules/auth/institute-admin/sign-in/sign-in.routes')},
-            {path: 'verify-password', loadChildren: () => import('app/modules/auth/institute-admin/create-password/create-password.routes')},
+            {path: 'verify-email', loadChildren: () => import('app/modules/auth/institute-admin/create-password/create-password.routes')},
         ]
     },
     {
@@ -143,5 +143,7 @@ export const appRoutes: Route[] = [
         path: 'unauthorized',
         loadChildren: () =>
             import('app/modules/auth/not-authorized/not-authorized.routes'),
-    }
+    },
+    {path: '404-not-found', pathMatch: 'full', loadChildren: () => import('app/modules/error/error-404/error-404.routes')},
+    {path: '**', redirectTo: '404-not-found'}
 ];
