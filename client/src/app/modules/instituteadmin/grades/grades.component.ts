@@ -76,8 +76,8 @@ export class GradesComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSource = new MatTableDataSource<IGrades>();
   displayedColumns: string[] = [
       'grade_name',
-      'createdAt',
-      'updatedAt',
+      'created_at',
+      'updated_at',
       'subject_count'
   ];
   mode = null;

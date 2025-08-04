@@ -33,14 +33,14 @@
                         <td mat-cell *matCellDef="let element"><a class="text-primary" [routerLink]="element.id + '/subjects'">{{ element.grade_name }}</a></td>
                     </ng-container>
 
-                    <ng-container matColumnDef="createdAt">
+                    <ng-container matColumnDef="created_at">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_created_on' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element">{{ element.createdAt | date }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.created_at | date }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="updatedAt">
+                    <ng-container matColumnDef="updated_at">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_modified_on' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element">{{ element.updatedAt | date }}</td>
+                        <td mat-cell *matCellDef="let element">{{ element.updated_at | date }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="subject_count">

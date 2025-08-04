@@ -78,8 +78,8 @@ export class SubjectsComponent implements OnInit, AfterViewInit, OnDestroy {
     dataSource = new MatTableDataSource<ISubjects>();
     displayedColumns: string[] = [
         'subject_name',
-        'createdAt',
-        'updatedAt',
+        'created_at',
+        'updated_at',
         'chapter_count',
     ];
     mode = null;
