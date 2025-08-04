@@ -82,7 +82,7 @@ export class GradesService {
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}grade`, {
+                    .post('api/superadmin/grade', {
                         ...request,
                         curriculum_id: curriculumId,
                     })
@@ -128,7 +128,7 @@ export class GradesService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateGrade`, {
+                    .put(`api/superadmin/updateGrade`, {
                         name: data.grade_name,
                         curriculum_id: curriculumId,
                         id: Number(data.id),
@@ -166,7 +166,7 @@ export class GradesService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deleteGrade/${id}`)
+                    .delete(`api/superadmin/deleteGrade/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200 && index !== -1) {
