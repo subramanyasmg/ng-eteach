@@ -246,4 +246,12 @@ export class AuthService {
             })
         );
     }
+
+    getOrgDetails() {
+        return this._httpClient.get('api/insadmin/organization-info').pipe(
+            switchMap((response: any) => {
+                return of(response);
+            })
+        );
+    }
 }

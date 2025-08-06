@@ -143,6 +143,9 @@ export class GradeDetailsComponent implements OnInit {
         this.subjects$ = this.store.select(
             selectSubjectsByGradeId(this.gradeId)
         );
+        this.store.dispatch(
+            SectionActions.loadSections({ gradeId: this.gradeId })
+        );
 
         this.handleAPIResponse();
 

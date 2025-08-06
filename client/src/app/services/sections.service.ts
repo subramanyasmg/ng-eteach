@@ -45,11 +45,11 @@ export class SectionsService {
 
     getAll(gradeId: string) {
         return this._httpClient
-            .get(`${this.apiUrl}getAllSections/${gradeId}`)
+            .get(`${this.apiUrl}section/${gradeId}`)
             .pipe(
                 tap((response: any) => {
                     if (response?.status) {
-                        this._items.next(response.data as ISections[]);
+                        this._items.next(response.data.rows as ISections[]);
                     } else {
                         this._items.next([]);
                     }
@@ -63,20 +63,11 @@ export class SectionsService {
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
-                // this._httpClient
-                //     .post(`${this.apiUrl}createSection`, {
-                //         ...request,
-                //         grade_id: gradeId,
-                //     })
-                const mockResponse = {
-                    status: 200,
-                    data: {
-                        id: Date.now().toString(),
-                        section_name: request.section_name,
-                        subjects:[]
-                    } as ISections,
-                };
-                 return of(mockResponse)
+                 return this._httpClient
+                    .post(`${this.apiUrl}section`, {
+                        ...request,
+                        grade_id: gradeId,
+                    })
                     .pipe(
                         mergeMap((response: any) => {
                             if (response.status !== 200) {
