@@ -32,7 +32,8 @@
         "subtext": "Overview of the company",
         "total_publishers": "Total Publishers",
         "total_institutes": "Total Institutes",
-        "total_licenses": "Total Licenses"
+        "total_licenses": "Total Licenses",
+        "error_data_fetch": "Failed to fetch dashboard data"
     },
     "insadmin_dashboard": {
         "subtext": "Overview of the Institute",
@@ -229,7 +230,9 @@
         "page_subtext": "You can add upto {{count}} teachers in your subscription plan",
         "empty_state_line1": "It looks like you haven’t added any Teacher information of your institution.",
         "empty_state_line2": "Add teacher information by clicking the (+) button on the to right",
-        "table_name": "Teacher’s name",
+        "table_name":"Name",
+        "table_fname": "First name",
+        "table_lname": "Last name",
         "table_assigned_subjects": "Assigned subjects",
         "table_assigned_classes": "Assigned classes",
         "subscription_limit_reached_title": "Oops! Subscription limit has been reached!",
@@ -242,7 +245,8 @@
         "form_subject_expertise": "Subject expertise",
         "form_associated_class": "Associated Class",
         "error_duplicate_combination": "This combination is already added",
-        "error_teachers_name_required": "Teacher's name is required",
+        "error_teachers_fname_required": "Teacher's First name is required",
+        "error_teachers_lname_required": "Teacher's Last name is required",
         "error_email_required": "Email ID is required",
         "error_email_invalid": "Email ID is invalid",
         "error_phone_required": "Phone No. is required",
