@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import {
     FormsModule,
@@ -18,6 +19,8 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
 import { USER_TYPES } from 'app/constants/usertypes';
 import { AuthService } from 'app/core/auth/auth.service';
+import { SecureSessionStorageService } from 'app/services/securestorage.service';
+import { take } from 'rxjs';
 
 @Component({
     selector: 'auth-sign-in',
@@ -34,6 +37,7 @@ import { AuthService } from 'app/core/auth/auth.service';
         MatIconModule,
         MatCheckboxModule,
         MatProgressSpinnerModule,
+        CommonModule,
     ],
 })
 export class InstituteAdminSignInComponent implements OnInit {
@@ -45,9 +49,11 @@ export class InstituteAdminSignInComponent implements OnInit {
     };
     signInForm: UntypedFormGroup;
     showAlert: boolean = false;
-    schoolLogo = 'images/school-logo.jpg';
-    schoolName = 'Dhirubhai Ambani International School';
-    schoolCover = 'images/school.png';
+    schoolLogo = '';
+    schoolName = '';
+    schoolCover = '';
+    isOrgValid = false;
+    isLoading = true;
 
     /**
      * Constructor
@@ -56,7 +62,8 @@ export class InstituteAdminSignInComponent implements OnInit {
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
         private _formBuilder: UntypedFormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _secureStorageService: SecureSessionStorageService
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -67,6 +74,36 @@ export class InstituteAdminSignInComponent implements OnInit {
      * On init
      */
     ngOnInit(): void {
+        this._authService
+            .getOrgDetails()
+            .pipe(take(1))
+            .subscribe(
+                (response) => {
+                    console.log(response);
+                    this.isLoading = false;
+                    if (response.success) {
+                        this.isOrgValid = true;
+                        this.schoolLogo = response.data.logo
+                            ? response.data.logo
+                            : 'images/logo_placeholder.png';
+                        this.schoolName = response.data.institute_name;
+                        this.schoolCover = response.data.custom
+                            ? response.data.photo
+                            : 'images/placeholder.jpg';
+
+                        this._secureStorageService.setItem('license', {
+                            total_licenses: response.data.total_licenses,
+                            license_end: response.data.license_end
+                        } );
+                    }
+                },
+                (error) => {
+                    console.error('error', error);
+                    this.isOrgValid = false;
+                    this.isLoading = false;
+                }
+            );
+
         // Create the form
         this.signInForm = this._formBuilder.group({
             email: ['', [Validators.required, Validators.email]],

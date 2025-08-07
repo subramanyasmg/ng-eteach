@@ -2,7 +2,9 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { DashboardService } from 'app/services/dashboard.service';
 import { ApexOptions, NgApexchartsModule } from 'ng-apexcharts';
 
 @Component({
@@ -61,13 +63,25 @@ export class DashboardComponent implements OnInit {
     };
     chartInstitutesOnboarded: ApexOptions = {};
     chartTeachersOnboarded: ApexOptions = {};
+    stats: {institutes: any, publishers, licenses: any} = {
+        institutes: {
+            total: 0
+        },
+        publishers: {
+            total: 0
+        },
+        licenses: {
+            total: 0
+        },
+    };
     /**
      * Constructor
      */
     constructor(
         private titleService: BreadcrumbService,
+        private _dashboardService: DashboardService,
         private _router: Router,
-
+         private _snackBar: SnackBarService,
         private translocoService: TranslocoService
     ) {
         this.titleService.setBreadcrumb([
@@ -83,6 +97,23 @@ export class DashboardComponent implements OnInit {
     }
 
     ngOnInit(): void {
+
+        this._dashboardService.getSuperAdminDashboard().subscribe((response) => {
+            console.log('response', response);
+            if (response.success && response.data) {
+                this.stats.institutes.total = response.data.organization;
+                this.stats.publishers.total = response.data.publisher;
+                this.stats.licenses.total = response.data.totalLicenses;
+            } else {
+                 this._snackBar.showError(
+                    this.translocoService.translate(
+                        'superadmin_dashboard.error_data_fetch'
+                    )
+                );
+            }
+        })
+
+
         // Attach SVG fill fixer to all ApexCharts
         window['Apex'] = {
             chart: {

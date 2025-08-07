@@ -14,7 +14,7 @@ export class SectionsEffects {
       ofType(SectionActions.loadSections),
       mergeMap(({ gradeId }) =>
         this.service.getAll(gradeId).pipe(
-          map(response => SectionActions.loadSectionsSuccess({ gradeId, sections: response.data })),
+          map(response => SectionActions.loadSectionsSuccess({ gradeId, sections: response.data.rows })),
           catchError(error => of(SectionActions.loadSectionsFailure({ error })))
         )
       )
