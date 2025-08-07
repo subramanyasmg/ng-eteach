@@ -156,10 +156,19 @@ export class GradeDetailsComponent implements OnInit {
         this.store
             .select(selectSectionsByGradeId(this.gradeId))
             .subscribe((data) => {
-                this.sectionList = data.map((section) => ({
-                    ...section,
+                this.sectionList = data.map((section: any) => ({
+                    section_name: section.section_name,
+                    id: section.id,
+                    subjects: section.section_mappings.map((el) => ({
+                        ...el.subject,
+                        teacher: {
+                            id:  el.teacher.id,
+                            name:  el.teacher.first_name + ' ' + el.teacher.last_name
+                        }   
+                    })),
                     editMode: false,
                 }));
+                console.log(this.sectionList);
             });
     }
 
