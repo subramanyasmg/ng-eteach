@@ -79,7 +79,8 @@
                                 + ' - ' + element?.associatedClass[0]?.section?.name 
                                 + ' - ' +element?.associatedClass[0]?.subject?.name}}</span>
                                  <span class="rounded text-orange-400 px-2 py-0.5" *ngIf="element?.associatedClass?.length === 0">
-                                    No class assigned
+                                   {{ 'teachers.error_no_class_assigned' |
+                            transloco }}
                                  </span>
 
                                 <!-- If more grades exist -->
