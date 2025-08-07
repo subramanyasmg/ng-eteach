@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import {
     ChangeDetectorRef,
     Component,
+    OnDestroy,
     OnInit,
     TemplateRef,
     ViewChild,
@@ -42,16 +43,19 @@ import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.servi
 import { ISections } from 'app/models/sections.types';
 import { ISubjects } from 'app/models/subject.types';
 import { PipesModule } from 'app/pipes/pipes.module';
+import { TeachersService } from 'app/services/teachers.service';
 import * as GradeActions from 'app/state/grades/grades.actions';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import * as SectionActions from 'app/state/sections/sections.actions';
 import { selectSectionsByGradeId } from 'app/state/sections/sections.selectors';
 import * as SubjectActions from 'app/state/subjects/subjects.actions';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
+import * as TeacherActions from 'app/state/teachers/teacher.actions';
+import { selectAllTeachers } from 'app/state/teachers/teacher.selectors';
 import { QuillModule } from 'ngx-quill';
-import { SkeletonModule } from 'primeng/skeleton';
 import { SelectModule } from 'primeng/select';
-import { filter, map, Observable, take, tap } from 'rxjs';
+import { SkeletonModule } from 'primeng/skeleton';
+import { filter, map, Observable, Subject, take, takeUntil, tap } from 'rxjs';
 
 @Component({
     selector: 'app-grade-details',
@@ -84,14 +88,16 @@ import { filter, map, Observable, take, tap } from 'rxjs';
         MatChipsModule,
         SkeletonModule,
         QuillModule,
-        SelectModule
+        SelectModule,
     ],
     templateUrl: './grade-details.component.html',
     styleUrl: './grade-details.component.scss',
 })
-export class GradeDetailsComponent implements OnInit {
+export class GradeDetailsComponent implements OnInit, OnDestroy {
     @ViewChild('filePreviewModal') filePreviewModal: TemplateRef<any>;
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
+
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     query = '';
     curriculumId = '1';
@@ -105,17 +111,13 @@ export class GradeDetailsComponent implements OnInit {
     newSectionName: string = '';
     sectionList: ISections[];
     subjectForSections = [];
-    displayedColumns: string[] = ['subjectName', 'teacher', 'chapters', 'completion'];
-
-
-
-     teachers: any[] | undefined = [
-        { name: 'Teacher 1', id: '1' },
-        { name: 'Teacher 2', id: '2' },
-        { name: 'Teacher 3', id: '3' },
-        { name: 'Teacher 4', id: '4' },
-        { name: 'Teacher 5', id: '5' }
+    displayedColumns: string[] = [
+        'subjectName',
+        'teacher',
+        'chapters',
+        'completion',
     ];
+    teacherList: any[] = null;
 
     constructor(
         private route: ActivatedRoute,
@@ -128,7 +130,8 @@ export class GradeDetailsComponent implements OnInit {
         private _cdr: ChangeDetectorRef,
         private translocoService: TranslocoService,
         private sanitizer: DomSanitizer,
-        private titleService: BreadcrumbService
+        private titleService: BreadcrumbService,
+        private _teacherService: TeachersService
     ) {}
 
     ngOnInit(): void {
@@ -147,11 +150,26 @@ export class GradeDetailsComponent implements OnInit {
             SectionActions.loadSections({ gradeId: this.gradeId })
         );
 
+        this.store.dispatch(TeacherActions.loadTeachers());
+
         this.handleAPIResponse();
 
         this.entityForm = this._formBuilder.group({
             name: ['', [Validators.required]],
         });
+
+        this.store
+            .select(selectAllTeachers)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((data) => {
+               
+               this.teacherList = data.map((el) => ({
+                    id: el.id,
+                    name: el.first_name + ' ' + el.last_name,
+                    edit: false
+               }));
+                console.log('teacherList', this.teacherList);
+            });
 
         this.store
             .select(selectSectionsByGradeId(this.gradeId))
@@ -162,15 +180,30 @@ export class GradeDetailsComponent implements OnInit {
                     subjects: section.section_mappings.map((el) => ({
                         ...el.subject,
                         teacher: {
-                            id:  el.teacher.id,
-                            name:  el.teacher.first_name + ' ' + el.teacher.last_name
-                        }   
+                            id: el.teacher.id,
+                            name:
+                                el.teacher.first_name +
+                                ' ' +
+                                el.teacher.last_name,
+                            edit: false
+                        },
                     })),
                     editMode: false,
                 }));
-                console.log(this.sectionList);
             });
     }
+
+    ngOnDestroy(): void {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
+    }
+
+    enterEditMode(element: any) {
+        element.teacher = this.teacherList.find(t => t.id === element.teacher?.id) || null;
+        element.teacher.edit = true;
+    }
+
 
     openAddSectionModal() {
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
@@ -202,7 +235,6 @@ export class GradeDetailsComponent implements OnInit {
             })
         );
     }
-
 
     deleteItem(item: ISections): void {
         // Open the confirmation dialog
@@ -263,17 +295,19 @@ export class GradeDetailsComponent implements OnInit {
     }
 
     addSubjectToSection(section: ISections) {
-        const existingSubjectIds = new Set(section.subjects.map(s => s.id));
+        const existingSubjectIds = new Set(section.subjects.map((s) => s.id));
 
-        const duplicates = this.subjectForSections.filter(el => existingSubjectIds.has(el.id));
+        const duplicates = this.subjectForSections.filter((el) =>
+            existingSubjectIds.has(el.id)
+        );
         const newSubjects = this.subjectForSections
-            .filter(el => !existingSubjectIds.has(el.id))
-            .map(el => ({
+            .filter((el) => !existingSubjectIds.has(el.id))
+            .map((el) => ({
                 id: el.id,
                 subject_name: el.subject_name,
                 teacher: null,
                 chapters: 0,
-                completion: 0
+                completion: 0,
             }));
 
         // Add new subjects to the section
@@ -284,13 +318,23 @@ export class GradeDetailsComponent implements OnInit {
 
         // Notify if there were duplicates
         if (duplicates.length > 0) {
-            const duplicateNames = duplicates.map(d => d.subject_name).join(', ');
-            this._snackBar.showError(`Subjects already added: ${duplicateNames}`);
+            const duplicateNames = duplicates
+                .map((d) => d.subject_name)
+                .join(', ');
+            this._snackBar.showError(
+                `Subjects already added: ${duplicateNames}`
+            );
         }
     }
-    
+
     onTeacherAssign(event, subjectForSection) {
+        console.log(event);
         subjectForSection.teacher.edit = false;
+        if (event.value) {
+            subjectForSection.teacher = JSON.parse(
+                JSON.stringify(event.value)
+            )
+        }
     }
 
     handleAPIResponse() {

@@ -281,7 +281,11 @@
         "select_subject_placeholder": "Select Subjects",
         "assign_teacher_label": "Assign a Teacher",
         "add_selected_subjects_tooltip": "Add selected subjects to this section",
-        "chapters_completed_label":"Chapters Completed"
+        "chapters_completed_label":"Chapters Completed",
+        "label_subject_name": "Subject Name",
+        "label_chapters": "Chapters",
+        "label_teachers":"Teachers",
+        "label_completion_percentage": "Completion %"
     },
     "classes": {
         "subtext": "Overview of the assigned classes",

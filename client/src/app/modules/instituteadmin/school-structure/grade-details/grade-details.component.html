@@ -147,34 +147,35 @@
                             <table mat-table [dataSource]="section.subjects">
     
                                 <ng-container matColumnDef="subjectName">
-                                    <th mat-header-cell *matHeaderCellDef> Subject Name </th>
+                                    <th mat-header-cell *matHeaderCellDef> {{ 'school_structure.label_subject_name' | transloco }} </th>
                                     <td mat-cell *matCellDef="let element"> {{element.subject_name ?? '-'}} </td>
                                 </ng-container>
     
                                 <ng-container matColumnDef="teacher">
-                                    <th mat-header-cell *matHeaderCellDef> Teacher </th>
+                                    <th mat-header-cell *matHeaderCellDef>  {{ 'school_structure.label_teachers' | transloco }} </th>
                                     <td mat-cell *matCellDef="let element">
                                         <div class="flex items-center gap-2" *ngIf="element.teacher && !element.teacher.edit else assignTeacher">
                                             {{ element.teacher?.name }}
-                                             <button mat-icon-button (click)="element.teacher.edit = true">
+                                             <button mat-icon-button (click)="enterEditMode(element)">
                                                 <mat-icon [matTooltip]="'school_structure.assign_teacher_label' | transloco" class="font-bold icon-size-4">edit</mat-icon>
                                             </button>
                                         </div>
                                         <ng-template #assignTeacher>
-                                            <p-select appendTo="body" size="small" (onChange)="onTeacherAssign($event, element)" [options]="teachers" onmodelchange [(ngModel)]="element.teacher" optionLabel="name"
-                                                [filter]="true" filterBy="name" [showClear]="true" [placeholder]="'school_structure.assign_teacher_label' | transloco" class="w-full md:w-56">
+                                            <p-select appendTo="body" size="small" (onChange)="onTeacherAssign($event, element)" [options]="teacherList"
+                                                onmodelchange [ngModel]="element.teacher" optionLabel="name" [filter]="true" filterBy="name" [showClear]="true"
+                                                [placeholder]="'school_structure.assign_teacher_label' | transloco"  class="w-full md:w-56">
                                             </p-select>
                                         </ng-template>
                                     </td>
                                 </ng-container>
     
                                 <ng-container matColumnDef="chapters">
-                                    <th mat-header-cell *matHeaderCellDef> Chapters </th>
+                                    <th mat-header-cell *matHeaderCellDef>  {{ 'school_structure.label_chapters' | transloco }} </th>
                                     <td mat-cell *matCellDef="let element"> {{element.chapters ?? '-'}} </td>
                                 </ng-container>
     
                                 <ng-container matColumnDef="completion">
-                                    <th mat-header-cell *matHeaderCellDef> Completion % </th>
+                                    <th mat-header-cell *matHeaderCellDef>  {{ 'school_structure.label_completion_percentage' | transloco }} </th>
                                     <td mat-cell *matCellDef="let element"> {{element.completion ?? '-'}} </td>
                                 </ng-container>
     
