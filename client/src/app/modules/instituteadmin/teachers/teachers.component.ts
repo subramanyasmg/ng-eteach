@@ -1,4 +1,4 @@
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { COMMA, E, ENTER } from '@angular/cdk/keycodes';
 import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
@@ -42,9 +42,13 @@ import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { ITeachers } from 'app/models/teachers.types';
+import { GradesService } from 'app/services/grades.service';
+import { SectionsService } from 'app/services/sections.service';
+import { SecureSessionStorageService } from 'app/services/securestorage.service';
+import { SubjectsService } from 'app/services/subjects.service';
 import * as TeacherActions from 'app/state/teachers/teacher.actions';
 import { selectAllTeachers } from 'app/state/teachers/teacher.selectors';
-import { map, Observable, of, startWith, Subject, tap } from 'rxjs';
+import { map, Observable, of, startWith, Subject, takeUntil, tap } from 'rxjs';
 
 @Component({
     selector: 'app-teachers',
@@ -85,8 +89,8 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dataSource = new MatTableDataSource<ITeachers>();
     displayedColumns: string[] = [
-        'name',
-        'subjectExpertise',
+        'first_name',
+        // 'subjectExpertise',
         'associatedClass',
         'actions',
     ];
@@ -94,7 +98,8 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     query = '';
     entityForm: UntypedFormGroup;
     matDialogRef = null;
-    licenseCount: number = 20;
+    licenseCount: number = 0;
+    disableAddTeacher = false;
     subjectCtrl = new FormControl('');
     separatorKeysCodes: number[] = [ENTER, COMMA];
     selectedSubjects: { id: string; name: string }[] = [];
@@ -109,24 +114,6 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         { id: 'bio108', name: 'Biology' },
     ];
     filteredSubjects!: Observable<{ id: string; name: string }[]>;
-    gradeList$: Observable<{ id: string; name: string }[]> = of([
-        { id: 'g1', name: 'Grade 1' },
-        { id: 'g2', name: 'Grade 2' },
-        { id: 'g3', name: 'Grade 3' },
-        { id: 'g4', name: 'Grade 4' },
-    ]);
-    sectionList$: Observable<{ id: string; name: string }[]> = of([
-        { id: 'sec1', name: 'Section 1' },
-        { id: 'sec2', name: 'Section 2' },
-        { id: 'sec3', name: 'Section 3' },
-        { id: 'sec4', name: 'Section 4' },
-    ]);
-    gradeSubjectList$: Observable<{ id: string; name: string }[]> = of([
-        { id: 's1', name: 'Subject 1' },
-        { id: 's2', name: 'Subject 2' },
-        { id: 's3', name: 'Subject 3' },
-        { id: 's4', name: 'Subject 4' },
-    ]);
 
     gradeList: { id: string; name: string }[] = [];
     sectionList: { id: string; name: string }[] = [];
@@ -139,11 +126,15 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         private _matDialog: MatDialog,
         private _formBuilder: UntypedFormBuilder,
         private _snackBar: SnackBarService,
+        private _gradeService: GradesService,
+        private _sectionService: SectionsService,
+        private _subjectService: SubjectsService,
         private store: Store,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
         private titleService: BreadcrumbService,
-        private translocoService: TranslocoService
+        private translocoService: TranslocoService,
+        private _secureStorageService: SecureSessionStorageService
     ) {
         this.titleService.setBreadcrumb([
             {
@@ -158,19 +149,47 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             },
         ]);
 
+        this.licenseCount = (this._secureStorageService.getItem('license') as any).total_licenses;
+
+        this.store.dispatch(TeacherActions.loadTeachers());
+
         this.handleAPIResponse();
 
         this.list$.subscribe((data) => {
-            this.dataSource = new MatTableDataSource(data); // reassign!
+            console.log(data);
+            const mappedData = data.map((el: any) => ({
+                ...el,
+                associatedClass: el.teacher_section_mappings.map((el2) => ({
+                    grade: {
+                        id: el2.section.grade.id,
+                        name: el2.section.grade.grade_name
+                    },
+                    section: {
+                        id: el2.section.id,
+                        name: el2.section.section_name
+                    },
+                    subject: {
+                        id: el2.subject.id,
+                        name: el2.subject.subject_name
+                    },
+                }))
+            }));
+            console.log('mappedData', mappedData);
+            this.dataSource = new MatTableDataSource(mappedData); // reassign!
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
+
+            if(mappedData.length >= this.licenseCount) {
+                this.disableAddTeacher = true;
+            }
         });
     }
 
     ngOnInit(): void {
         this.entityForm = this._formBuilder.group({
             id: [''],
-            name: ['', [Validators.required]],
+            fname: ['', [Validators.required]],
+            lname: ['', [Validators.required]],
             email: ['', [Validators.required, Validators.email]],
             phone: [
                 '',
@@ -181,11 +200,11 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
                     Validators.pattern(/^\+?[0-9]{10,15}$/),
                 ],
             ],
-            subjects: [[], [Validators.required]],
+          //  subjects: [[], [Validators.required]],
             grade: [''],
             section: [''],
             gradesubject: [''],
-            selectedGradeSectionSubjects: [[], Validators.required],
+            selectedGradeSectionSubjects: [[]],
         });
 
         this.filteredSubjects = this.subjectCtrl.valueChanges.pipe(
@@ -193,10 +212,58 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             map((value: string) => this._filterSubjects(value || ''))
         );
 
-        // Cache the lists locally for lookup by ID
-        this.gradeList$.subscribe((data) => (this.gradeList = data));
-        this.sectionList$.subscribe((data) => (this.sectionList = data));
-        this.gradeSubjectList$.subscribe((data) => (this.subjectList = data));
+        this._gradeService
+            .getAll('1')
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((response) => {
+                console.log(response);
+                if (response.success && response.data?.rows) {
+                    this.gradeList = response.data.rows.map((el) => ({
+                        id: el.id,
+                        name: el.grade_name,
+                    }));
+                }
+            });
+
+        this.entityForm
+            .get('grade')
+            ?.valueChanges.subscribe((gradeId: string) => {
+                if (gradeId) {
+                    this.entityForm.patchValue({ section: '' });
+                    this.entityForm.patchValue({ gradesubject: '' });
+
+                    this._sectionService
+                        .getAll(gradeId)
+                        .pipe(takeUntil(this._unsubscribeAll))
+                        .subscribe((response) => {
+                            console.log('sections', response);
+                            if (response.success && response.data?.rows) {
+                                this.sectionList = response.data.rows.map(
+                                    (el) => ({
+                                        id: el.id,
+                                        name: el.section_name,
+                                    })
+                                );
+                            }
+                        });
+
+                    this._subjectService
+                        .getAll(gradeId)
+                        .pipe(takeUntil(this._unsubscribeAll))
+                        .subscribe((response) => {
+                            console.log('subjects', response);
+                            if (response.success && response.data?.rows) {
+                                this.subjectList = response.data.rows.map(
+                                    (el) => ({
+                                        id: el.id,
+                                        name: el.subject_name,
+                                    })
+                                );
+                            }
+                        });
+                }
+            });
+
     }
 
     private _filterSubjects(value: string): { id: string; name: string }[] {
@@ -274,13 +341,18 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     patchFormValues(data: ITeachers) {
         this.entityForm.patchValue({
             id: data.id,
-            name: data.name,
+            fname: data.first_name,
+            lname: data.last_name,
             email: data.email,
             phone: data.phone,
-            subjects: JSON.parse(JSON.stringify(data.subjectExpertise)),
-            selectedGradeSectionSubjects: JSON.parse(JSON.stringify(data.associatedClass))
+           // subjects: JSON.parse(JSON.stringify(data.subjectExpertise)),
+            selectedGradeSectionSubjects: JSON.parse(
+                JSON.stringify(data.associatedClass)
+            ),
         });
-        this.selectedSubjects = JSON.parse(JSON.stringify(data.subjectExpertise));
+        // this.selectedSubjects = JSON.parse(
+        //     JSON.stringify(data.subjectExpertise)
+        // );
     }
 
     addSelectedGrade(): void {
@@ -337,11 +409,11 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             ?.setValue([...selectedGrades]);
     }
 
-    getRemainingGradeNames(grades: { grade: { name: string } }[]): string {
-        if (grades.length <= 1) return '';
-        return grades
+    getRemainingGradeNames(classes: any[]): string {
+        if (classes.length <= 1) return '';
+        return classes
             .slice(1) // skip the first
-            .map((g) => g.grade.name)
+            .map((c) => c.grade.name + ' - ' + c.section.name + ' - ' + c.subject.name)
             .join(', ');
     }
 
@@ -355,11 +427,15 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         this.entityForm.disable();
         const formValues = this.entityForm.value;
         const requestObj: ITeachers = {
-            name: formValues.name,
+            first_name: formValues.fname,
+            last_name: formValues.lname,
             email: formValues.email,
             phone: formValues.phone,
-            subjectExpertise: formValues.subjects,
-            associatedClass: formValues.selectedGradeSectionSubjects,
+            associatedClass: formValues.selectedGradeSectionSubjects.map((el) => ({
+                 grade_id: el.grade.id,
+                section_id: el.section.id,
+                subject_id: el.subject.id
+            }))
         };
         this.store.dispatch(TeacherActions.addTeacher({ teacher: requestObj }));
     }
@@ -375,13 +451,16 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         const formValues = this.entityForm.value;
         const requestObj: ITeachers = {
             id: formValues.id,
-            name: formValues.name,
+            first_name: formValues.fname,
+            last_name: formValues.lname,
             email: formValues.email,
             phone: formValues.phone,
-            subjectExpertise: formValues.subjects,
+           // subjectExpertise: formValues.subjects,
             associatedClass: formValues.selectedGradeSectionSubjects,
         };
-        this.store.dispatch(TeacherActions.updateTeacher({ teacher: requestObj }));
+        this.store.dispatch(
+            TeacherActions.updateTeacher({ teacher: requestObj })
+        );
     }
 
     deleteItem(item: ITeachers): void {

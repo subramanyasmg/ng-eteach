@@ -19,6 +19,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
 import { USER_TYPES } from 'app/constants/usertypes';
 import { AuthService } from 'app/core/auth/auth.service';
+import { SecureSessionStorageService } from 'app/services/securestorage.service';
 import { take } from 'rxjs';
 
 @Component({
@@ -61,7 +62,8 @@ export class InstituteAdminSignInComponent implements OnInit {
         private _activatedRoute: ActivatedRoute,
         private _authService: AuthService,
         private _formBuilder: UntypedFormBuilder,
-        private _router: Router
+        private _router: Router,
+        private _secureStorageService: SecureSessionStorageService
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -85,9 +87,14 @@ export class InstituteAdminSignInComponent implements OnInit {
                             ? response.data.logo
                             : 'images/logo_placeholder.png';
                         this.schoolName = response.data.institute_name;
-                        this.schoolCover = response.data.photo
+                        this.schoolCover = response.data.custom
                             ? response.data.photo
                             : 'images/placeholder.jpg';
+
+                        this._secureStorageService.setItem('license', {
+                            total_licenses: response.data.total_licenses,
+                            license_end: response.data.license_end
+                        } );
                     }
                 },
                 (error) => {

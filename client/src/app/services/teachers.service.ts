@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ITeachers } from 'app/models/teachers.types';
 import {
     BehaviorSubject,
     Observable,
@@ -12,7 +13,6 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { ITeachers } from 'app/models/teachers.types';
 
 @Injectable({ providedIn: 'root' })
 export class TeachersService {
@@ -22,7 +22,7 @@ export class TeachersService {
     private _item: BehaviorSubject<ITeachers | null> = new BehaviorSubject(
         null
     );
-    private apiUrl = '/api/a/teachers';
+    private apiUrl = '/api/insadmin/teacher';
 
     /**
      * Constructor
@@ -47,7 +47,7 @@ export class TeachersService {
         return this._httpClient.get(this.apiUrl).pipe(
             tap((response: any) => {
                 if (response?.status) {
-                    this._items.next(response.data as ITeachers[]);
+                    this._items.next(response.data.rows as ITeachers[]);
                 } else {
                     this._items.next([]);
                 }
@@ -55,67 +55,35 @@ export class TeachersService {
         );
     }
 
-    // create(request): Observable<any> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((item) =>
-    //             this._httpClient.post(this.apiUrl, { ...request }).pipe(
-    //                 mergeMap((response: any) => {
-    //                     if (!response.status) {
-    //                         return throwError(() => new Error('Something went wrong while adding'));
-    //                     }
-
-    //                     this._items.next([
-    //                         response.data as ITeachers,
-    //                         ...item,
-    //                     ]);
-
-    //                     return of(response);
-    //                 })
-    //             )
-    //         )
-    //     );
-    // }
-
     create(request): Observable<any> {
         return this.items$.pipe(
             take(1),
-            switchMap((existingItems) => {
-                const items = existingItems ?? [];
-
-                const mockResponse = {
-                    status: true,
-                    data: {
-                        id: Date.now().toString(),
-                        name: request.name,
-                        email: request.email,
-                        phone: request.phone,
-                        subjectExpertise: request.subjectExpertise,
-                        associatedClass: request.associatedClass
-                    } as ITeachers,
-                };
-
-                return of(mockResponse).pipe(
-                    delay(300), // Simulate API delay
-                    mergeMap((response: any) => {
-                        if (response.status !== 200) {
-                            return throwError(
-                                () =>
-                                    new Error(
-                                        response.message ?? 'Something went wrong while adding'
-                                    )
-                            );
-                        }
-
-                        this._items.next([
-                            response.data as ITeachers,
-                            ...items,
-                        ]);
-
-                        return of(response);
+            switchMap((existingItems) =>
+                this._httpClient
+                    .post(this.apiUrl, {
+                        ...request,
                     })
-                );
-            })
+                    .pipe(
+                        mergeMap((response: any) => {
+                            if (response.status !== 200) {
+                                return throwError(
+                                    () =>
+                                        new Error(
+                                            response.message ??
+                                                'Something went wrong while adding'
+                                        )
+                                );
+                            }
+
+                            this._items.next([
+                                response.data as ITeachers,
+                                ...existingItems,
+                            ]);
+
+                            return of(response);
+                        })
+                    )
+            )
         );
     }
 

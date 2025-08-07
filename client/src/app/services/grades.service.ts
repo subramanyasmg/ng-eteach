@@ -134,7 +134,6 @@ export class GradesService {
                         id: Number(data.id),
                     })
                     .pipe(
-                        delay(300),
                         map((response: any) => {
                             if (response.status === 200) {
                                 // Replace the old item with updated item

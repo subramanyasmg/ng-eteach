@@ -14,7 +14,7 @@ export class TeacherEffects {
       ofType(TeacherActions.loadTeachers),
       mergeMap(() =>
         this.service.getAll().pipe(
-          map(response => TeacherActions.loadTeachersSuccess({ teachers: response.data })),
+          map(response => TeacherActions.loadTeachersSuccess({ teachers: response.data.rows })),
           catchError(error => of(TeacherActions.loadTeachersFailure({ error })))
         )
       )
