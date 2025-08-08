@@ -47,6 +47,7 @@ import { ICurriculum } from '../../../models/curriculum.types';
 import { UserService } from 'app/core/user/user.service';
 import { User } from 'app/core/user/user.types';
 import { USER_TYPES } from 'app/constants/usertypes';
+import { CurriculumService } from 'app/services/curriculum.service';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -81,6 +82,7 @@ export class CurriculumListComponent
     implements OnInit, AfterViewInit, OnDestroy
 {
     @ViewChild('EntityDialog') EntityDialog: TemplateRef<any>;
+    @ViewChild('ExcelDialog') ExcelDialog: TemplateRef<any>;
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
 
@@ -96,10 +98,12 @@ export class CurriculumListComponent
     list$: Observable<ICurriculum[]>;
     entityForm: UntypedFormGroup;
     matDialogRef = null;
+    matDialogRefExcelUpload = null;
     publisherId;
-    user:User = null;
+    user: User = null;
     readonly USER_TYPES = USER_TYPES;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    selectedExcelFile = null;
 
     constructor(
         private route: ActivatedRoute,
@@ -112,77 +116,84 @@ export class CurriculumListComponent
         private _cdr: ChangeDetectorRef,
         private _userService: UserService,
         private translocoService: TranslocoService,
-        private titleService: BreadcrumbService
+        private titleService: BreadcrumbService,
+        private _curriculumService: CurriculumService
     ) {}
 
-    
     ngOnInit(): void {
-
         // Check if the User Type is Publisher or Super Admin
         this._userService.user$.pipe(take(1)).subscribe((user: User) => {
             this.user = user;
 
             switch (this.user.type) {
-                case USER_TYPES.SUPER_ADMIN: {
-                    this.store.dispatch(PublisherActions.loadPublishers());
-                    this.publisherId = Number(this.route.snapshot.paramMap.get('id'));
+                case USER_TYPES.SUPER_ADMIN:
+                    {
+                        this.store.dispatch(PublisherActions.loadPublishers());
+                        this.publisherId = Number(
+                            this.route.snapshot.paramMap.get('id')
+                        );
 
-                    if (this.publisherId) {
-                        this.store
-                            .select(selectAllPublishers)
-                            .pipe(
-                                map((publishers) =>
-                                    publishers.find((c) => c.id === this.publisherId)
+                        if (this.publisherId) {
+                            this.store
+                                .select(selectAllPublishers)
+                                .pipe(
+                                    map((publishers) =>
+                                        publishers.find(
+                                            (c) => c.id === this.publisherId
+                                        )
+                                    ),
+                                    filter(Boolean),
+                                    take(1)
+                                )
+                                .subscribe((publisher) => {
+                                    this.titleService.setBreadcrumb([
+                                        {
+                                            label: this.translocoService.translate(
+                                                'navigation.curriculum'
+                                            ),
+                                            url: 'manage-publishers',
+                                        },
+                                        {
+                                            label: this.translocoService.translate(
+                                                'navigation.managePublishers'
+                                            ),
+                                            url: 'manage-publishers',
+                                        },
+                                        {
+                                            label: publisher.publication_name,
+                                            url: '',
+                                        },
+                                    ]);
+                                });
+
+                            this.getAllCurriculums();
+                        }
+                    }
+                    break;
+                case USER_TYPES.PUBLISHER_ADMIN:
+                case USER_TYPES.PUBLISHER_USER:
+                    {
+                        this.publisherId = this.user.id;
+
+                        this.titleService.setBreadcrumb([
+                            {
+                                label: this.translocoService.translate(
+                                    'navigation.curriculum'
                                 ),
-                                filter(Boolean),
-                                take(1)
-                            )
-                            .subscribe((publisher) => {
-                                this.titleService.setBreadcrumb([
-                                    {
-                                        label: this.translocoService.translate(
-                                            'navigation.curriculum'
-                                        ),
-                                        url: 'manage-publishers',
-                                    },
-                                    {
-                                        label: this.translocoService.translate(
-                                            'navigation.managePublishers'
-                                        ),
-                                        url: 'manage-publishers',
-                                    },
-                                    { label: publisher.publication_name, url: '' },
-                                ]);
-                            });
-
+                                url: 'manage-curriculum',
+                            },
+                            {
+                                label: this.translocoService.translate(
+                                    'navigation.manageCurriculum'
+                                ),
+                                url: '',
+                            },
+                        ]);
                         this.getAllCurriculums();
                     }
-                }
-                break;
-                case USER_TYPES.PUBLISHER_ADMIN:
-                case USER_TYPES.PUBLISHER_USER: {
-
-                    this.publisherId = this.user.id
-
-                    this.titleService.setBreadcrumb([
-                        {
-                            label: this.translocoService.translate(
-                                'navigation.curriculum'
-                            ),
-                            url: 'manage-curriculum',
-                        },
-                        {
-                            label: this.translocoService.translate(
-                                'navigation.manageCurriculum'
-                            ),
-                            url: ''
-                        }
-                    ]);
-                    this.getAllCurriculums();
-                }
-                break;
+                    break;
             }
-        })
+        });
 
         this.entityForm = this._formBuilder.group({
             id: [''],
@@ -197,11 +208,9 @@ export class CurriculumListComponent
             this.dataSource.paginator = this.paginator;
         });
     }
-    
+
     getAllCurriculums() {
-        this.list$ = this.store.select(
-            selectAllCurriculums(this.publisherId)
-        );
+        this.list$ = this.store.select(selectAllCurriculums(this.publisherId));
 
         this.store.dispatch(
             CurriculumActions.loadCurriculums({ publisherId: this.publisherId })
@@ -323,6 +332,50 @@ export class CurriculumListComponent
                     })
                 );
             }
+        });
+    }
+
+    openExcelUploadDialog() {
+        this.matDialogRefExcelUpload = this._matDialog.open(this.ExcelDialog, {
+            width: '500px',
+        });
+
+        this.matDialogRefExcelUpload.afterClosed().subscribe((result) => {
+            this.selectedExcelFile = null;
+        });
+    }
+
+    onFileSelected(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const files = Array.from(input.files || []);
+        if (files.length > 0) {
+            this.selectedExcelFile = files[0];
+        } else {
+            this.selectedExcelFile = null;
+        }
+    }
+
+    uploadExcelFile() {
+        this._curriculumService.uploadExcelFile(this.selectedExcelFile, +this.publisherId).subscribe({
+            next: (res: any) => {
+                console.log('Upload success:', res);
+                if (res.success && res.status === 200) {
+                    this._matDialog.closeAll();
+                    this._snackBar.showSuccess( this.translocoService.translate(
+                        'curriculum.file_upload_success'
+                    ));
+                } else {
+                    this._snackBar.showError(this.translocoService.translate(
+                    'curriculum.file_upload_error'
+                ) + ' - ' +res.message);
+                }
+            },
+            error: (err) => {
+                console.error('Upload failed:', err);
+                this._snackBar.showError( this.translocoService.translate(
+                    'curriculum.file_upload_error'
+                ));
+            },
         });
     }
 

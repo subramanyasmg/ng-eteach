@@ -59,6 +59,7 @@
         "signedInAs": "Signed in as",
         "profile": "Profile",
         "signOut": "Sign out",
+        "upload": "Upload",
         "license_expiring_in": "License expiring in {{ licenseEnd }} day(s) "
     },
     "institute": {
@@ -152,7 +153,10 @@
         "error_phone_invalid": "Invalid phone number",
         "success_add": "Curriculum added successfully!",
         "success_update": "Curriculum updated successfully!",
-        "success_delete": "Curriculum deleted successfully!"
+        "success_delete": "Curriculum deleted successfully!",
+        "upload_excel":"Upload Excel",
+        "file_upload_success":"Excel data successfully uploaded and inserted into database",
+        "file_upload_error": "Failed to upload file"
     },
     "grades": {
         "page_subtext": "Add grade information under this curriculum",
