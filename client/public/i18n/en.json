@@ -38,7 +38,8 @@
     "insadmin_dashboard": {
         "subtext": "Overview of the Institute",
         "total_grades": "Total Grades",
-        "total_teachers": "Total Teachers"
+        "total_teachers": "Total Teachers",
+        "error_data_fetch": "Failed to fetch dashboard data"
     },
     "common": {
         "search": "Search",

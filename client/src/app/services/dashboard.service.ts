@@ -5,6 +5,7 @@ import { User } from 'app/core/user/user.types';
 import {
     BehaviorSubject,
     Observable,
+    catchError,
     delay,
     map,
     mergeMap,
@@ -35,7 +36,23 @@ export class DashboardService {
                         return response;
                     } else {
                         return throwError(
-                            () => new Error('Failed to get super admin dashboard')
+                            () => new Error('Failed to get super admin dashboard information')
+                        );
+                    }
+                })
+            );
+    }
+
+    getInstituteAdminDashboard() {
+        return this._httpClient
+            .get(`api/insadmin/admin-dashboard`)
+            .pipe(
+                tap((response: any) => {
+                    if (response?.success) {
+                        return response;
+                    } else {
+                        return throwError(
+                            () => new Error('Failed to get dashboard information')
                         );
                     }
                 })
