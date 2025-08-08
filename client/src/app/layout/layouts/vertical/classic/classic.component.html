@@ -38,7 +38,7 @@
 
         <!-- Components -->
         <div class="ml-auto flex items-center space-x-0.5 pl-2 sm:space-x-2">
-            <span *ngIf="licenseEnd && licenseEnd <= 630" class="animate-pulse text-white bg-red-600 px-2 py-1 rounded-full mr-2">
+            <span *ngIf="licenseEnd && licenseEnd <= 30" class="animate-pulse text-white bg-red-600 px-2 py-1 rounded-full mr-2">
                 {{ 'common.license_expiring_in' | transloco:{licenseEnd} }}
              </span>
             <fuse-fullscreen class="hidden md:block"></fuse-fullscreen>
