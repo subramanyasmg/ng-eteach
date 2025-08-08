@@ -99,7 +99,10 @@
                             {{ 'institute.header_expires_on' | transloco }}
                         </th>
                         <td mat-cell *matCellDef="let element">
-                            {{ element?.OrganizationLicense[0]?.license_end | date }}
+                            <span *ngIf="element?.OrganizationLicense">
+                                 {{ element?.OrganizationLicense[0]?.license_end | date }}
+                            </span>  
+                           
                         </td>
                     </ng-container>
 
@@ -108,7 +111,10 @@
                             {{ 'institute.header_license_count' | transloco }}
                         </th>
                         <td mat-cell *matCellDef="let element">
+                           <span *ngIf="element?.OrganizationLicense">
                             {{ element?.OrganizationLicense[0]?.total_licenses }}
+                           </span>  
+                           
                         </td>
                     </ng-container>
 
