@@ -11,7 +11,7 @@
     </div>
 
     <!-- Main -->
-    <div class="flex-auto p-6 sm:p-10">
+    <div class="flex-auto p-6 sm:p-10  overflow-y-auto">
          <div class="max-w-2xl">
             <div class="prose prose-sm max-w-3xl">
                 <h2 class="text-3xl">  {{ 'navigation.changePassword' | transloco }}</h2>
@@ -22,6 +22,25 @@
                 class="bg-card mt-4 flex flex-col overflow-hidden rounded-2xl px-8 pt-10 shadow"
             >
               
+                <!-- Password field -->
+                <mat-form-field class="w-full">
+                    <mat-label>{{ 'profile.current_password' | transloco }} </mat-label>
+                    <input id="current_password" matInput type="password" [formControlName]="'currentPassword'" #passwordField2 />
+                    <button mat-icon-button type="button" (click)="
+                            passwordField2.type === 'password'
+                                ? (passwordField2.type = 'text')
+                                : (passwordField2.type = 'password')
+                        " matSuffix>
+                        @if (passwordField2.type === 'password') {
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                        }
+                        @if (passwordField2.type === 'text') {
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                        }
+                    </button>
+                    <mat-error> {{ 'profile.current_password_error_required' | transloco }}  </mat-error>
+                </mat-form-field>
+
                 <!-- Password field -->
                 <mat-form-field class="w-full">
                     <mat-label>{{ 'profile.password_label' | transloco }} </mat-label>

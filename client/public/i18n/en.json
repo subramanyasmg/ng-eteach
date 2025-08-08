@@ -20,8 +20,10 @@
         "changePassword": "Change Password"
     },
     "profile": {
+        "current_password":"Current Password",
         "password_label":"Password",
         "cpasword_label":"Confirm Password",
+        "current_password_error_required":"Your current Password is required",
         "password_error_required":"Password is required",
         "cpassword_error_required":"Confirm your password",
         "password_mismatch":"Passwords must match",
