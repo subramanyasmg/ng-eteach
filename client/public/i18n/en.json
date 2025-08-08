@@ -55,7 +55,8 @@
         "moreItems": "+ {{count}} more",
         "signedInAs": "Signed in as",
         "profile": "Profile",
-        "signOut": "Sign out"
+        "signOut": "Sign out",
+        "license_expiring_in": "License expiring in {{ licenseEnd }} day(s) "
     },
     "institute": {
         "page_subtext": "Manage institute information",
