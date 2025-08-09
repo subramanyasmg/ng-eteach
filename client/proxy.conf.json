@@ -1,6 +1,6 @@
 {
   "/api/": {
-    "target": "https://podar.eteach.in",
+    "target": "https://eteach.in",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
