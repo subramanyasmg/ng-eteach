@@ -166,4 +166,11 @@ export class CurriculumService {
             })
         );
     }
+
+    uploadExcelFile(file: File, publisherId) {
+        const formData = new FormData();
+        formData.append('upload-sheet', file);
+        formData.append('publisher_id', publisherId);
+        return this._httpClient.post(`api/superadmin/upload-excel`, formData);
+    }
 }

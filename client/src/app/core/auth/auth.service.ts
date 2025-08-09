@@ -224,7 +224,7 @@ export class AuthService {
         );
     }
 
-    resetProfilePassword(password: string): Observable<any> {
+    resetProfilePassword(requestObj: {currentPassword: string, newPassword: string}): Observable<any> {
         let apiurl = '';
         let user = this._secureStorageService.getItem<User>('user');
         switch (user.type) {
@@ -240,7 +240,7 @@ export class AuthService {
                 throw new Error('Unsupported user type');
         }
         
-        return this._httpClient.post(apiurl, password).pipe(
+        return this._httpClient.post(apiurl, requestObj).pipe(
             switchMap((response: any) => {
                 return of(response);
             })

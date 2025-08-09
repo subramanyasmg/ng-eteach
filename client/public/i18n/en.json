@@ -20,8 +20,10 @@
         "changePassword": "Change Password"
     },
     "profile": {
+        "current_password":"Current Password",
         "password_label":"Password",
         "cpasword_label":"Confirm Password",
+        "current_password_error_required":"Your current Password is required",
         "password_error_required":"Password is required",
         "cpassword_error_required":"Confirm your password",
         "password_mismatch":"Passwords must match",
@@ -38,7 +40,8 @@
     "insadmin_dashboard": {
         "subtext": "Overview of the Institute",
         "total_grades": "Total Grades",
-        "total_teachers": "Total Teachers"
+        "total_teachers": "Total Teachers",
+        "error_data_fetch": "Failed to fetch dashboard data"
     },
     "common": {
         "search": "Search",
@@ -55,7 +58,9 @@
         "moreItems": "+ {{count}} more",
         "signedInAs": "Signed in as",
         "profile": "Profile",
-        "signOut": "Sign out"
+        "signOut": "Sign out",
+        "upload": "Upload",
+        "license_expiring_in": "License expiring in {{ licenseEnd }} day(s) "
     },
     "institute": {
         "page_subtext": "Manage institute information",
@@ -148,7 +153,10 @@
         "error_phone_invalid": "Invalid phone number",
         "success_add": "Curriculum added successfully!",
         "success_update": "Curriculum updated successfully!",
-        "success_delete": "Curriculum deleted successfully!"
+        "success_delete": "Curriculum deleted successfully!",
+        "upload_excel":"Upload Excel",
+        "file_upload_success":"Excel data successfully uploaded and inserted into database",
+        "file_upload_error": "Failed to upload file"
     },
     "grades": {
         "page_subtext": "Add grade information under this curriculum",
@@ -281,7 +289,11 @@
         "select_subject_placeholder": "Select Subjects",
         "assign_teacher_label": "Assign a Teacher",
         "add_selected_subjects_tooltip": "Add selected subjects to this section",
-        "chapters_completed_label":"Chapters Completed"
+        "chapters_completed_label":"Chapters Completed",
+        "label_subject_name": "Subject Name",
+        "label_chapters": "Chapters",
+        "label_teachers":"Teachers",
+        "label_completion_percentage": "Completion %"
     },
     "classes": {
         "subtext": "Overview of the assigned classes",

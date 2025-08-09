@@ -32,7 +32,7 @@ import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.servi
         ReactiveFormsModule,
         MatSnackBarModule,
         MatIconModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
     ],
     templateUrl: './edit-profile.component.html',
     styleUrl: './edit-profile.component.scss',
@@ -68,6 +68,7 @@ export class EditProfileComponent implements OnInit {
         // Create the form
         this.resetPasswordForm = this._formBuilder.group(
             {
+                currentPassword: ['', Validators.required],
                 password: ['', Validators.required],
                 cpassword: ['', Validators.required],
             },
@@ -78,7 +79,7 @@ export class EditProfileComponent implements OnInit {
     }
 
     resetPassword() {
-       // Return if the form is invalid
+        // Return if the form is invalid
         if (this.resetPasswordForm.invalid) {
             return;
         }
@@ -87,25 +88,29 @@ export class EditProfileComponent implements OnInit {
         this.resetPasswordForm.disable();
 
         // Sign in
-        this._authService.resetProfilePassword(this.resetPasswordForm.value.password).subscribe(
+        const requestObj = {
+            currentPassword: this.resetPasswordForm.value.currentPassword,
+            newPassword: this.resetPasswordForm.value.password,
+        };
+        this._authService.resetProfilePassword(requestObj).subscribe(
             (response) => {
                 console.log(response);
+                this.resetPasswordForm.reset();
                 this.resetPasswordForm.enable();
                 if (response.success && response.status === 200) {
                     this._snackBar.showSuccess(
-                          this.translocoService.translate('profile.password_change_success')
-                      );
-                } else {
-                    this._snackBar.showError(
-                        `Error: ${response.message}`
+                        this.translocoService.translate(
+                            'profile.password_change_success'
+                        )
                     );
+                } else {
+                    this._snackBar.showError(`Error: ${response.message}`);
                 }
             },
-            (response) => {
-              this.resetPasswordForm.enable();
-               this._snackBar.showError(
-                      `Error: Something went wrong.`
-                  );
+            (error) => {
+                this.resetPasswordForm.reset();
+                this.resetPasswordForm.enable();
+                this._snackBar.showError(`Error: ${error.message}`);
             }
         );
     }

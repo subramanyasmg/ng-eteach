@@ -18,8 +18,11 @@ import {
     superAdmin,
     teacher,
 } from 'app/mock-api/common/navigation/data';
+import { SecureSessionStorageService } from 'app/services/securestorage.service';
 import { Subject, takeUntil } from 'rxjs';
 import { BreadcrumbComponent } from '../../../common/breadcrumb/breadcrumb.component';
+import { CommonModule } from '@angular/common';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
     selector: 'classic-layout',
@@ -34,11 +37,14 @@ import { BreadcrumbComponent } from '../../../common/breadcrumb/breadcrumb.compo
         UserComponent,
         RouterOutlet,
         BreadcrumbComponent,
+        CommonModule,
+        TranslocoModule
     ],
 })
 export class ClassicLayoutComponent implements OnInit, OnDestroy {
     isScreenSmall: boolean;
     navigationData;
+    licenseEnd;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**
@@ -49,7 +55,8 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
         private _router: Router,
         private _userService: UserService,
         private _fuseMediaWatcherService: FuseMediaWatcherService,
-        private _fuseNavigationService: FuseNavigationService
+        private _fuseNavigationService: FuseNavigationService,
+        private _secureStorageService: SecureSessionStorageService
     ) {}
 
     // -----------------------------------------------------------------------------------------------------
@@ -75,23 +82,27 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((user) => {
                 switch (user.type) {
-                    case USER_TYPES.INSTITUTE_ADMIN: {
-                        this.navigationData = instituteAdmin;
-                    }
-                    break;
-                    case USER_TYPES.SUPER_ADMIN: {
-                        this.navigationData = superAdmin;
-                    }
-                    break;
-                    case USER_TYPES.PUBLISHER_ADMIN: 
-                    case USER_TYPES.PUBLISHER_USER:{
-                        this.navigationData = publisher;
-                    }
-                    break;
-                    case USER_TYPES.TEACHER: {
-                        this.navigationData = teacher;
-                    }
-                    break;
+                    case USER_TYPES.INSTITUTE_ADMIN:
+                        {
+                            this.navigationData = instituteAdmin;
+                        }
+                        break;
+                    case USER_TYPES.SUPER_ADMIN:
+                        {
+                            this.navigationData = superAdmin;
+                        }
+                        break;
+                    case USER_TYPES.PUBLISHER_ADMIN:
+                    case USER_TYPES.PUBLISHER_USER:
+                        {
+                            this.navigationData = publisher;
+                        }
+                        break;
+                    case USER_TYPES.TEACHER:
+                        {
+                            this.navigationData = teacher;
+                        }
+                        break;
                     default:
                         this.navigationData = [];
                         break;
@@ -105,6 +116,8 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
                 // Check if the screen is small
                 this.isScreenSmall = !matchingAliases.includes('md');
             });
+
+        this.getLicenseEndDate();
     }
 
     /**
@@ -136,5 +149,18 @@ export class ClassicLayoutComponent implements OnInit, OnDestroy {
             // Toggle the opened status
             navigation.toggle();
         }
+    }
+
+    getLicenseEndDate() {
+        const license = this._secureStorageService.getItem('license') as any;
+        const today = new Date();
+        const expiryDate = new Date(license?.license_end);
+
+        // Clear the time part to avoid partial-day issues
+        today.setHours(0, 0, 0, 0);
+        expiryDate.setHours(0, 0, 0, 0);
+
+        const diffTime = expiryDate.getTime() - today.getTime();
+        this.licenseEnd = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
 }
