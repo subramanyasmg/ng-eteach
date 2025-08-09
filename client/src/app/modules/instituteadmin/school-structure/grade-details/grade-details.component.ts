@@ -43,6 +43,7 @@ import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.servi
 import { ISections } from 'app/models/sections.types';
 import { ISubjects } from 'app/models/subject.types';
 import { PipesModule } from 'app/pipes/pipes.module';
+import { SectionsService } from 'app/services/sections.service';
 import { TeachersService } from 'app/services/teachers.service';
 import * as GradeActions from 'app/state/grades/grades.actions';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
@@ -131,7 +132,8 @@ export class GradeDetailsComponent implements OnInit, OnDestroy {
         private translocoService: TranslocoService,
         private sanitizer: DomSanitizer,
         private titleService: BreadcrumbService,
-        private _teacherService: TeachersService
+        private _teacherService: TeachersService,
+        private _sectionService: SectionsService
     ) {}
 
     ngOnInit(): void {
@@ -305,35 +307,78 @@ export class GradeDetailsComponent implements OnInit, OnDestroy {
             .map((el) => ({
                 id: el.id,
                 subject_name: el.subject_name,
-                teacher: null,
+                teacher: undefined,
                 chapters: 0,
                 completion: 0,
             }));
 
-        // Add new subjects to the section
-        section.subjects = [...section.subjects, ...newSubjects];
+        console.log(newSubjects);
 
-        // Clear selected subjects
-        this.subjectForSections = [];
+        const requestObj = {
+            subject_id: newSubjects.map((el) => el.id),
+            section_id: section.id
+        };
+        
+        this._sectionService
+            .assignSubjects(requestObj)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(
+                (response) => {
+                    console.log(response);
+                    // Add new subjects to the section
+                    section.subjects = [...section.subjects, ...newSubjects];
 
-        // Notify if there were duplicates
-        if (duplicates.length > 0) {
-            const duplicateNames = duplicates
-                .map((d) => d.subject_name)
-                .join(', ');
-            this._snackBar.showError(
-                `Subjects already added: ${duplicateNames}`
+                    // Clear selected subjects
+                    this.subjectForSections = [];
+
+                    // Notify if there were duplicates
+                    if (duplicates.length > 0) {
+                        const duplicateNames = duplicates
+                            .map((d) => d.subject_name)
+                            .join(', ');
+                        this._snackBar.showError(
+                            `Subjects already added: ${duplicateNames}`
+                        );
+                    }
+                },
+                (error) => {
+                    this._snackBar.showError(
+                            `Error: ${error?.message || 'Something went wrong.'}`
+                        );
+                }
             );
-        }
     }
 
-    onTeacherAssign(event, subjectForSection) {
-        console.log(event);
-        subjectForSection.teacher.edit = false;
+    onTeacherAssign(event, subjectForSection, section) {
+        if (subjectForSection.teacher) {
+             subjectForSection.teacher.edit = false;
+        }
         if (event.value) {
-            subjectForSection.teacher = JSON.parse(
-                JSON.stringify(event.value)
-            )
+
+            const requestObj = {
+                section_id: section.id,
+                subject_id: subjectForSection.id,
+                teacher_id: event.value.id,
+            };
+
+             this._sectionService
+            .assignTeachers(requestObj)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(
+                (response) => {
+                    console.log(response);
+                    // subjectForSection.teacher = JSON.parse(
+                    //     JSON.stringify(event.value)
+                    // )
+                },
+                (error) => {
+                    this._snackBar.showError(
+                            `Error: ${error?.message || 'Something went wrong.'}`
+                        );
+                }
+            );
+
+            
         }
     }
 
