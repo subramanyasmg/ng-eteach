@@ -165,4 +165,12 @@ export class SectionsService {
             })
         );
     }
+
+    assignSubjects(requestObj) {
+        return this._httpClient.post(`${this.apiUrl}subject-section-mapping`, requestObj);
+    }
+
+    assignTeachers(requestObj) {
+        return this._httpClient.post(`${this.apiUrl}section-teacher-mapping`, requestObj)
+    }
 }

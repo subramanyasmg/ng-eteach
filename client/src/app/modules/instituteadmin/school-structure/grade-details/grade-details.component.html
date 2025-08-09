@@ -3,7 +3,7 @@
 >
     <!-- Header -->
     <div
-        class="relative flex flex-0 flex-col px-6 py-6 sm:flex-row sm:items-center sm:justify-between md:px-8"
+        class="relative flex flex-0 flex-col px-6 py-3 sm:flex-row sm:items-center sm:justify-between md:px-8"
     >
         <div class="min-w-0 flex-1">
             <!-- Title -->
@@ -161,7 +161,7 @@
                                             </button>
                                         </div>
                                         <ng-template #assignTeacher>
-                                            <p-select appendTo="body" size="small" (onChange)="onTeacherAssign($event, element)" [options]="teacherList"
+                                            <p-select appendTo="body" size="small" (onChange)="onTeacherAssign($event, element, section)" [options]="teacherList"
                                                 onmodelchange [ngModel]="element.teacher" optionLabel="name" [filter]="true" filterBy="name" [showClear]="true"
                                                 [placeholder]="'school_structure.assign_teacher_label' | transloco"  class="w-full md:w-56">
                                             </p-select>

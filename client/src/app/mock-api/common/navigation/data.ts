@@ -26,15 +26,15 @@ export const superAdmin: FuseNavigationItem[] = [
                 title: 'navigation.manageInstitute',
                 type: 'basic',
                 icon : 'heroicons_outline:academic-cap',
-                link: '/admin/manage-institute',
-            },
-            {
-                id: 'subscriptions',
-                title: 'navigation.subscriptions',
-                type: 'basic',
-               icon : 'heroicons_outline:ticket',
-                link: '/admin/subscriptions',
+                link: '/admin/manage-institute'
             }
+            // {
+            //     id: 'subscriptions',
+            //     title: 'navigation.subscriptions',
+            //     type: 'basic',
+            //    icon : 'heroicons_outline:ticket',
+            //     link: '/admin/subscriptions',
+            // }
         ],
     },
     {
@@ -49,13 +49,6 @@ export const superAdmin: FuseNavigationItem[] = [
                 icon : 'heroicons_outline:book-open',
                 link: '/admin/manage-publishers',
             }
-            // {
-            //     id: 'curriculum',
-            //     title: 'navigation.manageCurriculum',
-            //     type: 'basic',
-            //    icon : 'heroicons_outline:book-open',
-            //     link: '/curriculum',
-            // }
         ],
     }
 ];
@@ -86,14 +79,14 @@ export const publisher: FuseNavigationItem[] = [
                 type: 'basic',
                 icon : 'heroicons_outline:academic-cap',
                 link: '/admin/manage-institute',
-            },
-            {
-                id: 'subscriptions',
-                title: 'navigation.subscriptions',
-                type: 'basic',
-               icon : 'heroicons_outline:ticket',
-                link: '/admin/subscriptions',
             }
+            // {
+            //     id: 'subscriptions',
+            //     title: 'navigation.subscriptions',
+            //     type: 'basic',
+            //    icon : 'heroicons_outline:ticket',
+            //     link: '/admin/subscriptions',
+            // }
         ],
     },
     {
@@ -138,14 +131,14 @@ export const instituteAdmin: FuseNavigationItem[] = [
                 type: 'basic',
                 icon : 'heroicons_outline:academic-cap',
                 link: '/teachers',
-            },
-            {
-                id: 'subscriptions',
-                title: 'navigation.subscriptions',
-                type: 'basic',
-               icon : 'heroicons_outline:ticket',
-                link: '/subscriptions',
             }
+            // {
+            //     id: 'subscriptions',
+            //     title: 'navigation.subscriptions',
+            //     type: 'basic',
+            //    icon : 'heroicons_outline:ticket',
+            //     link: '/subscriptions',
+            // }
         ],
     },
     {

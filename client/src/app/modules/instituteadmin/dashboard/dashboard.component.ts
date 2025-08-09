@@ -34,11 +34,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 {
                     label: 'G1',
                     styleClass: '!bg-blue-100 !text-blue-900',
-                    expanded: true,
+                    expanded: false,
                     children: [
                         {
                             label: 'Sec A',
-                            expanded: true,
+                            expanded: false,
                             styleClass: '!bg-purple-100 !text-purple-900',
                             children: [
                                 {
@@ -53,7 +53,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         },
                         {
                             label: 'Sec B',
-                            expanded: true,
+                            expanded: false,
                             styleClass: '!bg-purple-100 !text-purple-900',
                             children: [
                                 {
@@ -66,12 +66,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 },
                 {
                     label: 'G2',
-                    expanded: true,
+                    expanded: false,
                     styleClass: '!bg-blue-100 !text-blue-900',
                     children: [
                         {
                             label: 'Sec A',
-                            expanded: true,
+                            expanded: false,
                             styleClass: '!bg-purple-100 !text-purple-900',
                             children: [
                                 {
@@ -84,12 +84,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 },
                 {
                     label: 'G10',
-                    expanded: true,
+                    expanded: false,
                     styleClass: '!bg-blue-100 !text-blue-900',
                     children: [
                         {
                             label: 'Sec A',
-                            expanded: true,
+                            expanded: false,
                             styleClass: '!bg-purple-100 !text-purple-900',
                             children: [
                                 {
