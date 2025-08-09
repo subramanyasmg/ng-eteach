@@ -96,6 +96,7 @@ export class UserComponent implements OnInit, OnDestroy {
     showEditProfile() {
         switch (this.user.type) {
             case USER_TYPES.INSTITUTE_ADMIN:
+            case USER_TYPES.TEACHER:
                 this._router.navigate(['/edit-profile']);
                 break;
             case USER_TYPES.SUPER_ADMIN:
