@@ -296,7 +296,8 @@
         "label_subject_name": "Subject Name",
         "label_chapters": "Chapters",
         "label_teachers":"Teachers",
-        "label_completion_percentage": "Completion %"
+        "label_completion_percentage": "Completion %",
+        "assign_subjects": "Add Subjects"
     },
     "classes": {
         "subtext": "Overview of the assigned classes",
