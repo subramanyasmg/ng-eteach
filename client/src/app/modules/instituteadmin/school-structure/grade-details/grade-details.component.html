@@ -132,17 +132,19 @@
                         </mat-expansion-panel-header>
 
                         <div class="bg-white rounded-md" matExpansionPanelContent>
-                            <mat-form-field class="w-full" floatLabel="always" [subscriptSizing]="'dynamic'">
-                                <mat-select [multiple]="true" [(ngModel)]="subjectForSections"
-                                    [placeholder]="'school_structure.select_subject_placeholder' | transloco">
-                                    <mat-option *ngFor="let el of subjects$ | async" [value]="el">
-                                        {{ el.subject_name }}
-                                    </mat-option>
-                                </mat-select>
-                                <button mat-icon-button matSuffix [disabled]="subjectForSections?.length === 0" (click)="addSubjectToSection(section); $event.stopPropagation()">
-                                    <mat-icon [matTooltip]="'school_structure.add_selected_subjects_tooltip' | transloco" class="text-blue-500 font-bold">add</mat-icon>
-                                </button>
-                            </mat-form-field>
+                            <div class="flex gap-2">
+                                <mat-form-field class="w-full" floatLabel="always" [subscriptSizing]="'dynamic'">
+                                    <mat-select [multiple]="true" [(ngModel)]="subjectForSections"
+                                        [placeholder]="'school_structure.select_subject_placeholder' | transloco">
+                                        <mat-option *ngFor="let el of subjects$ | async" [value]="el">
+                                            {{ el.subject_name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <button class="rounded-md" mat-flat-button [color]="'primary'" [disabled]="subjectForSections?.length === 0" (click)="addSubjectToSection(section); $event.stopPropagation()">
+                                        <mat-icon [matTooltip]="'school_structure.add_selected_subjects_tooltip' | transloco" class="text-blue-500 font-bold">add</mat-icon>{{ 'school_structure.assign_subjects' | transloco }}
+                                    </button>
+                            </div>
 
                             <table mat-table [dataSource]="section.subjects">
     

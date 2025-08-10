@@ -43,6 +43,9 @@
         "total_teachers": "Total Teachers",
         "error_data_fetch": "Failed to fetch dashboard data"
     },
+    "teacher_dashboard": {
+        "error_data_fetch": "Failed to fetch dashboard data"
+    },
     "common": {
         "search": "Search",
         "actions": "Actions",
@@ -195,6 +198,7 @@
         "success_delete": "Subject deleted successfully!"
     },
     "chapters": {
+        "page_subtext": " Add Chapter information under this subject",
         "chapter_no": "Chapter {{num}}",
         "button_edit_chapter": "Edit Chapter Name",
         "button_delete_chapter": "Delete Chapter",
@@ -293,7 +297,8 @@
         "label_subject_name": "Subject Name",
         "label_chapters": "Chapters",
         "label_teachers":"Teachers",
-        "label_completion_percentage": "Completion %"
+        "label_completion_percentage": "Completion %",
+        "assign_subjects": "Add Subjects"
     },
     "classes": {
         "subtext": "Overview of the assigned classes",

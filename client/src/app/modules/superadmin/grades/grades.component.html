@@ -7,7 +7,7 @@
                 {{ 'navigation.grades' | transloco }}
             </div>
             <div class="text-xl text-secondary">
-                Add grade information under this curriculum
+                {{ 'grades.page_subtext' | transloco}}
             </div>
         </div>
         <!-- Actions -->
@@ -63,7 +63,7 @@
                     </ng-container>
 
                     <ng-container matColumnDef="subject_count">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_subject_count' | transloco }}</th>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >{{ 'grades.header_subject_count' | transloco }}</th>
                         <td mat-cell *matCellDef="let element">{{ element.subject_count ?? '0' }}</td>
                     </ng-container>
 
@@ -145,7 +145,7 @@
 
     <!-- Card form -->
     <form class="flex w-full flex-0 flex-col items-start overflow-y-auto max-h-96 space-y-3 p-4 mt-3"
-        [formGroup]="entityForm">
+        [formGroup]="entityForm" (ngSubmit)="mode === 1 ? addEntity(): updateEntity()">
 
         <div class="flex w-full">
             <mat-form-field class="w-full" floatLabel="always">
@@ -157,6 +157,8 @@
             </mat-form-field>
         </div>
         <input matInput [formControlName]="'id'" [hidden]="true" />
+        <!-- Hidden submit button to allow Enter key submission -->
+         <button type="submit" hidden></button>
     </form>
 
     <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">

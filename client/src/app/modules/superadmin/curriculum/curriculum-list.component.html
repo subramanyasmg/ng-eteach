@@ -6,9 +6,6 @@
             <div class="text-4xl font-extrabold tracking-tight">
                 {{ 'navigation.manageCurriculum' | transloco }}
             </div>
-            <div class="text-xl text-secondary">
-                {{ 'curriculum.page_subtext' | transloco }}
-            </div>
         </div>
         <!-- Actions -->
         <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
@@ -158,7 +155,7 @@
 
     <!-- Card form -->
     <form class="flex w-full flex-0 flex-col items-start overflow-y-auto max-h-96 space-y-3 p-4 mt-3"
-        [formGroup]="entityForm">
+        [formGroup]="entityForm"  (ngSubmit)="mode === 1 ? addEntity(): updateEntity()">
 
         <div class="flex flex-col md:flex-row lg:flex-row xl:flex-row gap-4 w-full">
             <mat-form-field class="w-full" floatLabel="always">
@@ -173,6 +170,8 @@
 
         </div>
         <input matInput [formControlName]="'id'" [hidden]="true" />
+        <!-- Hidden submit button to allow Enter key submission -->
+         <button type="submit" hidden></button>
     </form>
 
     <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
