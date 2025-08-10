@@ -327,6 +327,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '600px',
+             disableClose: true
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {

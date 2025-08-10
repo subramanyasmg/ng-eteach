@@ -11,6 +11,9 @@
                     class="animate-spin ml-2 icon-size-10"
                 ></mat-icon>
             </div>
+            <div class="text-xl text-secondary">
+               {{ 'chapters.page_subtext' | transloco}}
+            </div>
         </div>
         <!-- Actions -->
         <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
@@ -297,7 +300,7 @@
 
     <!-- Card form -->
     <form class="flex w-full flex-0 flex-col items-start overflow-y-auto max-h-96 space-y-3 p-4 mt-3"
-        [formGroup]="entityForm">
+        [formGroup]="entityForm" (ngSubmit)="addEntity()">
 
         <div formArrayName="chapters" class="space-y-4 p-4 w-full">
             <div *ngFor="let chapter of chapters.controls; let i = index" [formGroupName]="i"
@@ -320,6 +323,8 @@
                 </button>
             </div>
         </div>
+        <!-- Hidden submit button to allow Enter key submission -->
+         <button type="submit" hidden></button>
 
     </form>
 

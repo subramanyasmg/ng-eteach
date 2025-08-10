@@ -198,6 +198,7 @@
         "success_delete": "Subject deleted successfully!"
     },
     "chapters": {
+        "page_subtext": " Add Chapter information under this subject",
         "chapter_no": "Chapter {{num}}",
         "button_edit_chapter": "Edit Chapter Name",
         "button_delete_chapter": "Delete Chapter",

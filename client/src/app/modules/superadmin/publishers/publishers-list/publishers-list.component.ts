@@ -124,7 +124,7 @@ export class PublishersListComponent
             id: [''],
             contact_name: ['', [Validators.required]],
             publication_name: ['', [Validators.required]],
-            address: ['', [Validators.required]],
+            address: ['', [Validators.required, Validators.maxLength]],
             email: ['', [Validators.required, Validators.email]],
             phone: [
                 '',
@@ -183,6 +183,7 @@ export class PublishersListComponent
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',
+            disableClose: true
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {
