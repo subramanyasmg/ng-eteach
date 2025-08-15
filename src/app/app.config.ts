@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
     ApplicationConfig,
     inject,
@@ -38,6 +38,7 @@ import { providePrimeNG } from 'primeng/config';
 import Material from '@primeuix/themes/material';
 import { sectionsReducer } from './state/sections/sections.reducer';
 import { SectionsEffects } from './state/sections/sections.effects';
+import { tenantInterceptor  } from './tenant.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -178,6 +179,9 @@ export const appConfig: ApplicationConfig = {
         provideState('teachers', teacherReducer),
         provideEffects(TeacherEffects),
         provideState('sections', sectionsReducer),
-        provideEffects(SectionsEffects)
+        provideEffects(SectionsEffects),
+        provideHttpClient(
+            withInterceptors([tenantInterceptor])
+          )
     ],
 };

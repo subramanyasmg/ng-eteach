@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Location } from '@angular/common';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { SubdomainService } from './services/subdomain.service';
 
 @Component({
@@ -11,12 +12,23 @@ import { SubdomainService } from './services/subdomain.service';
 export class AppComponent {
     constructor(
         private subdomainService: SubdomainService,
-        private router: Router
+        private router: Router,
+        private location: Location
       ) {}
     
       ngOnInit() {
         const subdomain = this.subdomainService.getSubdomain();
         const path = window.location.pathname;
+
+        // verify this
+        // this.router.events.subscribe(event => {
+        //   if (event instanceof NavigationEnd) {
+        //     if (event.url === '/home' && !subdomain) {
+        //       this.location.replaceState('');
+        //     }
+        //   }
+        // }); 
+
         
         // Redirect to home if trying to access superadmin with subdomain
         // if (subdomain && (path === '/admin/sign-in' || path.startsWith('/home')) )  {
