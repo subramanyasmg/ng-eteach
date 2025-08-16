@@ -209,4 +209,11 @@ export class TeachersService {
             })
         );
     }
+
+    resendVerificationEmail(requestObj) {
+        return this._httpClient.post(
+            `${this.apiUrl}teacher/resend-email-verification`,
+            requestObj
+        );
+    }
 }

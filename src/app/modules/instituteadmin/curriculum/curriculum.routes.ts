@@ -1,11 +1,10 @@
-import { Routes } from '@angular/router';
-import { SubjectsService } from 'app/services/subjects.service';
 import { inject } from '@angular/core';
+import { Routes } from '@angular/router';
 import { ChaptersService } from 'app/services/chapters.service';
-import { CurriculumComponent } from './curriculum.component';
+import { ChaptersComponent } from '../chapters/chapters.component';
 import { GradesComponent } from '../grades/grades.component';
 import { SubjectsComponent } from '../subjects/subjects.component';
-import { ChaptersComponent } from '../chapters/chapters.component';
+import { CurriculumComponent } from './curriculum.component';
 
 export default [
     {
@@ -14,19 +13,19 @@ export default [
         children: [
             {
                 path: '',
-                component: GradesComponent
+                component: GradesComponent,
             },
             {
-                path: ':id/subjects',
+                path: ':id/:name/subjects',
                 component: SubjectsComponent,
             },
             {
-                path: ':id/subjects/:sid/chapters',
+                path: ':id/:gname/subjects/:sid/:sname/chapters',
                 component: ChaptersComponent,
                 resolve: {
-                    phases: () => inject(ChaptersService).getPhases()
-                }
-            }
+                    phases: () => inject(ChaptersService).getPhases(),
+                },
+            },
         ],
     },
 ] as Routes;

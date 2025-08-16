@@ -82,7 +82,7 @@
                         <td mat-cell *matCellDef="let element">
                             <a
                                 class="text-primary"
-                                routerLink="{{ element.id + '/chapters' }}"
+                                [routerLink]="[ element.id ,element.subject_name,  'chapters']"
                                 >{{ element.subject_name }}</a
                             >
                         </td>

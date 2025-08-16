@@ -17,15 +17,15 @@ export default [
                 component: CurriculumListComponent
             },
             {
-                path: ':cid/grades',
+                path: ':cid/:cname/grades',
                 component: GradesListComponent,
             },
             {
-                path: ':cid/grades/:gid/subjects',
+                path: ':cid/:cname/grades/:gid/:gname/subjects',
                 component: SubjectsListComponent
             },
             {
-                path: ':cid/grades/:gid/subjects/:sid/chapters',
+                path: ':cid/:cname/grades/:gid/:gname/subjects/:sid/:sname/chapters',
                 component: ChaptersListComponent,
                 resolve: {
                     phases: () => inject(ChaptersService).getPhases()

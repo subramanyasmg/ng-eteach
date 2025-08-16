@@ -1,4 +1,4 @@
-import { COMMA, E, ENTER } from '@angular/cdk/keycodes';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
@@ -46,9 +46,10 @@ import { GradesService } from 'app/services/grades.service';
 import { SectionsService } from 'app/services/sections.service';
 import { SecureSessionStorageService } from 'app/services/securestorage.service';
 import { SubjectsService } from 'app/services/subjects.service';
+import { TeachersService } from 'app/services/teachers.service';
 import * as TeacherActions from 'app/state/teachers/teacher.actions';
 import { selectAllTeachers } from 'app/state/teachers/teacher.selectors';
-import { map, Observable, of, startWith, Subject, takeUntil, tap } from 'rxjs';
+import { map, Observable, startWith, Subject, takeUntil, tap } from 'rxjs';
 
 @Component({
     selector: 'app-teachers',
@@ -119,6 +120,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     sectionList: { id: string; name: string }[] = [];
     subjectList: { id: string; name: string }[] = [];
     list$: Observable<ITeachers[]> = this.store.select(selectAllTeachers);
+    emailVerificationInProgress = false;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -129,6 +131,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         private _gradeService: GradesService,
         private _sectionService: SectionsService,
         private _subjectService: SubjectsService,
+        private _teacherService: TeachersService,
         private store: Store,
         private actions$: Actions,
         private _cdr: ChangeDetectorRef,
@@ -149,7 +152,9 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             },
         ]);
 
-        this.licenseCount = (this._secureStorageService.getItem('license') as any).total_licenses;
+        this.licenseCount = (
+            this._secureStorageService.getItem('license') as any
+        ).total_licenses;
 
         this.store.dispatch(TeacherActions.loadTeachers());
 
@@ -159,27 +164,27 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             console.log(data);
             const mappedData = data.map((el: any) => ({
                 ...el,
-                associatedClass: el.teacher_section_mappings.map((el2) => ({
+                associatedClass: el.section_mappings.map((el2) => ({
                     grade: {
                         id: el2.section.grade.id,
-                        name: el2.section.grade.grade_name
+                        name: el2.section.grade.grade_name,
                     },
                     section: {
                         id: el2.section.id,
-                        name: el2.section.section_name
+                        name: el2.section.section_name,
                     },
                     subject: {
-                        id: el2.subject.id,
-                        name: el2.subject.subject_name
+                        id: el2.section_subject.id,
+                        name: el2.section_subject.subject_name,
                     },
-                }))
+                })),
             }));
             console.log('mappedData', mappedData);
             this.dataSource = new MatTableDataSource(mappedData); // reassign!
             this.dataSource.sort = this.sort;
             this.dataSource.paginator = this.paginator;
 
-            if(mappedData.length >= this.licenseCount) {
+            if (mappedData.length >= this.licenseCount) {
                 this.disableAddTeacher = true;
             }
         });
@@ -200,7 +205,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
                     Validators.pattern(/^\+?[0-9]{10,15}$/),
                 ],
             ],
-          //  subjects: [[], [Validators.required]],
+            //  subjects: [[], [Validators.required]],
             grade: [''],
             section: [''],
             gradesubject: [''],
@@ -263,7 +268,6 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
                         });
                 }
             });
-
     }
 
     private _filterSubjects(value: string): { id: string; name: string }[] {
@@ -327,7 +331,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '600px',
-             disableClose: true
+            disableClose: true,
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {
@@ -346,7 +350,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             lname: data.last_name,
             email: data.email,
             phone: data.phone,
-           // subjects: JSON.parse(JSON.stringify(data.subjectExpertise)),
+            // subjects: JSON.parse(JSON.stringify(data.subjectExpertise)),
             selectedGradeSectionSubjects: JSON.parse(
                 JSON.stringify(data.associatedClass)
             ),
@@ -414,7 +418,14 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
         if (classes.length <= 1) return '';
         return classes
             .slice(1) // skip the first
-            .map((c) => c.grade.name + ' - ' + c.section.name + ' - ' + c.subject.name)
+            .map(
+                (c) =>
+                    c.grade.name +
+                    ' - ' +
+                    c.section.name +
+                    ' - ' +
+                    c.subject.name
+            )
             .join(', ');
     }
 
@@ -432,11 +443,13 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             last_name: formValues.lname,
             email: formValues.email,
             phone: formValues.phone,
-            associatedClass: formValues.selectedGradeSectionSubjects.map((el) => ({
-                 grade_id: el.grade.id,
-                section_id: el.section.id,
-                subject_id: el.subject.id
-            }))
+            associatedClass: formValues.selectedGradeSectionSubjects.map(
+                (el) => ({
+                    grade_id: el.grade.id,
+                    section_id: el.section.id,
+                    subject_id: el.subject.id,
+                })
+            ),
         };
         this.store.dispatch(TeacherActions.addTeacher({ teacher: requestObj }));
     }
@@ -456,7 +469,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             last_name: formValues.lname,
             email: formValues.email,
             phone: formValues.phone,
-           // subjectExpertise: formValues.subjects,
+            // subjectExpertise: formValues.subjects,
             associatedClass: formValues.selectedGradeSectionSubjects,
         };
         this.store.dispatch(
@@ -491,6 +504,42 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
                 );
             }
         });
+    }
+
+    resendEmailVerification(element) {
+        const requestObj = {
+            id: element.id,
+            email: element.email,
+        };
+        this.emailVerificationInProgress = true;
+        this._teacherService.resendVerificationEmail(requestObj).subscribe(
+            (response: any) => {
+                this.emailVerificationInProgress = false;
+                console.log(response);
+                if (response.success && response.status === 200) {
+                    this._snackBar.showSuccess(
+                        this.translocoService.translate(
+                            'teachers.email_verification_success'
+                        )
+                    );
+                } else {
+                    this._snackBar.showError(
+                        this.translocoService.translate(
+                            'teachers.email_verification_error'
+                        )
+                    );
+                }
+            },
+            (error) => {
+                this.emailVerificationInProgress = false;
+                console.error(error);
+                this._snackBar.showError(
+                    this.translocoService.translate(
+                        'teachers.email_verification_error'
+                    )
+                );
+            }
+        );
     }
 
     handleAPIResponse() {
@@ -549,7 +598,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
                         action.type === TeacherActions.deleteTeacherFailure.type
                     ) {
                         this._snackBar.showError(
-                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                            `Error: ${action.error?.error?.message || 'Something went wrong.'}`
                         );
                     }
                 })

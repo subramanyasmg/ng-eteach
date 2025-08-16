@@ -18,19 +18,19 @@ export default [
                 component: PublishersListComponent
             },
             {
-                path: ':id/curriculum',
+                path: ':id/:name/curriculum',
                 component: CurriculumListComponent
             },
             {
-                path: ':pid/curriculum/:cid/grades',
+                path: ':pid/:pname/curriculum/:cid/:cname/grades',
                 component: GradesListComponent,
             },
             {
-                path: ':pid/curriculum/:cid/grades/:gid/subjects',
+                path: ':pid/:pname/curriculum/:cid/:cname/grades/:gid/:gname/subjects',
                 component: SubjectsListComponent
             },
             {
-                path: ':pid/curriculum/:cid/grades/:gid/subjects/:sid/chapters',
+                path: ':pid/:pname/curriculum/:cid/:cname/grades/:gid/:gname/subjects/:sid/:sname/chapters',
                 component: ChaptersListComponent,
                 resolve: {
                     phases: () => inject(ChaptersService).getPhases()

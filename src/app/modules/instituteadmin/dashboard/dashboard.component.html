@@ -1,10 +1,6 @@
-<div
-    class="flex min-w-0 flex-auto flex-col bg-gray-100 sm:absolute sm:inset-0 dark:bg-transparent"
->
+<div class="flex min-w-0 flex-auto flex-col bg-gray-100 sm:absolute sm:inset-0 dark:bg-transparent">
     <!-- Header -->
-    <div
-        class="relative flex flex-0 flex-col px-6 py-3 sm:flex-row sm:items-center sm:justify-between"
-    >
+    <div class="relative flex flex-0 flex-col px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0 flex-1">
             <!-- Title -->
             <div class="text-4xl font-extrabold tracking-tight">
@@ -17,66 +13,48 @@
     </div>
 
     <div class="-mt-px flex-auto pt-0 pb-6 pr-6 pl-6 overflow-y-auto">
-        <div
-            class="grid w-full min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4 "
-        >
-            <div
-                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow"
-            >
+        <div class="grid w-full min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4 ">
+            <div class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow">
                 <div class="flex items-center justify-center text-center">
-                    <div
-                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
-                    >
+                    <div class="truncate text-2xl font-extrabold leading-6 tracking-tight">
                         {{
-                            'insadmin_dashboard.total_grades' | transloco
+                        'insadmin_dashboard.total_grades' | transloco
                         }}
                     </div>
                 </div>
                 <div class="mt-2 flex flex-col items-center">
-                    <div
-                        class="text-7xl font-bold leading-none tracking-tight text-blue-500 sm:text-8xl"
-                    >
+                    <div class="text-7xl font-bold leading-none tracking-tight text-blue-500 sm:text-8xl">
                         {{count.total_grades}}
                     </div>
                 </div>
             </div>
 
-            <div
-                class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow"
-            >
+            <div class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow">
                 <div class="flex items-start justify-center">
-                    <div
-                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
-                    >
+                    <div class="truncate text-2xl font-extrabold leading-6 tracking-tight">
                         {{
-                            'insadmin_dashboard.total_teachers' | transloco
+                        'insadmin_dashboard.total_teachers' | transloco
                         }}
                     </div>
                     <div class="-mr-3 -mt-2 ml-2"></div>
                 </div>
                 <div class="mt-2 flex flex-col items-center">
-                    <div
-                        class="text-7xl font-bold leading-none tracking-tight text-amber-500 sm:text-8xl"
-                    >
+                    <div class="text-7xl font-bold leading-none tracking-tight text-amber-500 sm:text-8xl">
                         {{count.total_teachers}}
                     </div>
                 </div>
             </div>
 
-             <div
-                class="bg-card flex flex-auto flex-col overflow-x-auto rounded-2xl p-6 shadow sm:col-span-2 md:col-span-4 lg:col-span-4"
-            >
-                <div
-                    class="flex flex-col items-start justify-between sm:flex-row"
-                >
-                    <div
-                        class="truncate text-2xl font-extrabold leading-6 tracking-tight"
-                    >
-                       School Hierarchy
+            <div
+                class="bg-card flex flex-auto flex-col overflow-x-auto rounded-2xl p-6 shadow sm:col-span-2 md:col-span-4 lg:col-span-4">
+                <div class="flex flex-col items-start justify-between sm:flex-row">
+                    <div class="truncate text-2xl font-extrabold leading-6 tracking-tight">
+                        School Hierarchy
                     </div>
                 </div>
                 <div class="mt-6 flex flex-auto flex-col">
-                      <p-organizationChart [value]="data" [collapsible]="true"></p-organizationChart>
+                    <!-- <p-organizationChart [value]="data" [collapsible]="true"></p-organizationChart> -->
+                    <p-tree [value]="data" class="w-full md:w-[30rem]" />
                 </div>
             </div>
         </div>

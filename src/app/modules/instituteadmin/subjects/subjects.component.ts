@@ -34,11 +34,9 @@ import { Store } from '@ngrx/store';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { ISubjects } from 'app/models/subject.types';
 import { PipesModule } from 'app/pipes/pipes.module';
-import * as GradeActions from 'app/state/grades/grades.actions';
-import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
 import * as SubjectActions from 'app/state/subjects/subjects.actions';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
-import { filter, map, Observable, Subject, take } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
     selector: 'app-subjects',
@@ -97,42 +95,19 @@ export class SubjectsComponent implements OnInit, AfterViewInit, OnDestroy {
         private route: ActivatedRoute,
         private store: Store,
         private translocoService: TranslocoService,
-        private titleService: BreadcrumbService) {}
+        private titleService: BreadcrumbService
+    ) {}
 
     ngOnInit(): void {
         this.gradeId = Number(this.route.snapshot.paramMap.get('id'));
-
-        this.store.dispatch(
-            GradeActions.loadGrades({ curriculumId: this.curriculumId })
-        );
-
-        setTimeout(() => {
-            this.store
-                .select(selectGradesByCurriculumId(this.curriculumId))
-                .pipe(
-                    take(1),
-                    map((grades) => grades?.find((g) => g.id === this.gradeId)),
-                    filter((grade) => !!grade)
-                )
-                .subscribe((grade) => {
-                    this.gradeName = grade.grade_name;
-                    this.titleService.setBreadcrumb([
-                        {
-                            label: this.translocoService.translate(
-                                'navigation.curriculum'
-                            ),
-                            url: 'curriculum',
-                        },
-                        {
-                            label: this.translocoService.translate(
-                                'navigation.manageCurriculum'
-                            ),
-                            url: 'curriculum',
-                        },
-                        { label: grade.grade_name, url: '' },
-                    ]);
-                });
-        }, 200);
+        this.gradeName = this.route.snapshot.paramMap.get('name');
+        this.titleService.setBreadcrumb([
+            {
+                label: this.translocoService.translate('navigation.curriculum'),
+                url: 'curriculum',
+            },
+            { label: this.gradeName, url: '' },
+        ]);
 
         this.list$ = this.store.select(selectSubjectsByGradeId(this.gradeId));
 

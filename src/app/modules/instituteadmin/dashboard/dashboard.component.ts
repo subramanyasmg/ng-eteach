@@ -7,7 +7,9 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { DashboardService } from 'app/services/dashboard.service';
+import { TreeNode } from 'primeng/api';
 import { OrganizationChartModule } from 'primeng/organizationchart';
+import { Tree } from 'primeng/tree';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -18,6 +20,7 @@ import { Subject, takeUntil } from 'rxjs';
         MatButtonModule,
         TranslocoModule,
         OrganizationChartModule,
+        Tree,
     ],
     standalone: true,
     templateUrl: './dashboard.component.html',
@@ -27,42 +30,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
     count = {
         total_grades: 0,
         total_teachers: 0,
-    }
-    data: any[] = [
+    };
+    data: TreeNode[] = [
         {
-            label: 'MySchool',
-            styleClass: '!bg-blue-600 !text-white !text-2xl !font-bold',
+            label: 'My School',
+            // styleClass: '!bg-blue-600 !text-white !text-2xl !font-bold',
             type: 'root',
             expanded: true,
             children: [
                 {
                     label: 'G1',
-                    styleClass: '!bg-blue-100 !text-blue-900',
+                    // styleClass: '!bg-blue-100 !text-blue-900',
                     expanded: false,
                     children: [
                         {
                             label: 'Sec A',
                             expanded: false,
-                            styleClass: '!bg-purple-100 !text-purple-900',
+                            // styleClass: '!bg-purple-100 !text-purple-900',
                             children: [
                                 {
                                     label: 'Sub1 - Teacher - 14/18 - 40%',
-                                    styleClass: '!bg-green-100 !text-green-900',
+                                    // styleClass: '!bg-green-100 !text-green-900',
                                 },
                                 {
                                     label: 'Sub2 - Teacher - 8/10 - 60%',
-                                    styleClass: '!bg-green-100 !text-green-900',
+                                    //  styleClass: '!bg-green-100 !text-green-900',
                                 },
                             ],
                         },
                         {
                             label: 'Sec B',
                             expanded: false,
-                            styleClass: '!bg-purple-100 !text-purple-900',
+                            //  styleClass: '!bg-purple-100 !text-purple-900',
                             children: [
                                 {
                                     label: 'Sub1 - Teacher - 10/12 - 80%',
-                                    styleClass: '!bg-green-100 !text-green-900',
+                                    //  styleClass: '!bg-green-100 !text-green-900',
                                 },
                             ],
                         },
@@ -71,16 +74,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 {
                     label: 'G2',
                     expanded: false,
-                    styleClass: '!bg-blue-100 !text-blue-900',
+                    // styleClass: '!bg-blue-100 !text-blue-900',
                     children: [
                         {
                             label: 'Sec A',
                             expanded: false,
-                            styleClass: '!bg-purple-100 !text-purple-900',
+                            //  styleClass: '!bg-purple-100 !text-purple-900',
                             children: [
                                 {
                                     label: 'Sub1 - Teacher - 12/15 - 70%',
-                                    styleClass: '!bg-green-100 !text-green-900',
+                                    //   styleClass: '!bg-green-100 !text-green-900',
                                 },
                             ],
                         },
@@ -89,16 +92,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 {
                     label: 'G10',
                     expanded: false,
-                    styleClass: '!bg-blue-100 !text-blue-900',
+                    // styleClass: '!bg-blue-100 !text-blue-900',
                     children: [
                         {
                             label: 'Sec A',
                             expanded: false,
-                            styleClass: '!bg-purple-100 !text-purple-900',
+                            //   styleClass: '!bg-purple-100 !text-purple-900',
                             children: [
                                 {
                                     label: 'Sub1 - Teacher - 5/10 - 50%',
-                                    styleClass: '!bg-green-100 !text-green-900',
+                                    //    styleClass: '!bg-green-100 !text-green-900',
                                 },
                             ],
                         },
@@ -144,7 +147,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     console.log('response', response);
                     if (response.success && response.data) {
                         this.count.total_grades = response.data.total_grades;
-                        this.count.total_teachers = response.data.total_teachers;
+                        this.count.total_teachers =
+                            response.data.total_teachers;
                     } else {
                         this._snackBar.showError(
                             this.translocoService.translate(
@@ -157,7 +161,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     this._snackBar.showError(
                         this.translocoService.translate(
                             'insadmin_dashboard.error_data_fetch'
-                        ) + ' - ' + error?.message
+                        ) +
+                            ' - ' +
+                            error?.message
                     );
                 }
             );

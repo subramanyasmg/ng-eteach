@@ -4,7 +4,6 @@ import {
     Component,
     OnDestroy,
     OnInit,
-    TemplateRef,
     ViewChild,
 } from '@angular/core';
 import {
@@ -13,6 +12,7 @@ import {
     UntypedFormGroup,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatRippleModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,20 +27,18 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Store } from '@ngrx/store';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
-import { Observable, Subject } from 'rxjs';
-import { IGrades } from '../../../models/grades.types';
 import * as GradeActions from 'app/state/grades/grades.actions';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-
+import { Observable, Subject } from 'rxjs';
+import { IGrades } from '../../../models/grades.types';
 
 @Component({
-  selector: 'app-grades',
-  standalone: true,
+    selector: 'app-grades',
+    standalone: true,
     imports: [
         MatProgressBarModule,
         MatFormFieldModule,
@@ -63,32 +61,31 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
         MatSortModule,
         MatSelectModule,
         RouterModule,
-        TranslocoModule
+        TranslocoModule,
     ],
-  templateUrl: './grades.component.html',
-  styleUrl: './grades.component.scss'
+    templateUrl: './grades.component.html',
+    styleUrl: './grades.component.scss',
 })
 export class GradesComponent implements OnInit, AfterViewInit, OnDestroy {
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+    dataSource = new MatTableDataSource<IGrades>();
+    displayedColumns: string[] = [
+        'grade_name',
+        'created_at',
+        'updated_at',
+        'subject_count',
+    ];
+    mode = null;
+    query = '';
+    list$: Observable<IGrades[]>;
+    entityForm: UntypedFormGroup;
+    matDialogRef = null;
+    curriculumId = '1';
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-  dataSource = new MatTableDataSource<IGrades>();
-  displayedColumns: string[] = [
-      'grade_name',
-      'created_at',
-      'updated_at',
-      'subject_count'
-  ];
-  mode = null;
-  query = '';
-  list$: Observable<IGrades[]>;
-  entityForm: UntypedFormGroup;
-  matDialogRef = null;
-  curriculumId = "1";
-  private _unsubscribeAll: Subject<any> = new Subject<any>();
-
-  constructor(
+    constructor(
         private store: Store,
         private translocoService: TranslocoService,
         private titleService: BreadcrumbService
@@ -96,34 +93,28 @@ export class GradesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnInit(): void {
         this.titleService.setBreadcrumb([
-                {
-                    label: this.translocoService.translate(
-                        'navigation.curriculum'
-                    ),
-                    url: 'curriculum',
-                },
-                {
-                    label: this.translocoService.translate(
-                        'navigation.manageCurriculum'
-                    ),
-                    url: 'curriculum',
-                }
-            ]);
+            {
+                label: this.translocoService.translate('navigation.curriculum'),
+                url: 'curriculum',
+            },
+        ]);
 
+        this.list$ = this.store.select(
+            selectGradesByCurriculumId(this.curriculumId)
+        );
+        this.loadGradesForCurriculum();
 
-      this.list$ = this.store.select(selectGradesByCurriculumId(this.curriculumId));
-      this.loadGradesForCurriculum();
-        
+        this.list$.subscribe((data) => {
+            this.dataSource = new MatTableDataSource(data); // reassign!
+            this.dataSource.sort = this.sort;
+            this.dataSource.paginator = this.paginator;
+        });
+    }
 
-      this.list$.subscribe((data) => {
-          this.dataSource = new MatTableDataSource(data); // reassign!
-          this.dataSource.sort = this.sort;
-          this.dataSource.paginator = this.paginator;
-      });
-  }
-
-   loadGradesForCurriculum() {
-        this.store.dispatch(GradeActions.loadGrades({ curriculumId: this.curriculumId }));
+    loadGradesForCurriculum() {
+        this.store.dispatch(
+            GradeActions.loadGrades({ curriculumId: this.curriculumId })
+        );
     }
 
     ngAfterViewInit(): void {
@@ -145,5 +136,4 @@ export class GradesComponent implements OnInit, AfterViewInit, OnDestroy {
         const filterValue = this.query?.trim().toLowerCase() || '';
         this.dataSource.filter = filterValue;
     }
-
 }
