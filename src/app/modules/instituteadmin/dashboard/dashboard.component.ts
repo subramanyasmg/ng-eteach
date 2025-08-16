@@ -24,6 +24,10 @@ import { Subject, takeUntil } from 'rxjs';
     styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+    count = {
+        total_grades: 0,
+        total_teachers: 0,
+    }
     data: any[] = [
         {
             label: 'MySchool',
@@ -139,6 +143,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 (response) => {
                     console.log('response', response);
                     if (response.success && response.data) {
+                        this.count.total_grades = response.data.total_grades;
+                        this.count.total_teachers = response.data.total_teachers;
                     } else {
                         this._snackBar.showError(
                             this.translocoService.translate(
