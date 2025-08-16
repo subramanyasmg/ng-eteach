@@ -106,6 +106,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     matDialogRef = null;
     today: Date = new Date();
     emailVerificationInProgress = false;
+    minDate: Date;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -133,6 +134,9 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
                 url: '',
             },
         ]);
+
+        const today = new Date();
+        this.minDate = new Date(today.setDate(today.getDate() + 7)); // today + 7 days
     }
 
     ngOnInit(): void {
