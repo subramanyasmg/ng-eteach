@@ -1,10 +1,6 @@
-<div
-    class="flex min-w-0 flex-auto flex-col bg-gray-100 sm:absolute sm:inset-0 sm:overflow-hidden dark:bg-transparent"
->
+<div class="flex min-w-0 flex-auto flex-col bg-gray-100 sm:absolute sm:inset-0 sm:overflow-hidden dark:bg-transparent">
     <!-- Header -->
-    <div
-        class="relative flex flex-0 flex-col px-6 py-3 sm:flex-row sm:items-center sm:justify-between"
-    >
+    <div class="relative flex flex-0 flex-col px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0 flex-1">
             <!-- Title -->
             <div class="text-4xl font-extrabold tracking-tight">
@@ -17,22 +13,10 @@
         <!-- Actions -->
         <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
             <!-- Search -->
-            <mat-form-field
-                class="fuse-mat-dense min-w-64 rounded-md"
-                [subscriptSizing]="'dynamic'"
-            >
-                <mat-icon
-                    class="icon-size-5"
-                    matPrefix
-                    [svgIcon]="'heroicons_solid:magnifying-glass'"
-                ></mat-icon>
-                <input
-                    matInput
-                    [(ngModel)]="query"
-                    (ngModelChange)="applyFilter()"
-                    [autocomplete]="'off'"
-                    [placeholder]="'common.search' | transloco"
-                />
+            <mat-form-field class="fuse-mat-dense min-w-64 rounded-md" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [(ngModel)]="query" (ngModelChange)="applyFilter()" [autocomplete]="'off'"
+                    [placeholder]="'common.search' | transloco" />
             </mat-form-field>
 
             <mat-form-field class="ml-4" [subscriptSizing]="'dynamic'">
@@ -47,12 +31,7 @@
                 <mat-icon [svgIcon]="'mat_outline:file_download'"></mat-icon>
             </button>
 
-            <button
-                class="ml-4 rounded-md"
-                mat-flat-button
-                [color]="'primary'"
-                (click)="openDialog(1)"
-            >
+            <button class="ml-4 rounded-md" mat-flat-button [color]="'primary'" (click)="openDialog(1)">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
             </button>
         </div>
@@ -62,26 +41,18 @@
     <div class="flex flex-auto overflow-hidden">
         <div class="flex flex-auto flex-col overflow-hidden sm:overflow-y-auto">
             <div class="overflow-x-auto p-4 pt-0">
-                <table
-                    [hidden]="dataSource.data.length === 0"
-                    mat-table
-                    [dataSource]="dataSource"
-                    matSort
-                    class="w-full overflow-hidden rounded-lg border border-gray-300 shadow-sm"
-                >
+                <table [hidden]="dataSource.data.length === 0" mat-table [dataSource]="dataSource" matSort
+                    class="w-full overflow-hidden rounded-lg border border-gray-300 shadow-sm">
                     <ng-container matColumnDef="institute_name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>
                             {{ 'institute.header_name' | transloco }}
                         </th>
                         <td mat-cell *matCellDef="let element">
                             {{ element?.institute_name }}
-                            <span
-                                class="ml-2 inline-block h-2 w-2 rounded-full"
-                                [ngClass]="{
+                            <span class="ml-2 inline-block h-2 w-2 rounded-full" [ngClass]="{
                                     'bg-green-500': element.email_verification_status !== 'PENDING',
                                     'bg-red-500': element.email_verification_status === 'PENDING',
-                                }"
-                            ></span>
+                                }"></span>
                         </td>
                     </ng-container>
 
@@ -100,9 +71,9 @@
                         </th>
                         <td mat-cell *matCellDef="let element">
                             <span *ngIf="element?.OrganizationLicense">
-                                 {{ element?.OrganizationLicense[0]?.license_end | date }}
-                            </span>  
-                           
+                                {{ element?.OrganizationLicense[0]?.license_end | date }}
+                            </span>
+
                         </td>
                     </ng-container>
 
@@ -111,10 +82,10 @@
                             {{ 'institute.header_license_count' | transloco }}
                         </th>
                         <td mat-cell *matCellDef="let element">
-                           <span *ngIf="element?.OrganizationLicense">
-                            {{ element?.OrganizationLicense[0]?.total_licenses }}
-                           </span>  
-                           
+                            <span *ngIf="element?.OrganizationLicense">
+                                {{ element?.OrganizationLicense[0]?.total_licenses }}
+                            </span>
+
                         </td>
                     </ng-container>
 
@@ -134,31 +105,31 @@
                         </th>
                         <td mat-cell *matCellDef="let element">
                             <div class="flex gap-2">
-                                <button
-                                    class="h-7 min-h-7 min-w-10 border-none px-2 leading-6"
-                                    mat-stroked-button
-                                    [matTooltip]="'common.update' | transloco"
-                                    [disabled]="entityForm.disabled"
-                                    (click)="openDialog(2, element)"
-                                >
-                                    <mat-icon
-                                        class="text-primary-500 icon-size-6"
+                                <button *ngIf="element.email_verification_status === 'PENDING'"
+                                    class="h-7 min-h-7 min-w-10 border-none px-2 leading-6" mat-stroked-button
+                                    [matTooltip]="'common.resend_verification' | transloco"
+                                    [disabled]="entityForm.disabled || emailVerificationInProgress"
+                                    (click)="resendEmailVerification(element)">
+                                    <mat-icon *ngIf="!emailVerificationInProgress" class="text-green-500 icon-size-6"
                                         [svgIcon]="
-                                            'heroicons_solid:pencil-square'
-                                        "
-                                    ></mat-icon>
+                                            'mat_solid:refresh'
+                                        "></mat-icon>
+                                    <mat-progress-spinner *ngIf="emailVerificationInProgress" [diameter]="24"
+                                        [mode]="'indeterminate'"></mat-progress-spinner>
                                 </button>
 
-                                <button
-                                    class="h-7 min-h-7 min-w-10 border-none px-2 leading-6"
-                                    mat-stroked-button
-                                    [matTooltip]="'common.delete' | transloco"
-                                    (click)="deleteItem(element)"
-                                >
-                                    <mat-icon
-                                        class="text-red-500 icon-size-6"
-                                        [svgIcon]="'heroicons_outline:trash'"
-                                    ></mat-icon>
+                                <button class="h-7 min-h-7 min-w-10 border-none px-2 leading-6" mat-stroked-button
+                                    [matTooltip]="'common.update' | transloco" [disabled]="entityForm.disabled"
+                                    (click)="openDialog(2, element)">
+                                    <mat-icon class="text-primary-500 icon-size-6" [svgIcon]="
+                                            'heroicons_solid:pencil-square'
+                                        "></mat-icon>
+                                </button>
+
+                                <button class="h-7 min-h-7 min-w-10 border-none px-2 leading-6" mat-stroked-button
+                                    [matTooltip]="'common.delete' | transloco" (click)="deleteItem(element)">
+                                    <mat-icon class="text-red-500 icon-size-6"
+                                        [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                 </button>
                             </div>
                         </td>
@@ -166,17 +137,11 @@
 
                     <!-- Header & Row Declarations -->
                     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr
-                        mat-row
-                        *matRowDef="let row; columns: displayedColumns"
-                    ></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
                     <!-- No Records Message -->
                     <tr class="mat-row" *matNoDataRow>
-                        <td
-                            class="mat-cell"
-                            [attr.colspan]="displayedColumns.length"
-                        >
+                        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
                             <div class="p-6 text-center text-xl tracking-tight">
                                 {{ 'common.noRecordsFound' | transloco }}
                                 <span class="font-semibold">"{{ query }}"</span>
@@ -185,16 +150,12 @@
                     </tr>
                 </table>
 
-                <mat-paginator
-                     [ngClass]="{ 'hidden': dataSource.data.length === 0 }"
-                    class="z-10 mt-5 rounded-md border-b bg-white"
-                    [pageSize]="10"
-                    [pageSizeOptions]="[5, 10, 25, 50]"
-                    showFirstLastButtons
-                >
+                <mat-paginator [ngClass]="{ 'hidden': dataSource.data.length === 0 }"
+                    class="z-10 mt-5 rounded-md border-b bg-white" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 50]"
+                    showFirstLastButtons>
                 </mat-paginator>
 
-                 <ng-container *ngIf="dataSource.data.length === 0">
+                <ng-container *ngIf="dataSource.data.length === 0">
                     <ng-container *ngTemplateOutlet="noData"></ng-container>
                 </ng-container>
             </div>
@@ -210,9 +171,7 @@
         <div class="mt-5 text-center text-4xl font-extrabold">
             {{ 'common.noDataAvailable' | transloco }}
         </div>
-        <div
-            class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl"
-        >
+        <div class="text-secondary mt-2 text-center text-lg font-medium tracking-tight md:text-xl">
             {{ 'institute.empty_state_line1' | transloco }} <br />
             {{ 'institute.empty_state_line2' | transloco }}
         </div>
@@ -222,174 +181,115 @@
 <ng-template #EntityDialog let-data="data">
     <div class="flex max-h-160 flex-auto flex-col overflow-hidden">
         <div
-            class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5"
-        >
+            class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
             <div class="text-lg font-medium">
                 {{
-                    mode === 1
-                        ? ('institute.button_add_institute' | transloco)
-                        : ('institute.button_update_institute' | transloco)
+                mode === 1
+                ? ('institute.button_add_institute' | transloco)
+                : ('institute.button_update_institute' | transloco)
                 }}
             </div>
-            <button
-                mat-icon-button
-                (click)="matDialogRef.close()"
-                [tabIndex]="-1"
-            >
-                <mat-icon
-                    class="text-current"
-                    [svgIcon]="'heroicons_outline:x-mark'"
-                ></mat-icon>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
             </button>
         </div>
     </div>
 
-    <form
-        class="mt-3 flex max-h-120 w-full flex-0 flex-col items-start space-y-3 overflow-y-auto p-4"
-        [formGroup]="entityForm"
-    >
-        <div
-            class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row"
-        >
+    <form class="mt-3 flex max-h-120 w-full flex-0 flex-col items-start space-y-3 overflow-y-auto p-4"
+        [formGroup]="entityForm">
+        <div class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row">
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>
                     {{
-                        'institute.label_institute_name' | transloco
-                    }}</mat-label
-                >
-                <input
-                    matInput
-                    [formControlName]="'name'"
-                    [placeholder]="'e.g. Dhirubhai Ambani International School'"
-                    required
-                    maxlength="200"
-                />
+                    'institute.label_institute_name' | transloco
+                    }}</mat-label>
+                <input matInput [formControlName]="'name'" [placeholder]="'e.g. Dhirubhai Ambani International School'"
+                    required maxlength="200" />
                 @if (entityForm.get('name').hasError('required')) {
-                    <mat-error>
-                        {{
-                            'institute.error_institute_name_required'
-                                | transloco
-                        }}
-                    </mat-error>
+                <mat-error>
+                    {{
+                    'institute.error_institute_name_required'
+                    | transloco
+                    }}
+                </mat-error>
                 }
             </mat-form-field>
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{
                     'institute.label_teacher_count' | transloco
-                }}</mat-label>
-                <input
-                    type="number"
-                    matInput
-                    min="1"
-                    [formControlName]="'noOfLicense'"
-                    placeholder="e.g. 10"
-                    required
-                />
+                    }}</mat-label>
+                <input type="number" matInput min="1" [formControlName]="'noOfLicense'" placeholder="e.g. 10"
+                    required />
                 @if (entityForm.get('noOfLicense').hasError('required')) {
-                    <mat-error
-                        >{{
-                            'institute.error_teacher_count_required' | transloco
-                        }}
-                    </mat-error>
+                <mat-error>{{
+                    'institute.error_teacher_count_required' | transloco
+                    }}
+                </mat-error>
                 }
                 @if (entityForm.get('noOfLicense').hasError('min')) {
-                    <mat-error
-                        >{{
-                            'institute.error_teacher_count_invalid' | transloco
-                        }}
-                    </mat-error>
+                <mat-error>{{
+                    'institute.error_teacher_count_invalid' | transloco
+                    }}
+                </mat-error>
                 }
             </mat-form-field>
         </div>
 
-        <div
-            class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row"
-        >
+        <div class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row">
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{
                     'institute.label_address' | transloco
-                }}</mat-label>
-                <input
-                    matInput
-                    [formControlName]="'instituteAddress'"
-                    [placeholder]="
+                    }}</mat-label>
+                <input matInput [formControlName]="'instituteAddress'" [placeholder]="
                         'e.g. 49, Saki-Vikhrol Road, Mumbai, Maharashtra, India'
-                    "
-                    required
-                    maxlength="300"
-                />
+                    " required maxlength="300" />
                 @if (entityForm.get('instituteAddress').hasError('required')) {
-                    <mat-error
-                        >{{ 'institute.error_address_required' | transloco }}
-                    </mat-error>
+                <mat-error>{{ 'institute.error_address_required' | transloco }}
+                </mat-error>
                 }
             </mat-form-field>
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{ 'institute.label_phone' | transloco }}</mat-label>
-                <input
-                    matInput
-                    [formControlName]="'phone'"
-                    placeholder="e.g. +919876543210"
-                    required
-                    minlength="10"
-                    maxlength="15"
-                />
+                <input matInput [formControlName]="'phone'" placeholder="e.g. +919876543210" required minlength="10"
+                    maxlength="15" />
                 @if (entityForm.get('phone')?.hasError('required')) {
-                    <mat-error>{{
-                        'institute.error_phone_required' | transloco
+                <mat-error>{{
+                    'institute.error_phone_required' | transloco
                     }}</mat-error>
                 }
                 @if (entityForm.get('phone')?.hasError('pattern')) {
-                    <mat-error>{{
-                        'institute.error_phone_invalid' | transloco
+                <mat-error>{{
+                    'institute.error_phone_invalid' | transloco
                     }}</mat-error>
                 }
             </mat-form-field>
         </div>
 
-        <div
-            class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row"
-        >
+        <div class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row">
             <mat-form-field class="w-full" floatLabel="always">
-                <mat-label
-                    >{{ 'institute.label_admin_name' | transloco }}
+                <mat-label>{{ 'institute.label_admin_name' | transloco }}
                 </mat-label>
-                <input
-                    matInput
-                    [formControlName]="'adminName'"
-                    [placeholder]="'e.g. Mr. Sudhir'"
-                    required
-                    maxlength="200"
-                />
+                <input matInput [formControlName]="'adminName'" [placeholder]="'e.g. Mr. Sudhir'" required
+                    maxlength="200" />
                 @if (entityForm.get('adminName').hasError('required')) {
-                    <mat-error
-                        >{{ 'institute.error_admin_name_required' | transloco }}
-                    </mat-error>
+                <mat-error>{{ 'institute.error_admin_name_required' | transloco }}
+                </mat-error>
                 }
             </mat-form-field>
             <mat-form-field class="w-full" floatLabel="always">
-                <mat-label
-                    >{{ 'institute.label_admin_email' | transloco }}
+                <mat-label>{{ 'institute.label_admin_email' | transloco }}
                 </mat-label>
-                <input
-                    matInput
-                    [formControlName]="'adminEmail'"
-                    placeholder="e.g. sudhir@company.com"
-                    type="email"
-                    required
-                    maxlength="200"
-                />
+                <input matInput [formControlName]="'adminEmail'" placeholder="e.g. sudhir@company.com" type="email"
+                    required maxlength="200" />
                 @if (entityForm.get('adminEmail').hasError('required')) {
-                    <mat-error
-                        >{{
-                            'institute.error_admin_email_required' | transloco
-                        }}
-                    </mat-error>
+                <mat-error>{{
+                    'institute.error_admin_email_required' | transloco
+                    }}
+                </mat-error>
                 }
                 @if (entityForm.get('adminEmail').hasError('email')) {
-                    <mat-error
-                        >{{ 'institute.error_admin_email_invalid' | transloco }}
-                    </mat-error>
+                <mat-error>{{ 'institute.error_admin_email_invalid' | transloco }}
+                </mat-error>
                 }
             </mat-form-field>
         </div>
@@ -398,100 +298,73 @@
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{
                     'institute.header_subdomain' | transloco
-                }}</mat-label>
-                <input
-                    matInput
-                    [formControlName]="'subdomain'"
-                    (blur)="entityForm.get('subdomain').updateValueAndValidity()"
-                    [placeholder]="'e.g. dais.eteach.com'"
-                    required
-                    maxlength="300"
-                    [disabled]="mode === 2"
-                />
-              
-                <mat-error *ngIf="entityForm.get('subdomain').hasError('required')"
-                    >{{ 'institute.error_subdomain_required' | transloco }}
+                    }}</mat-label>
+                <input matInput [formControlName]="'subdomain'"
+                    (blur)="entityForm.get('subdomain').updateValueAndValidity()" [placeholder]="'e.g. dais.eteach.com'"
+                    required maxlength="300" [disabled]="mode === 2" />
+
+                <mat-error *ngIf="entityForm.get('subdomain').hasError('required')">{{
+                    'institute.error_subdomain_required' | transloco }}
                 </mat-error>
                 <mat-error *ngIf="entityForm.get('subdomain').hasError('subdomainTaken')">
-                   {{ 'institute.subdomain_duplicate_error' | transloco}}
+                    {{ 'institute.subdomain_duplicate_error' | transloco}}
                 </mat-error>
 
-                <mat-icon
-                    class="icon-size-5"
-                    matSufix
-                    [svgIcon]="'mat_outline:info'"
-                    #tooltip="matTooltip"
-                    [matTooltip]="'institute.subdomain_tooltip' | transloco"
-                ></mat-icon>
+                <mat-icon class="icon-size-5" matSufix [svgIcon]="'mat_outline:info'" #tooltip="matTooltip"
+                    [matTooltip]="'institute.subdomain_tooltip' | transloco"></mat-icon>
             </mat-form-field>
         </div>
 
-        <div
-            class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row"
-        >
+        <div class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row">
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{
                     'institute.label_expiry' | transloco
-                }}</mat-label>
-                <input
-                    matInput
-                    [formControlName]="'expiresOn'"
-                    [min]="today"
-                    [matDatepicker]="picker1"
-                />
+                    }}</mat-label>
+                <input matInput [formControlName]="'expiresOn'" [min]="today" [matDatepicker]="picker1" />
                 <mat-hint>MM/DD/YYYY</mat-hint>
-                <mat-datepicker-toggle
-                    matSuffix
-                    [for]="picker1"
-                ></mat-datepicker-toggle>
+                <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
                 <mat-datepicker #picker1></mat-datepicker>
                 @if (entityForm.get('expiresOn').hasError('required')) {
-                    <mat-error
-                        >{{ 'institute.error_expiry_required' | transloco }}
-                    </mat-error>
+                <mat-error>{{ 'institute.error_expiry_required' | transloco }}
+                </mat-error>
                 }
             </mat-form-field>
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{
                     'institute.label_status' | transloco
-                }}</mat-label>
+                    }}</mat-label>
 
                 <mat-select [formControlName]="'status'">
                     <mat-option value="ACTIVE">{{
                         'institute.status_active' | transloco
-                    }}</mat-option>
+                        }}</mat-option>
                     <mat-option value="TRIAL">{{
                         'institute.status_trial' | transloco
-                    }}</mat-option>
+                        }}</mat-option>
                 </mat-select>
 
                 @if (entityForm.get('status').hasError('required')) {
-                    <mat-error>{{
-                        'institute.error_status_required' | transloco
+                <mat-error>{{
+                    'institute.error_status_required' | transloco
                     }}</mat-error>
                 }
             </mat-form-field>
         </div>
 
-        <div
-            class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row"
-        >
+        <div class="flex w-full flex-col gap-4 md:flex-row lg:flex-row xl:flex-row">
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{
                     'institute.label_publisher' | transloco
-                }}</mat-label>
+                    }}</mat-label>
                 <mat-select [formControlName]="'publisher'">
-                    <mat-option
-                        *ngFor="let publisher of publisherList$ | async"
-                        [value]="publisher.id"
-                    >
+                    <mat-option *ngFor="let publisher of publisherList$ | async" [value]="publisher.id">
                         {{ publisher.publication_name }}
                     </mat-option>
                 </mat-select>
 
                 @if (entityForm.get('publisher').hasError('required')) {
-                    <mat-error>{{
-                        'institute.error_publisher_required' | transloco
+                <mat-error>{{
+                    'institute.error_publisher_required' | transloco
                     }}</mat-error>
                 }
             </mat-form-field>
@@ -499,20 +372,17 @@
             <mat-form-field class="w-full" floatLabel="always">
                 <mat-label>{{
                     'institute.label_curriculum' | transloco
-                }}</mat-label>
+                    }}</mat-label>
 
                 <mat-select formControlName="curriculum">
-                    <mat-option
-                        *ngFor="let curriculum of curriculumList$ | async"
-                        [value]="curriculum.id"
-                    >
+                    <mat-option *ngFor="let curriculum of curriculumList$ | async" [value]="curriculum.id">
                         {{ curriculum.curriculum_name }}
                     </mat-option>
                 </mat-select>
 
                 @if (entityForm.get('curriculum').hasError('required')) {
-                    <mat-error>{{
-                        'institute.error_curriculum_required' | transloco
+                <mat-error>{{
+                    'institute.error_curriculum_required' | transloco
                     }}</mat-error>
                 }
             </mat-form-field>
@@ -521,27 +391,17 @@
         <input matInput [formControlName]="'id'" [hidden]="true" />
     </form>
 
-    <div
-        class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700"
-    >
+    <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
         <button mat-button (click)="matDialogRef.close()">
             {{ 'common.cancel' | transloco }}
         </button>
-        <button
-            class="ml-3 px-6"
-            mat-flat-button
-            [color]="'primary'"
-            (click)="mode === 1 ? addEntity() : updateEntity()"
-            [disabled]="entityForm.invalid || entityForm.disabled"
-        >
+        <button class="ml-3 px-6" mat-flat-button [color]="'primary'"
+            (click)="mode === 1 ? addEntity() : updateEntity()" [disabled]="entityForm.invalid || entityForm.disabled">
             @if (!entityForm.disabled) {
-                <span> {{ 'common.save' | transloco }} </span>
+            <span> {{ 'common.save' | transloco }} </span>
             }
             @if (entityForm.disabled) {
-                <mat-progress-spinner
-                    [diameter]="24"
-                    [mode]="'indeterminate'"
-                ></mat-progress-spinner>
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
             }
         </button>
     </div>

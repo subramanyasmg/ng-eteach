@@ -4,7 +4,6 @@ import {
     BehaviorSubject,
     Observable,
     catchError,
-    delay,
     map,
     mergeMap,
     of,
@@ -57,17 +56,17 @@ export class InstituteService {
     }
 
     checkSubdomainAvailability(subdomain: string): Observable<boolean> {
-        return this._httpClient.get<boolean>(
-            `${this.apiUrl}check-subdomain/${subdomain}`
-        ).pipe(
-            map((response: any) => response.status), // Success => subdomain is available
-            catchError(err => {
-                if (err.status === 400 || err.status === 500) {
-                    return of(false);
-                }
-                return throwError(() => err); // rethrow other errors
-            })
-        );
+        return this._httpClient
+            .get<boolean>(`${this.apiUrl}check-subdomain/${subdomain}`)
+            .pipe(
+                map((response: any) => response.status), // Success => subdomain is available
+                catchError((err) => {
+                    if (err.status === 400 || err.status === 500) {
+                        return of(false);
+                    }
+                    return throwError(() => err); // rethrow other errors
+                })
+            );
     }
 
     create(request: IInstitutes): Observable<any> {
@@ -90,7 +89,6 @@ export class InstituteService {
                         license_end: request.license_end,
                     })
                     .pipe(
-                        delay(300), // Simulate API delay
                         mergeMap((response: any) => {
                             if (response.status !== 200) {
                                 return throwError(
@@ -129,9 +127,8 @@ export class InstituteService {
                 }
 
                 return this._httpClient
-                    .put(`${this.apiUrl}updateInstitute/${id}`, { ...data })
+                    .put(`${this.apiUrl}organization/${id}`, { ...data })
                     .pipe(
-                        delay(300),
                         map((response: any) => {
                             if (response.status === 200) {
                                 // Replace the old item with updated item
@@ -163,7 +160,7 @@ export class InstituteService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deleteInstitute/${id}`)
+                    .delete(`${this.apiUrl}organization/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200 && index !== -1) {
@@ -179,5 +176,9 @@ export class InstituteService {
                     );
             })
         );
+    }
+
+    resendVerificationEmail(requestObj) {
+        return this._httpClient.post(`${this.apiUrl}organization/resend-email-verification`, requestObj);
     }
 }

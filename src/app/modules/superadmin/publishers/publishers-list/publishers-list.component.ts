@@ -343,7 +343,7 @@ export class PublishersListComponent
                             PublisherActions.deletePublisherFailure.type
                     ) {
                         this._snackBar.showError(
-                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                            `Error: ${action.error?.error?.message || 'Something went wrong.'}`
                         );
                     }
                 })

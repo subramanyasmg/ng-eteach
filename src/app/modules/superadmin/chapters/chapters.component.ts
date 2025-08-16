@@ -32,13 +32,16 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { USER_TYPES } from 'app/constants/usertypes';
 import { SnackBarService } from 'app/core/general/snackbar.service';
+import { UserService } from 'app/core/user/user.service';
+import { User } from 'app/core/user/user.types';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
 import { PipesModule } from 'app/pipes/pipes.module';
 import { ChaptersService } from 'app/services/chapters.service';
@@ -48,16 +51,11 @@ import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
 import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
 import * as GradeActions from 'app/state/grades/grades.actions';
 import { selectGradesByCurriculumId } from 'app/state/grades/grades.selectors';
-import * as PublisherActions from 'app/state/publishers/publishers.actions';
-import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 import * as SubjectActions from 'app/state/subjects/subjects.actions';
 import { selectSubjectsByGradeId } from 'app/state/subjects/subjects.selectors';
 import { QuillModule } from 'ngx-quill';
 import { combineLatest, filter, map, Observable, take, tap } from 'rxjs';
 import { IChapters } from '../../../models/chapters.types';
-import { UserService } from 'app/core/user/user.service';
-import { User } from 'app/core/user/user.types';
-import { USER_TYPES } from 'app/constants/usertypes';
 
 @Component({
     selector: 'app-chapters',
@@ -100,13 +98,16 @@ export class ChaptersListComponent implements OnInit {
     gradeId;
     subjectId;
     publisherId;
+    publisherName;
+    curriculumName;
+    gradeName: string;
     subjectName = '';
     matDialogRef = null;
     entityForm: UntypedFormGroup;
     chapters$: Observable<IChapters[]>;
     chapterList: IChapters[];
     phases: [] = [];
-    user:User = null;
+    user: User = null;
     readonly USER_TYPES = USER_TYPES;
     newChapterName: string = '';
 
@@ -127,177 +128,112 @@ export class ChaptersListComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-         // Check if the User Type is Publisher or Super Admin
+        // Check if the User Type is Publisher or Super Admin
         this._userService.user$.pipe(take(1)).subscribe((user: User) => {
             this.user = user;
 
+            this.getAllPhases();
+
+            this.curriculumId = Number(
+                this.route.snapshot.paramMap.get('cid')
+            );
+            this.gradeId = Number(
+                this.route.snapshot.paramMap.get('gid')
+            );
+            this.subjectId = Number(
+                this.route.snapshot.paramMap.get('sid')
+            );
+
+            this.curriculumName =
+                this.route.snapshot.paramMap.get('cname');
+            this.gradeName =
+                this.route.snapshot.paramMap.get('gname');
+            this.subjectName =
+                this.route.snapshot.paramMap.get('sname');
+
+            this.store.dispatch(
+                ChapterActions.loadChapters({
+                    subjectId: this.subjectId,
+                })
+            );
+            this.getChaptersFromStore();
+
             switch (this.user.type) {
-                case USER_TYPES.SUPER_ADMIN: {
-                        this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
-                        this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
-                        this.subjectId = Number(this.route.snapshot.paramMap.get('sid'));
-                        this.publisherId = Number(this.route.snapshot.paramMap.get('pid'));
-
-                        this.getAllPhases();
-
-                        this.store.dispatch(PublisherActions.loadPublishers());
-                        this.store.dispatch(
-                            CurriculumActions.loadCurriculums({ publisherId: this.publisherId })
-                        );
-                        this.store.dispatch(
-                            GradeActions.loadGrades({ curriculumId: this.curriculumId })
-                        );
-                        this.store.dispatch(
-                            SubjectActions.loadSubjects({ gradeId: this.gradeId })
-                        );
-                        this.store.dispatch(
-                            ChapterActions.loadChapters({ subjectId: this.subjectId })
+                case USER_TYPES.SUPER_ADMIN:
+                    {
+                        
+                        this.publisherId = Number(
+                            this.route.snapshot.paramMap.get('pid')
                         );
 
-                        setTimeout(() => {
-                            combineLatest([
-                                this.store.select(selectAllPublishers),
-                                this.store.select(selectAllCurriculums(this.publisherId)),
-                                this.store.select(
-                                    selectGradesByCurriculumId(this.curriculumId)
+                        this.publisherName =
+                            this.route.snapshot.paramMap.get('pname');
+                       
+
+                        this.titleService.setBreadcrumb([
+                            {
+                                label: this.translocoService.translate(
+                                    'navigation.curriculum'
                                 ),
-                                this.store.select(selectSubjectsByGradeId(this.gradeId)),
-                            ])
-                                .pipe(
-                                    take(1),
-                                    map(([publishers, curriculums, grades, subjects]) => {
-                                        const publisher = publishers.find(
-                                            (p) => p.id === this.publisherId
-                                        );
-                                        const curriculum = curriculums.find(
-                                            (c) => c.id === this.curriculumId
-                                        );
-                                        const grade = grades?.find(
-                                            (g) => g.id === this.gradeId
-                                        );
-                                        const subject = subjects?.find(
-                                            (s) => s.id === this.subjectId
-                                        );
-                                        return { publisher, curriculum, grade, subject };
-                                    }),
-                                    filter(
-                                        ({ publisher, curriculum, grade, subject }) =>
-                                            !!publisher && !!curriculum && !!grade && !!subject
-                                    )
-                                )
-                                .subscribe(({ publisher, curriculum, grade, subject }) => {
-                                    this.subjectName = subject.subject_name;
-                                    this.titleService.setBreadcrumb([
-                                        {
-                                            label: this.translocoService.translate(
-                                                'navigation.curriculum'
-                                            ),
-                                            url: 'manage-publishers',
-                                        },
-                                        {
-                                            label: this.translocoService.translate(
-                                                'navigation.managePublishers'
-                                            ),
-                                            url: 'manage-publishers',
-                                        },
-                                        {
-                                            label: publisher.publication_name,
-                                            url: `manage-publishers/${this.publisherId}/curriculum`,
-                                        },
-                                        {
-                                            label: curriculum.curriculum_name,
-                                            url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades`,
-                                        },
-                                        {
-                                            label: grade.grade_name,
-                                            url: `manage-publishers/${this.publisherId}/curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
-                                        },
-                                        { label: subject.subject_name, url: '' },
-                                    ]);
-                                });
-                        }, 1000);
-                        this.getChaptersFromStore();
-                }
-                break;
+                                url: 'manage-publishers',
+                            },
+                            {
+                                label: this.translocoService.translate(
+                                    'navigation.managePublishers'
+                                ),
+                                url: 'manage-publishers',
+                            },
+                            {
+                                label: this.publisherName,
+                                url: `manage-publishers/${this.publisherId}/${this.publisherName}/curriculum`,
+                            },
+                            {
+                                label: this.curriculumName,
+                                url: `manage-publishers/${this.publisherId}/${this.publisherName}/curriculum/${this.curriculumId}/${this.curriculumName}/grades`,
+                            },
+                            {
+                                label: this.gradeName,
+                                url: `manage-publishers/${this.publisherId}/${this.publisherName}/curriculum/${this.curriculumId}/${this.curriculumName}/grades/${this.gradeId}/${this.gradeName}/subjects`,
+                            },
+                            { label: this.subjectName, url: '' },
+                        ]);
+
+                    }
+                    break;
                 case USER_TYPES.PUBLISHER_ADMIN:
-                case USER_TYPES.PUBLISHER_USER: {
-                        this.curriculumId = Number(this.route.snapshot.paramMap.get('cid'));
-                        this.gradeId = Number(this.route.snapshot.paramMap.get('gid'));
-                        this.subjectId = Number(this.route.snapshot.paramMap.get('sid'));
+                case USER_TYPES.PUBLISHER_USER:
+                    {
+
                         this.publisherId = this.user.id;
 
-                        this.getAllPhases();
-
-                        this.store.dispatch(
-                            CurriculumActions.loadCurriculums({ publisherId: this.publisherId })
-                        );
-                        this.store.dispatch(
-                            GradeActions.loadGrades({ curriculumId: this.curriculumId })
-                        );
-                        this.store.dispatch(
-                            SubjectActions.loadSubjects({ gradeId: this.gradeId })
-                        );
-                        this.store.dispatch(
-                            ChapterActions.loadChapters({ subjectId: this.subjectId })
-                        );
-
-                        setTimeout(() => {
-                            combineLatest([
-                                this.store.select(selectAllCurriculums(this.publisherId)),
-                                this.store.select(
-                                    selectGradesByCurriculumId(this.curriculumId)
-                                ),
-                                this.store.select(selectSubjectsByGradeId(this.gradeId)),
-                            ])
-                                .pipe(
-                                    take(1),
-                                    map(([ curriculums, grades, subjects]) => {
-                                        const curriculum = curriculums.find(
-                                            (c) => c.id === this.curriculumId
-                                        );
-                                        const grade = grades?.find(
-                                            (g) => g.id === this.gradeId
-                                        );
-                                        const subject = subjects?.find(
-                                            (s) => s.id === this.subjectId
-                                        );
-                                        return { curriculum, grade, subject };
-                                    }),
-                                    filter(
-                                        ({  curriculum, grade, subject }) =>
-                                           !!curriculum && !!grade && !!subject
-                                    )
-                                )
-                                .subscribe(({ curriculum, grade, subject }) => {
-                                    this.subjectName = subject.subject_name;
-                                    this.titleService.setBreadcrumb([
-                                        {
-                                            label: this.translocoService.translate(
-                                                'navigation.curriculum'
-                                            ),
-                                            url: 'manage-curriculum',
-                                        },
-                                        {
-                                            label: this.translocoService.translate(
-                                                'navigation.manageCurriculum'
-                                            ),
-                                            url: 'manage-curriculum',
-                                        },
-                                        {
-                                            label: curriculum.curriculum_name,
-                                            url: `manage-curriculum/${this.curriculumId}/grades`,
-                                        },
-                                        {
-                                            label: grade.grade_name,
-                                            url: `manage-curriculum/${this.curriculumId}/grades/${this.gradeId}/subjects`,
-                                        },
-                                        { label: subject.subject_name, url: '' },
-                                    ]);
-                                });
-                        }, 1000);
-                        this.getChaptersFromStore();
-                }
-                break;
+                         this.titleService.setBreadcrumb([
+                                {
+                                    label: this.translocoService.translate(
+                                        'navigation.curriculum'
+                                    ),
+                                    url: 'manage-curriculum',
+                                },
+                                {
+                                    label: this.translocoService.translate(
+                                        'navigation.manageCurriculum'
+                                    ),
+                                    url: 'manage-curriculum',
+                                },
+                                {
+                                    label: this.curriculumName,
+                                    url: `manage-curriculum/${this.curriculumId}/${this.curriculumName}/grades`,
+                                },
+                                {
+                                    label: this.gradeName,
+                                    url: `manage-curriculum/${this.curriculumId}/${this.curriculumName}/grades/${this.gradeId}/${this.gradeName}/subjects`,
+                                },
+                                {
+                                    label: this.subjectName,
+                                    url: '',
+                                },
+                            ]);
+                    }
+                    break;
             }
         });
 
@@ -310,18 +246,18 @@ export class ChaptersListComponent implements OnInit {
 
     getChaptersFromStore() {
         this.store
-        .select(selectChaptersBySubjectId(this.subjectId))
-        .subscribe((data) => {
-            this.chapterList = data.map((chapter) => ({
-                ...chapter,
-                editMode: false,
-                textBook: null,
-                referenceMaterials: [],
-                lessonPlan: this.clonePhases(
-                    chapter.lessonPlan ?? this.phases
-                ),
-            }));
-        });
+            .select(selectChaptersBySubjectId(this.subjectId))
+            .subscribe((data) => {
+                this.chapterList = data.map((chapter) => ({
+                    ...chapter,
+                    editMode: false,
+                    textBook: null,
+                    referenceMaterials: [],
+                    lessonPlan: this.clonePhases(
+                        chapter.lessonPlan ?? this.phases
+                    ),
+                }));
+            });
     }
 
     get filteredChapterList() {
@@ -396,7 +332,8 @@ export class ChaptersListComponent implements OnInit {
                     chapter.textBook = response?.data?.textbooks[0];
 
                     // reference materials
-                    chapter.referenceMaterials = response?.data?.reference_materials;
+                    chapter.referenceMaterials =
+                        response?.data?.reference_materials;
                 },
                 error: (error: any) => {
                     chapter.isLoading = false;
@@ -493,13 +430,15 @@ export class ChaptersListComponent implements OnInit {
         event.preventDefault();
         const files = Array.from(event.dataTransfer?.files || []);
         if (type === 1 && files.length > 0) {
-            this.uploadTextbookFile(files[0], chapter); 
+            this.uploadTextbookFile(files[0], chapter);
         }
         if (type === 2 && files.length > 0) {
             if (files.length > 10) {
-                this._snackBar.showError(this.translocoService.translate(
+                this._snackBar.showError(
+                    this.translocoService.translate(
                         'chapters.max_limit_reached'
-                    ));
+                    )
+                );
             } else {
                 this.uploadReferenceMaterialFiles(files, chapter);
             }
@@ -519,13 +458,15 @@ export class ChaptersListComponent implements OnInit {
         const files = Array.from(input.files || []);
 
         if (type === 1 && files.length > 0) {
-            this.uploadTextbookFile(files[0], chapter); 
+            this.uploadTextbookFile(files[0], chapter);
         }
         if (type === 2 && files.length > 0) {
             if (files.length > 10) {
-                this._snackBar.showError(this.translocoService.translate(
+                this._snackBar.showError(
+                    this.translocoService.translate(
                         'chapters.max_limit_reached'
-                    ));
+                    )
+                );
             } else {
                 this.uploadReferenceMaterialFiles(files, chapter);
             }
@@ -538,49 +479,71 @@ export class ChaptersListComponent implements OnInit {
                 console.log('Upload success:', res);
                 if (res.success && res.status === 200) {
                     this.addFiles(chapter, [res.file], 1);
-                    this._snackBar.showSuccess( this.translocoService.translate(
-                        'chapters.textbook_upload_success'
-                    ));
+                    this._snackBar.showSuccess(
+                        this.translocoService.translate(
+                            'chapters.textbook_upload_success'
+                        )
+                    );
                 } else {
-                    this._snackBar.showError(this.translocoService.translate(
-                    'chapters.textbook_upload_error'
-                ) + ' - ' +res.message);
+                    this._snackBar.showError(
+                        this.translocoService.translate(
+                            'chapters.textbook_upload_error'
+                        ) +
+                            ' - ' +
+                            res.message
+                    );
                 }
             },
             error: (err) => {
                 console.error('Upload failed:', err);
-                this._snackBar.showError( this.translocoService.translate(
-                    'chapters.textbook_upload_error'
-                ));
+                this._snackBar.showError(
+                    this.translocoService.translate(
+                        'chapters.textbook_upload_error'
+                    )
+                );
             },
         });
     }
 
     uploadReferenceMaterialFiles(files: File[], chapter: IChapters) {
-        this._chapterService.uploadReferenceMaterial(files, +chapter.id).subscribe({
-            next: (res) => {
-                console.log('Upload success:', res);
-                if (res.success && res.status === 200) {
-                    this.addFiles(chapter, files.length === 1 ? [res.file]:res.files, 2);
-                    this._snackBar.showSuccess( this.translocoService.translate(
-                        'chapters.rm_upload_success'
-                    ));
-                } else {
-                    this._snackBar.showError(this.translocoService.translate(
-                    'chapters.rm_upload_error'
-                ) + ' - ' +res.message);
-                }
-            },
-            error: (err) => {
-                console.error('Upload failed:', err);
-                this._snackBar.showError( this.translocoService.translate(
-                    'chapters.rm_upload_error'
-                ));
-            },
-        });
+        this._chapterService
+            .uploadReferenceMaterial(files, +chapter.id)
+            .subscribe({
+                next: (res) => {
+                    console.log('Upload success:', res);
+                    if (res.success && res.status === 200) {
+                        this.addFiles(
+                            chapter,
+                            files.length === 1 ? [res.file] : res.files,
+                            2
+                        );
+                        this._snackBar.showSuccess(
+                            this.translocoService.translate(
+                                'chapters.rm_upload_success'
+                            )
+                        );
+                    } else {
+                        this._snackBar.showError(
+                            this.translocoService.translate(
+                                'chapters.rm_upload_error'
+                            ) +
+                                ' - ' +
+                                res.message
+                        );
+                    }
+                },
+                error: (err) => {
+                    console.error('Upload failed:', err);
+                    this._snackBar.showError(
+                        this.translocoService.translate(
+                            'chapters.rm_upload_error'
+                        )
+                    );
+                },
+            });
     }
 
-    deleteTextbook(chapter:IChapters) {
+    deleteTextbook(chapter: IChapters) {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
             title: this.translocoService.translate(
@@ -602,22 +565,27 @@ export class ChaptersListComponent implements OnInit {
         confirmation.afterClosed().subscribe((result) => {
             // If the confirm button pressed...
             if (result === 'confirmed') {
-                this._chapterService.deleteTextbook(chapter.textBook.id).subscribe({
-                next: (res) => {
-                    console.log('Delete success:', res);
-                    chapter.textBook = null;
-                    this._snackBar.showSuccess( this.translocoService.translate(
-                        'chapters.textbook_delete_success'
-                    ));
-                },
-                error: (err) => {
-                    console.error('Delete failed:', err);
-                    this._snackBar.showError( this.translocoService.translate(
-                        'chapters.textbook_delete_error'
-                    ));
-                },
-            });
-                
+                this._chapterService
+                    .deleteTextbook(chapter.textBook.id)
+                    .subscribe({
+                        next: (res) => {
+                            console.log('Delete success:', res);
+                            chapter.textBook = null;
+                            this._snackBar.showSuccess(
+                                this.translocoService.translate(
+                                    'chapters.textbook_delete_success'
+                                )
+                            );
+                        },
+                        error: (err) => {
+                            console.error('Delete failed:', err);
+                            this._snackBar.showError(
+                                this.translocoService.translate(
+                                    'chapters.textbook_delete_error'
+                                )
+                            );
+                        },
+                    });
             }
         });
     }
@@ -629,7 +597,7 @@ export class ChaptersListComponent implements OnInit {
             : chapter.referenceMaterials.push(...files);
     }
 
-    deleteReferenceMaterial(chapter:IChapters, file) {
+    deleteReferenceMaterial(chapter: IChapters, file) {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
             title: this.translocoService.translate(
@@ -651,28 +619,39 @@ export class ChaptersListComponent implements OnInit {
         confirmation.afterClosed().subscribe((result) => {
             // If the confirm button pressed...
             if (result === 'confirmed') {
-                this._chapterService.deleteReferenceMaterial(file.id).subscribe({
-                next: (res) => {
-                    console.log('Delete success:', res);
-                    chapter.referenceMaterials = chapter.referenceMaterials.filter(rmFile => Number(rmFile.id) !== Number(file.id));
-                    this._snackBar.showSuccess( this.translocoService.translate(
-                        'chapters.rm_delete_success'
-                    ));
-                },
-                error: (err) => {
-                    console.error('Delete failed:', err);
-                    this._snackBar.showError( this.translocoService.translate(
-                        'chapters.rm_delete_error'
-                    ));
-                },
-            });
-                
+                this._chapterService
+                    .deleteReferenceMaterial(file.id)
+                    .subscribe({
+                        next: (res) => {
+                            console.log('Delete success:', res);
+                            chapter.referenceMaterials =
+                                chapter.referenceMaterials.filter(
+                                    (rmFile) =>
+                                        Number(rmFile.id) !== Number(file.id)
+                                );
+                            this._snackBar.showSuccess(
+                                this.translocoService.translate(
+                                    'chapters.rm_delete_success'
+                                )
+                            );
+                        },
+                        error: (err) => {
+                            console.error('Delete failed:', err);
+                            this._snackBar.showError(
+                                this.translocoService.translate(
+                                    'chapters.rm_delete_error'
+                                )
+                            );
+                        },
+                    });
             }
         });
     }
 
     previewFile(file: any): void {
-        const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(file.s3Url);
+        const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+            file.s3Url
+        );
         this.matDialogRef = this._matDialog.open(this.filePreviewModal, {
             height: 'calc(100% - 30px)',
             width: 'calc(100% - 30px)',
@@ -724,7 +703,7 @@ export class ChaptersListComponent implements OnInit {
     openDialog() {
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',
-            disableClose: true
+            disableClose: true,
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {
@@ -832,7 +811,7 @@ export class ChaptersListComponent implements OnInit {
                         action.type === ChapterActions.deleteChapterFailure.type
                     ) {
                         this._snackBar.showError(
-                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                            `Error: ${action.error?.error?.message || 'Something went wrong.'}`
                         );
                     }
                 })

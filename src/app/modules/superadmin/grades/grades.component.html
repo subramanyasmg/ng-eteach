@@ -49,7 +49,7 @@
 
                     <ng-container matColumnDef="grade_name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'grades.header_name' | transloco }}</th>
-                        <td mat-cell *matCellDef="let element"><a class="text-primary" [routerLink]="element.id + '/subjects'">{{ element.grade_name }}</a></td>
+                        <td mat-cell *matCellDef="let element"><a class="text-primary" [routerLink]="[element.id ,  element.grade_name, 'subjects']">{{ element.grade_name }}</a></td>
                     </ng-container>
 
                     <ng-container matColumnDef="created_at">

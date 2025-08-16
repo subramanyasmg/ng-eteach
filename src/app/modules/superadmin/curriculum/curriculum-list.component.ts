@@ -35,19 +35,17 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import { USER_TYPES } from 'app/constants/usertypes';
 import { SnackBarService } from 'app/core/general/snackbar.service';
-import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
-import { PipesModule } from 'app/pipes/pipes.module';
-import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
-import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
-import * as PublisherActions from 'app/state/publishers/publishers.actions';
-import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
-import { filter, map, Observable, Subject, take, tap } from 'rxjs';
-import { ICurriculum } from '../../../models/curriculum.types';
 import { UserService } from 'app/core/user/user.service';
 import { User } from 'app/core/user/user.types';
-import { USER_TYPES } from 'app/constants/usertypes';
+import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { PipesModule } from 'app/pipes/pipes.module';
 import { CurriculumService } from 'app/services/curriculum.service';
+import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
+import { selectAllCurriculums } from 'app/state/curriculum/curriculum.selectors';
+import { Observable, Subject, take, tap } from 'rxjs';
+import { ICurriculum } from '../../../models/curriculum.types';
 
 @Component({
     selector: 'app-curriculum-list',
@@ -100,6 +98,7 @@ export class CurriculumListComponent
     matDialogRef = null;
     matDialogRefExcelUpload = null;
     publisherId;
+    publisherName;
     user: User = null;
     readonly USER_TYPES = USER_TYPES;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -128,46 +127,31 @@ export class CurriculumListComponent
             switch (this.user.type) {
                 case USER_TYPES.SUPER_ADMIN:
                     {
-                        this.store.dispatch(PublisherActions.loadPublishers());
                         this.publisherId = Number(
                             this.route.snapshot.paramMap.get('id')
                         );
-
-                        if (this.publisherId) {
-                            this.store
-                                .select(selectAllPublishers)
-                                .pipe(
-                                    map((publishers) =>
-                                        publishers.find(
-                                            (c) => c.id === this.publisherId
-                                        )
-                                    ),
-                                    filter(Boolean),
-                                    take(1)
-                                )
-                                .subscribe((publisher) => {
-                                    this.titleService.setBreadcrumb([
-                                        {
-                                            label: this.translocoService.translate(
-                                                'navigation.curriculum'
-                                            ),
-                                            url: 'manage-publishers',
-                                        },
-                                        {
-                                            label: this.translocoService.translate(
-                                                'navigation.managePublishers'
-                                            ),
-                                            url: 'manage-publishers',
-                                        },
-                                        {
-                                            label: publisher.publication_name,
-                                            url: '',
-                                        },
-                                    ]);
-                                });
-
-                            this.getAllCurriculums();
-                        }
+                        this.publisherName = this.route.snapshot.paramMap.get('name');
+                       
+                        this.titleService.setBreadcrumb([
+                            {
+                                label: this.translocoService.translate(
+                                    'navigation.curriculum'
+                                ),
+                                url: 'manage-publishers',
+                            },
+                            {
+                                label: this.translocoService.translate(
+                                    'navigation.managePublishers'
+                                ),
+                                url: 'manage-publishers',
+                            },
+                            {
+                                label: this.publisherName,
+                                url: '',
+                            },
+                        ]);
+                        this.getAllCurriculums();
+                       
                     }
                     break;
                 case USER_TYPES.PUBLISHER_ADMIN:
@@ -245,7 +229,7 @@ export class CurriculumListComponent
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',
-             disableClose: true
+            disableClose: true,
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {
@@ -357,27 +341,37 @@ export class CurriculumListComponent
     }
 
     uploadExcelFile() {
-        this._curriculumService.uploadExcelFile(this.selectedExcelFile, +this.publisherId).subscribe({
-            next: (res: any) => {
-                console.log('Upload success:', res);
-                if (res.success && res.status === 200) {
-                    this._matDialog.closeAll();
-                    this._snackBar.showSuccess( this.translocoService.translate(
-                        'curriculum.file_upload_success'
-                    ));
-                } else {
-                    this._snackBar.showError(this.translocoService.translate(
-                    'curriculum.file_upload_error'
-                ) + ' - ' +res.message);
-                }
-            },
-            error: (err) => {
-                console.error('Upload failed:', err);
-                this._snackBar.showError( this.translocoService.translate(
-                    'curriculum.file_upload_error'
-                ));
-            },
-        });
+        this._curriculumService
+            .uploadExcelFile(this.selectedExcelFile, +this.publisherId)
+            .subscribe({
+                next: (res: any) => {
+                    console.log('Upload success:', res);
+                    if (res.success && res.status === 200) {
+                        this._matDialog.closeAll();
+                        this._snackBar.showSuccess(
+                            this.translocoService.translate(
+                                'curriculum.file_upload_success'
+                            )
+                        );
+                    } else {
+                        this._snackBar.showError(
+                            this.translocoService.translate(
+                                'curriculum.file_upload_error'
+                            ) +
+                                ' - ' +
+                                res.message
+                        );
+                    }
+                },
+                error: (err) => {
+                    console.error('Upload failed:', err);
+                    this._snackBar.showError(
+                        this.translocoService.translate(
+                            'curriculum.file_upload_error'
+                        )
+                    );
+                },
+            });
     }
 
     handleAPIResponse() {
@@ -446,7 +440,7 @@ export class CurriculumListComponent
                             CurriculumActions.deleteCurriculumFailure.type
                     ) {
                         this._snackBar.showError(
-                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                            `Error: ${action.error?.error?.message || 'Something went wrong.'}`
                         );
                     }
                 })
