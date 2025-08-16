@@ -76,7 +76,7 @@ export class SchoolGradesComponent implements OnInit, AfterViewInit, OnDestroy {
         'created_at',
         'updated_at',
         'subject_count',
-        'section_count'
+        'section_count',
     ];
     mode = null;
     query = '';
@@ -96,13 +96,13 @@ export class SchoolGradesComponent implements OnInit, AfterViewInit, OnDestroy {
         this.titleService.setBreadcrumb([
             {
                 label: this.translocoService.translate('navigation.curriculum'),
-                url: 'curriculum',
+                url: 'school-structure',
             },
             {
                 label: this.translocoService.translate(
-                    'navigation.manageCurriculum'
+                    'navigation.schoolStructure'
                 ),
-                url: 'curriculum',
+                url: 'school-structure',
             },
         ]);
 

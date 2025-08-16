@@ -274,7 +274,9 @@
         "success_add": "Teacher has been added to your institute. An email has been sent to her email to verify",
         "success_update": "Teacher updated successfully!",
         "success_delete": "Teacher deleted successfully!",
-        "error_no_class_assigned": "No class assigned"
+        "error_no_class_assigned": "No class assigned",
+        "email_verification_success": "Email verification resent successfully",
+        "email_verification_error": "Failed to send Email verification."
     },
     "school_structure": {
         "page_title": "My School Structure",

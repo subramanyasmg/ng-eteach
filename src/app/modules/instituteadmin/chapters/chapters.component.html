@@ -5,14 +5,11 @@
             <!-- Title -->
             <div class="text-4xl font-extrabold tracking-tight">
                 {{ subjectName }}
-                <mat-icon
-                    *ngIf="!subjectName"
-                    svgIcon="feather:loader"
-                    class="animate-spin ml-2 icon-size-10"
-                ></mat-icon>
+                <mat-icon *ngIf="!subjectName" svgIcon="feather:loader"
+                    class="animate-spin ml-2 icon-size-10"></mat-icon>
             </div>
-             <div class="text-xl text-secondary">
-               {{ 'chapters.page_subtext' | transloco}}
+            <div class="text-xl text-secondary">
+                {{ 'chapters.page_subtext' | transloco}}
             </div>
         </div>
         <!-- Actions -->
@@ -29,11 +26,11 @@
     <div class="flex flex-auto overflow-hidden">
 
         <div class="flex px-5 py-1 flex-auto flex-col gap-3 overflow-hidden sm:overflow-y-auto">
-           
+
             <ng-container *ngIf="filteredChapterList?.length > 0; else noData">
                 <mat-accordion>
                     <mat-expansion-panel *ngFor="let chapter of filteredChapterList; let i = index; trackBy: trackByFn"
-                        class="rounded-xl mb-4"  (opened)="onChapterExpand(chapter, i)">
+                        class="rounded-xl mb-4" (opened)="onChapterExpand(chapter, i)">
                         <mat-expansion-panel-header [collapsedHeight]="'75px'" class="p-6 items-center">
                             <div class="w-full flex flex-col mr-5">
                                 <div class="text-sm text-gray-500">
@@ -49,27 +46,31 @@
 
                         <!-- Inside Expansion Panel -->
                         <div class="bg-white rounded-md" matExpansionPanelContent>
-                                <div class="space-y-4 animate-pulse" *ngIf="chapter.isLoading">
+                            <div class="space-y-4 animate-pulse" *ngIf="chapter.isLoading">
                                 <div class="h-4 bg-gray-200 rounded w-3/4"></div>
                                 <div class="h-4 bg-gray-200 rounded w-5/6"></div>
                                 <div class="h-4 bg-gray-200 rounded w-2/3"></div>
                                 <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                                </div>
+                            </div>
                             <mat-tab-group *ngIf="!chapter.isLoading">
                                 <mat-tab label="{{ 'chapters.tab_lesson_plan' | transloco}}">
                                     <div class="mt-4 px-2 pb-2">
                                         <mat-accordion class="space-y-4"> <!-- multi -->
-                                            <mat-expansion-panel *ngFor="let phase of chapter.lessonPlan; let index = index">
+                                            <mat-expansion-panel
+                                                *ngFor="let phase of chapter.lessonPlan; let index = index">
                                                 <mat-expansion-panel-header>
                                                     <mat-panel-title class="text-2xl">
                                                         Phase {{ (index + 1) + ' - ' + phase.label
-                                                        }} 
+                                                        }}
                                                     </mat-panel-title>
                                                 </mat-expansion-panel-header>
                                                 <div class="p-2 flex flex-col gap-2">
-                                                    
-                                                    <div class="w-full" (copy)="$event.preventDefault()" (contextmenu)="$event.preventDefault()">
-                                                        <quill-view  [content]="phase.content ?? 'No content available'" class="no-copy" format="html" theme="snow" [sanitize]="true"></quill-view>
+
+                                                    <div class="w-full" (copy)="$event.preventDefault()"
+                                                        (contextmenu)="$event.preventDefault()">
+                                                        <quill-view [content]="phase.content ?? 'No content available'"
+                                                            class="no-copy" format="html" theme="snow"
+                                                            [sanitize]="true"></quill-view>
                                                     </div>
                                                 </div>
                                             </mat-expansion-panel>
@@ -104,7 +105,7 @@
                                                 class="bg-gray-100 p-4 rounded-lg flex flex-col items-start gap-2 relative">
                                                 <div class="w-full flex justify-between items-center">
                                                     <div class="text-lg text-gray-600 font-semibold"> {{
-                                                       chapter?.textBook?.filename?.includes('.')
+                                                        chapter?.textBook?.filename?.includes('.')
                                                         ? chapter.textBook.filename.split('.').pop()?.toUpperCase()
                                                         : 'UNKNOWN' }}</div>
                                                     <div>
@@ -112,16 +113,7 @@
                                                             matTooltip="{{ 'chapters.button_preview_file' | transloco}}"
                                                             class="bg-white rounded-full shadow-sm"
                                                             (click)="previewFile(chapter.textBook)">
-                                                            <mat-icon
-                                                                [svgIcon]="'heroicons_outline:eye'"></mat-icon>
-                                                        </button>
-                                                        <button mat-icon-button color="warn"
-                                                          
-                                                            matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
-                                                            class="bg-white rounded-full shadow-sm ml-2">
-                                                            <mat-icon
-                                                                [svgIcon]="'heroicons_outline:trash'" 
-                                                                (click)="deleteTextbook(chapter)"></mat-icon>
+                                                            <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -138,8 +130,7 @@
                                         <div class="w-full border-2 border-dashed border-blue-500 rounded-lg p-5 text-center cursor-pointer transition hover:bg-blue-50"
                                             (drop)="onFileDrop(chapter, $event, 2)"
                                             (dragover)="onDragOver(chapter,$event, 2)"
-                                            (dragleave)="onDragLeave(chapter,$event, 2)"
-                                            (click)="fileInput2.click()">
+                                            (dragleave)="onDragLeave(chapter,$event, 2)" (click)="fileInput2.click()">
                                             <!-- Cloud Upload Icon -->
                                             <div class="flex flex-col items-center justify-center">
                                                 <mat-icon class="icon-size-10 text-gray-400"
@@ -166,15 +157,13 @@
                                                             matTooltip="{{ 'chapters.button_preview_file' | transloco}}"
                                                             class="bg-white rounded-full shadow-sm"
                                                             (click)="previewFile(file)">
-                                                            <mat-icon
-                                                                [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                                            <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                                         </button>
                                                         <button mat-icon-button color="warn"
                                                             (click)="deleteReferenceMaterial(chapter, file)"
                                                             matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
                                                             class="bg-white rounded-full shadow-sm ml-2">
-                                                            <mat-icon
-                                                                [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                                            <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                                         </button>
                                                     </div>
 
@@ -191,7 +180,7 @@
                 </mat-accordion>
 
             </ng-container>
-           
+
 
         </div>
     </div>
@@ -226,8 +215,7 @@
     </div>
     <mat-dialog-content class="w-full h-full overflow-auto">
         <div class="w-full flex p-4 justify-center items-center">
-            <img *ngIf="isImageFile(data.type)" [src]="data.url" alt="Preview"
-                class="max-w-fit rounded shadow" />
+            <img *ngIf="isImageFile(data.type)" [src]="data.url" alt="Preview" class="max-w-fit rounded shadow" />
 
             <iframe style="height: calc(100vh - 185px);" *ngIf="isPdfFile(data.type)" [src]="data.url" width="100%"
                 class="rounded border"></iframe>
@@ -236,12 +224,9 @@
 
             <audio *ngIf="isAudioFile(data.type)" [src]="data.url" controls class="w-full mt-4"></audio>
 
-            <div
-                *ngIf="!isSupportedFile(data.type)"
-                class="text-center text-gray-500 text-lg"
-            >
+            <div *ngIf="!isSupportedFile(data.type)" class="text-center text-gray-500 text-lg">
                 <mat-icon class="icon-size-8 mb-2 text-gray-400">block</mat-icon><br />
-               {{ 'chapters.preview_not_available' | transloco }}
+                {{ 'chapters.preview_not_available' | transloco }}
             </div>
         </div>
     </mat-dialog-content>

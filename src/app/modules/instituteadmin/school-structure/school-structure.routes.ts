@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
-import { SchoolStructureComponent } from './school-structure.component';
-import { SchoolGradesComponent } from './school-grades/school-grades.component';
 import { GradeDetailsComponent } from './grade-details/grade-details.component';
+import { SchoolGradesComponent } from './school-grades/school-grades.component';
+import { SchoolStructureComponent } from './school-structure.component';
 
 export default [
     {
@@ -10,12 +10,12 @@ export default [
         children: [
             {
                 path: '',
-                component: SchoolGradesComponent
+                component: SchoolGradesComponent,
             },
             {
-                path: ':id/sections',
+                path: ':id/:name/sections',
                 component: GradeDetailsComponent,
-            }
+            },
         ],
     },
 ] as Routes;
