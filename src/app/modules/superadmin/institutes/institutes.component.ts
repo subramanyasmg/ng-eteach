@@ -35,27 +35,22 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FuseConfirmationService } from '@fuse/services/confirmation';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
-import * as PublisherActions from 'app/state/publishers/publishers.actions';
-import * as CurriculumActions from 'app/state/curriculum/curriculum.actions';
-import * as InstituteActions from 'app/state/institute/institute.actions';
-import {
-    selectAllCurriculums,
-    selectCurriculumsLoaded,
-} from 'app/state/curriculum/curriculum.selectors';
-import { selectAllInstitutes } from 'app/state/institute/institute.selectors';
-import { filter, map, Observable, Subject, take, tap } from 'rxjs';
-import { ICurriculum } from '../../../models/curriculum.types';
-import { IInstitutes } from '../../../models/institutes.types';
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
 import { IPublisher } from 'app/models/publisher.types';
 import { CurriculumService } from 'app/services/curriculum.service';
-import { subdomainAvailabilityValidator } from './subdomaincheck.validator';
 import { InstituteService } from 'app/services/institute.service';
+import * as InstituteActions from 'app/state/institute/institute.actions';
+import { selectAllInstitutes } from 'app/state/institute/institute.selectors';
+import * as PublisherActions from 'app/state/publishers/publishers.actions';
+import { selectAllPublishers } from 'app/state/publishers/publishers.selectors';
+import { map, Observable, Subject, tap } from 'rxjs';
+import { ICurriculum } from '../../../models/curriculum.types';
+import { IInstitutes } from '../../../models/institutes.types';
+import { subdomainAvailabilityValidator } from './subdomaincheck.validator';
 
 @Component({
     selector: 'app-institutes',
@@ -81,7 +76,7 @@ import { InstituteService } from 'app/services/institute.service';
         MatSelectModule,
         MatTooltipModule,
         MatDatepickerModule,
-        TranslocoModule
+        TranslocoModule,
     ],
     providers: [provideNativeDateAdapter()],
     templateUrl: './institutes.component.html',
@@ -104,11 +99,14 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     mode = null;
     query = '';
     curriculumList$: Observable<ICurriculum[]>;
-    publisherList$: Observable<IPublisher[]> = this.store.select(selectAllPublishers);
+    publisherList$: Observable<IPublisher[]> =
+        this.store.select(selectAllPublishers);
     list$: Observable<IInstitutes[]> = this.store.select(selectAllInstitutes);
     entityForm: UntypedFormGroup;
     matDialogRef = null;
     today: Date = new Date();
+    emailVerificationInProgress = false;
+    minDate: Date;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
@@ -125,9 +123,20 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
         private instituteService: InstituteService
     ) {
         this.titleService.setBreadcrumb([
-            { label: this.translocoService.translate('navigation.users'), url: 'manage-institute' },
-            { label: this.translocoService.translate('navigation.manageInstitute'), url: '' },
+            {
+                label: this.translocoService.translate('navigation.users'),
+                url: 'manage-institute',
+            },
+            {
+                label: this.translocoService.translate(
+                    'navigation.manageInstitute'
+                ),
+                url: '',
+            },
         ]);
+
+        const today = new Date();
+        this.minDate = new Date(today.setDate(today.getDate() + 7)); // today + 7 days
     }
 
     ngOnInit(): void {
@@ -154,10 +163,8 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             publisher: ['', [Validators.required]],
         });
 
-
         this.store.dispatch(PublisherActions.loadPublishers());
         this.store.dispatch(InstituteActions.loadInstitutes());
-
 
         this.handleAPIResponse();
 
@@ -167,16 +174,18 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             this.dataSource.paginator = this.paginator;
         });
 
-        this.entityForm.get('publisher')?.valueChanges.subscribe((publisherId: string) => {
-            if (publisherId) {
-                this.entityForm.patchValue({ curriculum: '' });
+        this.entityForm
+            .get('publisher')
+            ?.valueChanges.subscribe((publisherId: string) => {
+                if (publisherId) {
+                    this.entityForm.patchValue({ curriculum: '' });
 
-                // Direct service call
-                this.curriculumList$ = this.curriculumService.getAll(publisherId).pipe(
-                    map((response: any) => response.data.rows ?? [])
-                );
-            }
-        });
+                    // Direct service call
+                    this.curriculumList$ = this.curriculumService
+                        .getAll(publisherId)
+                        .pipe(map((response: any) => response.data.rows ?? []));
+                }
+            });
     }
 
     ngAfterViewInit(): void {
@@ -210,7 +219,9 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             this.entityForm.get('adminEmail')?.disable();
             this.patchFormValues(selectedItem);
         } else {
-            subdomainControl?.setAsyncValidators([subdomainAvailabilityValidator(this.instituteService)]);
+            subdomainControl?.setAsyncValidators([
+                subdomainAvailabilityValidator(this.instituteService),
+            ]);
             subdomainControl?.enable();
             this.entityForm.get('adminEmail')?.enable();
         }
@@ -219,7 +230,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '600px',
-             disableClose: true
+            disableClose: true,
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {
@@ -240,8 +251,8 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             expiresOn: data.OrganizationLicense[0]?.license_end,
             status: data.status,
             publisher: data.publisher_id,
-            curriculum: data.curriculum_id
-           // accountType: data.account_type
+            curriculum: data.curriculum_id,
+            // accountType: data.account_type
         });
     }
 
@@ -265,7 +276,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             curriculum_id: formValues.curriculum,
             publisher_id: formValues.publisher,
             account_type: 'k12',
-            phone: formValues.phone
+            phone: formValues.phone,
         };
         this.store.dispatch(
             InstituteActions.addInstitute({ institute: requestObj })
@@ -292,9 +303,9 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             license_end: formValues.expiresOn,
             curriculum_id: Number(formValues.curriculum),
             account_type: 'k12',
-            phone: formValues.phone
+            phone: formValues.phone,
         };
-        
+
         this.store.dispatch(
             InstituteActions.updateInstitute({ institute: requestObj })
         );
@@ -303,11 +314,17 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
     deleteItem(item: IInstitutes): void {
         // Open the confirmation dialog
         const confirmation = this._fuseConfirmationService.open({
-            title: this.translocoService.translate('common.deleteConfirmationTitle'),
-            message:this.translocoService.translate('common.deleteConfirmationMessage'),
+            title: this.translocoService.translate(
+                'common.deleteConfirmationTitle'
+            ),
+            message: this.translocoService.translate(
+                'common.deleteConfirmationMessage'
+            ),
             actions: {
                 confirm: {
-                    label: this.translocoService.translate('common.deletePermanently'),
+                    label: this.translocoService.translate(
+                        'common.deletePermanently'
+                    ),
                 },
             },
         });
@@ -321,6 +338,42 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
                 );
             }
         });
+    }
+
+    resendEmailVerification(element) {
+        const requestObj = {
+            id: element.id,
+            email: element.email,
+        };
+        this.emailVerificationInProgress = true;
+        this.instituteService.resendVerificationEmail(requestObj).subscribe(
+            (response: any) => {
+                this.emailVerificationInProgress = false;
+                console.log(response);
+                if (response.success && response.status === 200) {
+                    this._snackBar.showSuccess(
+                        this.translocoService.translate(
+                            'institute.email_verification_success'
+                        )
+                    );
+                } else {
+                    this._snackBar.showError(
+                        this.translocoService.translate(
+                            'institute.email_verification_error'
+                        )
+                    );
+                }
+            },
+            (error) => {
+                this.emailVerificationInProgress = false;
+                console.error(error);
+                this._snackBar.showError(
+                    this.translocoService.translate(
+                        'institute.email_verification_error'
+                    )
+                );
+            }
+        );
     }
 
     handleAPIResponse() {
@@ -355,21 +408,27 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
                         InstituteActions.addInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            this.translocoService.translate('institute.success_add')
+                            this.translocoService.translate(
+                                'institute.success_add'
+                            )
                         );
                     } else if (
                         action.type ===
                         InstituteActions.updateInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                            this.translocoService.translate('institute.success_update')
+                            this.translocoService.translate(
+                                'institute.success_update'
+                            )
                         );
                     } else if (
                         action.type ===
                         InstituteActions.deleteInstituteSuccess.type
                     ) {
                         this._snackBar.showSuccess(
-                             this.translocoService.translate('institute.success_delete')
+                            this.translocoService.translate(
+                                'institute.success_delete'
+                            )
                         );
                     }
 
@@ -383,7 +442,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
                             InstituteActions.deleteInstituteFailure.type
                     ) {
                         this._snackBar.showError(
-                            `Error: ${action.error?.message || 'Something went wrong.'}`
+                            `Error: ${action.error?.error?.message || 'Something went wrong.'}`
                         );
                     }
                 })

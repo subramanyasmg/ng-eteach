@@ -74,7 +74,7 @@
                         <td mat-cell *matCellDef="let element">
                             <a
                                 class="text-primary"
-                                routerLink="{{ element.id + '/curriculum' }}"
+                                [routerLink]="[element.id, element.publication_name , 'curriculum']"
                                 >{{ element.publication_name }}</a
                             >
                         </td>
