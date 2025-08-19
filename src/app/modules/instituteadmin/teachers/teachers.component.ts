@@ -164,7 +164,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             console.log(data);
             const mappedData = data.map((el: any) => ({
                 ...el,
-                associatedClass: el.section_mappings.map((el2) => ({
+                associatedClass: el.section_mappings?.map((el2) => ({
                     grade: {
                         id: el2.section.grade.id,
                         name: el2.section.grade.grade_name,
@@ -193,23 +193,33 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
     ngOnInit(): void {
         this.entityForm = this._formBuilder.group({
             id: [''],
-            fname: ['', [Validators.required]],
-            lname: ['', [Validators.required]],
+            fname: [
+                '',
+                [
+                    Validators.required,
+                    Validators.pattern(/^[A-Za-z]+$/), // only alphabets
+                ],
+            ],
+            lname: [
+                '',
+                [
+                    Validators.required,
+                    Validators.pattern(/^[A-Za-z]+$/), // only alphabets
+                ],
+            ],
             email: ['', [Validators.required, Validators.email]],
             phone: [
                 '',
                 [
                     Validators.required,
-                    Validators.minLength(10),
-                    Validators.maxLength(15),
-                    Validators.pattern(/^\+?[0-9]{10,15}$/),
+                    Validators.pattern(/^[0-9]{10}$/), // exactly 10 digits
                 ],
             ],
             //  subjects: [[], [Validators.required]],
-            grade: [''],
-            section: [''],
-            gradesubject: [''],
-            selectedGradeSectionSubjects: [[]],
+            //grade: [''],
+            //section: [''],
+            //gradesubject: [''],
+            //selectedGradeSectionSubjects: [[]],
         });
 
         this.filteredSubjects = this.subjectCtrl.valueChanges.pipe(
@@ -351,9 +361,9 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             email: data.email,
             phone: data.phone,
             // subjects: JSON.parse(JSON.stringify(data.subjectExpertise)),
-            selectedGradeSectionSubjects: JSON.parse(
-                JSON.stringify(data.associatedClass)
-            ),
+            // selectedGradeSectionSubjects: JSON.parse(
+            //     JSON.stringify(data.associatedClass)
+            // ),
         });
         // this.selectedSubjects = JSON.parse(
         //     JSON.stringify(data.subjectExpertise)
@@ -443,14 +453,15 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             last_name: formValues.lname,
             email: formValues.email,
             phone: formValues.phone,
-            associatedClass: formValues.selectedGradeSectionSubjects.map(
-                (el) => ({
-                    grade_id: el.grade.id,
-                    section_id: el.section.id,
-                    subject_id: el.subject.id,
-                })
-            ),
         };
+        // if (formValues.selectedGradeSectionSubjects) {
+        //     requestObj.associatedClass =
+        //         formValues.selectedGradeSectionSubjects?.map((el) => ({
+        //             grade_id: el.grade.id,
+        //             section_id: el.section.id,
+        //             subject_id: el.subject.id,
+        //         }));
+        // }
         this.store.dispatch(TeacherActions.addTeacher({ teacher: requestObj }));
     }
 
@@ -470,7 +481,7 @@ export class TeachersComponent implements OnInit, AfterViewInit, OnDestroy {
             email: formValues.email,
             phone: formValues.phone,
             // subjectExpertise: formValues.subjects,
-            associatedClass: formValues.selectedGradeSectionSubjects,
+            //associatedClass: formValues.selectedGradeSectionSubjects,
         };
         this.store.dispatch(
             TeacherActions.updateTeacher({ teacher: requestObj })

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -7,78 +7,41 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { SnackBarService } from 'app/core/general/snackbar.service';
 import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { ClassesService } from 'app/services/classes.service';
+import { SkeletonModule } from 'primeng/skeleton';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'app-classes',
-  imports: [
-    TranslocoModule,
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatInputModule,
-    RouterModule,
-    MatFormFieldModule,
-    FormsModule,
-    ReactiveFormsModule,
-  ],
-  templateUrl: './classes.component.html',
-  styleUrl: './classes.component.scss'
+    selector: 'app-classes',
+    imports: [
+        TranslocoModule,
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        MatInputModule,
+        RouterModule,
+        MatFormFieldModule,
+        FormsModule,
+        ReactiveFormsModule,
+        SkeletonModule,
+    ],
+    templateUrl: './classes.component.html',
+    styleUrl: './classes.component.scss',
 })
-export class ClassesComponent implements OnInit {
+export class ClassesComponent implements OnInit, OnDestroy {
+    query = '';
+    cardDataList = [];
 
-   query = '';
-    cardDataList = [
-        {
-            id: '1',
-            grade: 'Grade 1',
-            section: 'Section A',
-            subject: 'Math',
-            completed: 10,
-            total: 50,
-            get progress() {
-                return Math.round((this.completed / this.total) * 100);
-            },
-        },
-        {
-            id: '2',
-            grade: 'Grade 2',
-            section: 'Section B',
-            subject: 'Science',
-            completed: 25,
-            total: 40,
-            get progress() {
-                return Math.round((this.completed / this.total) * 100);
-            },
-        },
-        {
-            id: '3',
-            grade: 'Grade 3',
-            section: 'Section C',
-            subject: 'English',
-            completed: 35,
-            total: 50,
-            get progress() {
-                return Math.round((this.completed / this.total) * 100);
-            },
-        },
-        {
-            id: '4',
-            grade: 'Grade 4',
-            section: 'Section D',
-            subject: 'History',
-            completed: 15,
-            total: 30,
-            get progress() {
-                return Math.round((this.completed / this.total) * 100);
-            },
-        },
-    ];
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     constructor(
         private route: ActivatedRoute,
         private translocoService: TranslocoService,
-        private titleService: BreadcrumbService
+        private titleService: BreadcrumbService,
+        private _snackBar: SnackBarService,
+        private _classesService: ClassesService
     ) {}
 
     ngOnInit(): void {
@@ -94,6 +57,47 @@ export class ClassesComponent implements OnInit {
                 url: 'manage-classes',
             },
         ]);
+
+        this._classesService
+            .getAll()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(
+                (response: any) => {
+                    console.log(response);
+                    if (response.success && response.status === 200) {
+                        this.cardDataList = response.data?.rows?.map((el) => ({
+                            id: el.id,
+                            grade: el.section.grade.grade_name,
+                            section: el.section.section_name,
+                            subject: el.subject.subject_name,
+                            completed: el.subject.chapters.length ? 10 : 0,
+                            total: el.subject.chapters.length,
+                        }));
+                    } else {
+                        this._snackBar.showError(
+                            this.translocoService.translate(
+                                'classes.classes_get_error'
+                            )
+                        );
+                    }
+                },
+                (error) => {
+                    console.error(error);
+                    this._snackBar.showError(
+                        this.translocoService.translate(
+                            'classes.classes_get_error'
+                        ) +
+                            ' - ' +
+                            error.message
+                    );
+                }
+            );
+    }
+
+    ngOnDestroy(): void {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
     }
 
     get filteredList() {
