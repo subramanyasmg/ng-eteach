@@ -55,7 +55,7 @@ export class TeacherEffects {
                 this.service.update(teacher.id, teacher).pipe(
                     map((response) =>
                         TeacherActions.updateTeacherSuccess({
-                            teacher: response.data,
+                            teacher: response,
                         })
                     ),
                     catchError((error) =>
