@@ -11,12 +11,10 @@ export class ClassesService {
     constructor(private _httpClient: HttpClient) {}
 
     getAll() {
-        return this._httpClient.get(this.apiUrl + '/classes');
+        return this._httpClient.get(this.apiUrl + 'classes');
     }
 
     getSectionMappingDetails(id) {
-        return this._httpClient.get(
-            this.apiUrl + '/chapters-by-section-mapping-id/' + id
-        );
+        return this._httpClient.get(this.apiUrl + 'section-mapping-data/' + id);
     }
 }

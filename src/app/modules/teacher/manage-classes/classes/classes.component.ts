@@ -63,15 +63,17 @@ export class ClassesComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(
                 (response: any) => {
-                    console.log(response);
                     if (response.success && response.status === 200) {
                         this.cardDataList = response.data?.rows?.map((el) => ({
                             id: el.id,
                             grade: el.section.grade.grade_name,
                             section: el.section.section_name,
                             subject: el.subject.subject_name,
-                            completed: el.subject.chapters.length ? 10 : 0,
-                            total: el.subject.chapters.length,
+                            completed:
+                                el.subject.syllabus_progress?.filter(
+                                    (el) => el.status === 'COMPLETED'
+                                )?.length || 0,
+                            total: el.subject.chapter_count,
                         }));
                     } else {
                         this._snackBar.showError(

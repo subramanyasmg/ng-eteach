@@ -76,7 +76,7 @@ export class TeachersService {
                             }
 
                             this._items.next([
-                                response.data as ITeachers,
+                                response.data[0] as ITeachers,
                                 ...existingItems,
                             ]);
 

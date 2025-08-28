@@ -90,27 +90,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this._classesService
-            .getAll()
+        this._dashboardService
+            .getTeacherDashboard()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(
                 (response: any) => {
                     console.log('response', response);
                     if (response.success && response.data) {
-                        this.cardDataList = response.data?.rows?.map((el) => ({
-                            id: el.id,
-                            grade_name: el.section.grade.grade_name,
-                            section_name: el.section.section_name,
-                            subject_name: el.subject.subject_name,
-                            completed: el.subject.chapters.length ? 10 : 0,
-                            total: el.subject.chapters.length,
-                            get progress() {
-                                if (this.total === 0) return 0;
-                                return Math.round(
-                                    (this.completed / this.total) * 100
-                                );
-                            },
-                        }));
+                        this.cardDataList = response.data;
                     } else {
                         this._snackBar.showError(
                             this.translocoService.translate(

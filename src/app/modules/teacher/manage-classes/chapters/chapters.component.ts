@@ -34,28 +34,11 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class ChaptersComponent implements OnInit, OnDestroy {
     sectionMappingId;
-    selectedGrade = 'Grade 1 - Section A - Math';
+    selectedGrade = '';
     displayedColumns: string[] = ['chapterName', 'status', 'completion'];
     query = '';
-    card = {
-        id: '1',
-        grade: 'Grade 1',
-        section: 'Section A',
-        subject: 'Math',
-        completed: 10,
-        total: 50,
-        get progress() {
-            return Math.round((this.completed / this.total) * 100);
-        },
-    };
-    chapters = [
-        {
-            id: 2,
-            name: 'Chapter Name',
-            status: 'In Progress',
-            completion: '50%',
-        },
-    ];
+    completedChapter;
+    chapters = [];
 
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
@@ -68,6 +51,11 @@ export class ChaptersComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
+        this.sectionMappingId = Number(this.route.snapshot.paramMap.get('id'));
+        this.getChapterList();
+    }
+
+    generateBreadcrumb() {
         this.titleService.setBreadcrumb([
             {
                 label: this.translocoService.translate('navigation.curriculum'),
@@ -84,9 +72,6 @@ export class ChaptersComponent implements OnInit, OnDestroy {
                 url: '',
             },
         ]);
-
-        this.sectionMappingId = Number(this.route.snapshot.paramMap.get('id'));
-        this.getChapterList();
     }
 
     getChapterList() {
@@ -94,8 +79,29 @@ export class ChaptersComponent implements OnInit, OnDestroy {
             .getSectionMappingDetails(this.sectionMappingId)
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(
-                (response) => {
+                (response: any) => {
                     console.log(response);
+                    if (response.status === 200 && response.success) {
+                        const data = response.data[0];
+                        this.selectedGrade =
+                            data.grade_name +
+                            ' - ' +
+                            data.section_name +
+                            ' - ' +
+                            data.subject_name;
+
+                        this.generateBreadcrumb();
+
+                        this.completedChapter =
+                            data.completed_chapters + '/' + data.total_chapters;
+
+                        this.chapters = data.chapters.map((el) => ({
+                            id: el.id,
+                            name: el.chapter_name,
+                            status: el.status,
+                            completion: el.completion_percentage,
+                        }));
+                    }
                 },
                 (error) => {
                     console.error(error);
@@ -126,5 +132,14 @@ export class ChaptersComponent implements OnInit, OnDestroy {
         return this.chapters.filter((chapter) =>
             chapter.name?.toLowerCase().includes(lowerQuery)
         );
+    }
+
+    getStyleClass(status) {
+        if (status === 'COMPLETED') {
+            return 'bg-green-500 text-white';
+        }
+        if (status === 'INPROGRESS') {
+            return 'bg-blue-500 text-white';
+        }
     }
 }

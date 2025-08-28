@@ -159,7 +159,7 @@
                                                             (click)="previewFile(file)">
                                                             <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                                         </button>
-                                                        <button mat-icon-button color="warn"
+                                                        <button mat-icon-button color="warn" *ngIf="file.can_delete"
                                                             (click)="deleteReferenceMaterial(chapter, file)"
                                                             matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
                                                             class="bg-white rounded-full shadow-sm ml-2">

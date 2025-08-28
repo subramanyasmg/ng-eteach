@@ -15,7 +15,7 @@
             <mat-form-field class="fuse-mat-dense rounded-md min-w-64" [subscriptSizing]="'dynamic'">
                 <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
                 <input matInput [(ngModel)]="query" [autocomplete]="'off'"
-                    [placeholder]="'common.search' | transloco"/>
+                    [placeholder]="'common.search' | transloco" />
             </mat-form-field>
 
 
@@ -32,7 +32,7 @@
             </div>
             <div class="mt-5 flex flex-row items-center justify-between">
                 <div class="text-5xl font-extrabold leading-none tracking-tight">
-                    {{ card.completed }}/{{ card.total }}
+                    {{ completedChapter }}
 
                 </div>
                 <!-- <div class="progress-container">
@@ -49,24 +49,28 @@
                 <ng-container matColumnDef="chapterName">
                     <th mat-header-cell *matHeaderCellDef> {{ 'classes.heading_chapter_name' | transloco }} </th>
                     <td mat-cell *matCellDef="let element">
-                        <a class="text-primary" [routerLink]="element.id + '/details'"> {{element.name}} </a> </td>
+                        <a class="text-primary" [routerLink]="[element.id , selectedGrade, 'details']">
+                            {{element.name}} </a>
+                    </td>
                 </ng-container>
 
                 <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef>  {{ 'classes.heading_status' | transloco }} </th>
-                    <td mat-cell *matCellDef="let element"> <p-chip [label]="element.status" /> </td>
+                    <th mat-header-cell *matHeaderCellDef> {{ 'classes.heading_status' | transloco }} </th>
+                    <td mat-cell *matCellDef="let element"> <p-chip [styleClass]="getStyleClass(element.status)"
+                            [label]="element.status" />
+                    </td>
                 </ng-container>
 
                 <ng-container matColumnDef="completion">
                     <th mat-header-cell *matHeaderCellDef> {{ 'classes.heading_completion' | transloco }} </th>
-                    <td mat-cell *matCellDef="let element"> {{element.completion}} </td>
+                    <td mat-cell *matCellDef="let element"> {{element.completion}}% </td>
                 </ng-container>
 
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
-                 
+
                 <tr class="mat-row" *matNoDataRow>
                     <td class="mat-cell" [attr.colspan]="displayedColumns.length">
                         <div class="p-6 text-center text-xl tracking-tight">

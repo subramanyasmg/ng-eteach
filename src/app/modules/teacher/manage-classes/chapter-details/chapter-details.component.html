@@ -4,11 +4,11 @@
         <div class="min-w-0 flex-1">
             <!-- Title -->
             <div class="text-4xl font-extrabold tracking-tight">
-                {{ selectedChapter.name }}
+                {{ selectedChapter.title }}
+                <mat-icon *ngIf="selectedChapter.isLoading" svgIcon="feather:loader"
+                    class="animate-spin ml-2 icon-size-10"></mat-icon>
             </div>
-            <div class="text-secondary text-xl">
-                {{ 'classes.chapter_details_page_subtext' | transloco }}
-            </div>
+
         </div>
     </div>
 
@@ -21,21 +21,27 @@
                 </div>
                 <div>
                     <mat-form-field class="min-w-50" [subscriptSizing]="'dynamic'" floatLabel="always">
-                        <mat-select [(ngModel)]="chapterStatus">
-                            <mat-option value="in-progress">{{
+                        <mat-select (ngModelChange)="onStatusChange($event)" [ngModel]="chapterStatus">
+                            <mat-option [value]="CHAPTER_STATUS.IN_PROGRESS">{{
                                 'classes.status_in_progress' | transloco
                                 }}</mat-option>
-                            <mat-option value="completed">{{
+                            <mat-option [value]="CHAPTER_STATUS.COMPLETED">{{
                                 'classes.status_completed' | transloco
                                 }}</mat-option>
-                            <mat-option value="not-started">{{
+                            <mat-option [value]="CHAPTER_STATUS.NOT_STARTED">{{
                                 'classes.status_not_started' | transloco
                                 }}</mat-option>
                         </mat-select>
                     </mat-form-field>
                 </div>
             </div>
-            <mat-tab-group class="mt-4">
+            <div class="space-y-4 animate-pulse" *ngIf="selectedChapter.isLoading">
+                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+            <mat-tab-group class="mt-4" *ngIf="!selectedChapter.isLoading">
                 <mat-tab label="{{ 'chapters.tab_lesson_plan' | transloco}}">
                     <div class="mt-4 px-2 pb-2">
                         <mat-accordion class="space-y-4"> <!-- multi -->
@@ -69,22 +75,20 @@
                                 class="bg-gray-100 p-4 rounded-lg flex flex-col items-start gap-2 relative">
                                 <div class="w-full flex justify-between items-center">
                                     <div class="text-lg text-gray-600 font-semibold"> {{
-                                        file.name.split('.').pop()?.toUpperCase() }}</div>
+                                        selectedChapter?.textBook?.filename?.includes('.')
+                                        ? selectedChapter.textBook.filename.split('.').pop()?.toUpperCase()
+                                        : 'UNKNOWN' }}</div>
                                     <div>
                                         <button mat-icon-button color="primary"
                                             matTooltip="{{ 'chapters.button_preview_file' | transloco}}"
-                                            class="bg-white rounded-full shadow-sm" (click)="previewFile(file)">
+                                            class="bg-white rounded-full shadow-sm"
+                                            (click)="previewFile(chapter.textBook)">
                                             <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
-                                        </button>
-                                        <button mat-icon-button color="warn" (click)="removeFile(chapter, i, 1)"
-                                            matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
-                                            class="bg-white rounded-full shadow-sm ml-2">
-                                            <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                         </button>
                                     </div>
                                 </div>
                                 <div class="text-sm text-gray-800 break-words w-full truncate">{{
-                                    file.name }}</div>
+                                    chapter.textBook.filename }}</div>
                             </div>
                         </div>
                     </div>
@@ -119,14 +123,15 @@
                                 class="bg-gray-100 p-4 rounded-lg flex flex-col items-start gap-2 relative">
                                 <div class="w-full flex justify-between items-center">
                                     <div class="text-lg text-gray-600 font-semibold"> {{
-                                        file.name.split('.').pop()?.toUpperCase() }}</div>
+                                        file.filename.split('.').pop()?.toUpperCase() }}</div>
                                     <div>
                                         <button mat-icon-button color="primary"
                                             matTooltip="{{ 'chapters.button_preview_file' | transloco}}"
                                             class="bg-white rounded-full shadow-sm" (click)="previewFile(file)">
                                             <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                         </button>
-                                        <button mat-icon-button color="warn" (click)="removeFile(chapter, i, 2)"
+                                        <button mat-icon-button color="warn" *ngIf="file.can_delete"
+                                            (click)="removeFile(chapter, i, 2)"
                                             matTooltip="{{ 'chapters.button_delete_file' | transloco}}"
                                             class="bg-white rounded-full shadow-sm ml-2">
                                             <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
@@ -135,7 +140,7 @@
 
                                 </div>
                                 <div class="text-sm text-gray-800 break-words w-full truncate">{{
-                                    file.name }}</div>
+                                    file.filename }}</div>
                             </div>
                         </div>
                     </div>
@@ -144,3 +149,36 @@
         </div>
     </div>
 </div>
+
+<ng-template #filePreviewModal let-data>
+    <div class="flex max-h-160 flex-auto flex-col overflow-hidden">
+        <!-- Header -->
+        <div
+            class="flex h-14 flex-0 items-center justify-between bg-blue-600 pl-6 pr-3 text-on-primary sm:pl-8 sm:pr-5">
+            <div class="text-lg font-medium">{{ data?.name }}</div>
+            <button mat-icon-button (click)="matDialogRef.close()" [tabIndex]="-1">
+                <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+    </div>
+    <mat-dialog-content class="w-full h-full overflow-auto">
+        <div class="w-full flex p-4 justify-center items-center">
+            <img *ngIf="isImageFile(data.type)" [src]="data.url" alt="Preview" class="max-w-fit rounded shadow" />
+
+            <iframe style="height: calc(100vh - 185px);" *ngIf="isPdfFile(data.type)" [src]="data.url" width="100%"
+                class="rounded border"></iframe>
+
+            <video *ngIf="isVideoFile(data.type)" [src]="data.url" controls width="100%" class="rounded"></video>
+
+            <audio *ngIf="isAudioFile(data.type)" [src]="data.url" controls class="w-full mt-4"></audio>
+
+            <div *ngIf="!isSupportedFile(data.type)" class="text-center text-gray-500 text-lg">
+                <mat-icon class="icon-size-8 mb-2 text-gray-400">block</mat-icon><br />
+                {{ 'chapters.preview_not_available' | transloco }}
+            </div>
+        </div>
+    </mat-dialog-content>
+    <div class="flex items-center justify-end border-t bg-gray-50 px-8 py-3 dark:bg-gray-700">
+        <button mat-button (click)="matDialogRef.close()">{{ 'common.cancel' | transloco }}</button>
+    </div>
+</ng-template>

@@ -156,7 +156,7 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
             ],
             adminName: [
                 '',
-                [Validators.required, Validators.pattern(/^[A-Za-z]+$/)],
+                [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)],
             ],
             adminEmail: ['', [Validators.required, Validators.email]],
             subdomain: ['', [Validators.required]],
