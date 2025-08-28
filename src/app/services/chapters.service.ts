@@ -170,7 +170,7 @@ export class ChaptersService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateChapter`, {
+                    .put(`${this.apiUrl}chapter`, {
                         ...data,
                         subject_id: id,
                     })
@@ -207,7 +207,7 @@ export class ChaptersService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deleteChapter/${id}`)
+                    .delete(`${this.apiUrl}chapter/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200 && index !== -1) {

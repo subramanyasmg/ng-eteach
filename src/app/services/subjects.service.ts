@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { USER_TYPES } from 'app/constants/usertypes';
+import { User } from 'app/core/user/user.types';
 import {
     BehaviorSubject,
     Observable,
@@ -15,7 +16,6 @@ import {
 } from 'rxjs';
 import { ISubjects } from '../models/subject.types';
 import { SecureSessionStorageService } from './securestorage.service';
-import { User } from 'app/core/user/user.types';
 
 @Injectable({ providedIn: 'root' })
 export class SubjectsService {
@@ -64,24 +64,21 @@ export class SubjectsService {
                 throw new Error('Unsupported user type');
         }
 
-        return this._httpClient
-            .get(`${this.apiUrl}subject/${gradeId}`)
-            .pipe(
-                tap((response: any) => {
-                    if (response?.status) {
-                        this._items.next(response.data.row as ISubjects[]);
-                    } else {
-                        this._items.next([]);
-                    }
-                })
-            );
+        return this._httpClient.get(`${this.apiUrl}subject/${gradeId}`).pipe(
+            tap((response: any) => {
+                if (response?.status) {
+                    this._items.next(response.data.row as ISubjects[]);
+                } else {
+                    this._items.next([]);
+                }
+            })
+        );
     }
 
     create(gradeId: string, request: ISubjects): Observable<any> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
-
                 const items = existingItems ?? [];
 
                 return this._httpClient
@@ -108,8 +105,8 @@ export class SubjectsService {
 
                             return of(response);
                         })
-                    )
-             })
+                    );
+            })
         );
     }
 
@@ -129,7 +126,7 @@ export class SubjectsService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateSubject/${id}`, { ...data })
+                    .put(`${this.apiUrl}subject/${id}`, { ...data })
                     .pipe(
                         delay(300),
                         map((response: any) => {
@@ -163,7 +160,7 @@ export class SubjectsService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deleteSubject/${id}`)
+                    .delete(`${this.apiUrl}subject/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200 && index !== -1) {

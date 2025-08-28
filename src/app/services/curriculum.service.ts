@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { USER_TYPES } from 'app/constants/usertypes';
+import { User } from 'app/core/user/user.types';
 import {
     BehaviorSubject,
     Observable,
@@ -13,8 +15,6 @@ import {
 } from 'rxjs';
 import { ICurriculum } from '../models/curriculum.types';
 import { SecureSessionStorageService } from './securestorage.service';
-import { USER_TYPES } from 'app/constants/usertypes';
-import { User } from 'app/core/user/user.types';
 
 @Injectable({ providedIn: 'root' })
 export class CurriculumService {
@@ -29,8 +29,10 @@ export class CurriculumService {
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient, 
-        private _secureStorageService: SecureSessionStorageService) {}
+    constructor(
+        private _httpClient: HttpClient,
+        private _secureStorageService: SecureSessionStorageService
+    ) {}
 
     /**
      * Getter for single item
@@ -61,15 +63,17 @@ export class CurriculumService {
                 throw new Error('Unsupported user type');
         }
 
-        return this._httpClient.get(`${this.apiUrl}curriculum/${publisherId}`).pipe(
-            tap((response: any) => {
-                if (response?.status) {
-                    this._items.next(response.data.rows as ICurriculum[]);
-                } else {
-                    this._items.next([]);
-                }
-            })
-        );
+        return this._httpClient
+            .get(`${this.apiUrl}curriculum/${publisherId}`)
+            .pipe(
+                tap((response: any) => {
+                    if (response?.status) {
+                        this._items.next(response.data.rows as ICurriculum[]);
+                    } else {
+                        this._items.next([]);
+                    }
+                })
+            );
     }
 
     create(publisherId, request): Observable<any> {
@@ -77,14 +81,18 @@ export class CurriculumService {
             take(1),
             switchMap((item) =>
                 this._httpClient
-                    .post(`${this.apiUrl}curriculum`, { ...request, publisher_id: publisherId })
+                    .post(`${this.apiUrl}curriculum`, {
+                        ...request,
+                        publisher_id: publisherId,
+                    })
                     .pipe(
                         mergeMap((response: any) => {
                             if (response.status !== 200) {
                                 return throwError(
                                     () =>
                                         new Error(
-                                           response.message ?? 'Something went wrong while adding'
+                                            response.message ??
+                                                'Something went wrong while adding'
                                         )
                                 );
                             }
@@ -116,7 +124,10 @@ export class CurriculumService {
                 }
 
                 return this._httpClient
-                    .put(`${this.apiUrl}updateCurriculum/${id}`, { curriculum_name: data.curriculum_name, publisher_id: data.publisher_id })
+                    .put(`${this.apiUrl}curriculum/${id}`, {
+                        curriculum_name: data.curriculum_name,
+                        publisher_id: data.publisher_id,
+                    })
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200) {
@@ -149,7 +160,7 @@ export class CurriculumService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deleteCurriculum/${id}`)
+                    .delete(`${this.apiUrl}curriculum/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200 && index !== -1) {

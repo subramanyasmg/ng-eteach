@@ -4,7 +4,6 @@ import { ITeachers } from 'app/models/teachers.types';
 import {
     BehaviorSubject,
     Observable,
-    delay,
     map,
     mergeMap,
     of,
@@ -87,36 +86,11 @@ export class TeachersService {
         );
     }
 
-    // update(id, data): Observable<ITeachers> {
-    //     return this.items$.pipe(
-    //         take(1),
-    //         switchMap((item) =>
-    //             this._httpClient.put(this.apiUrl + '/' + id, { ...data }).pipe(
-    //                 map((response: any) => {
-    //                     if (response.status) {
-    //                         // Find the index of the updated item
-    //                         const index = item.findIndex(
-    //                             (item) => item.id === id
-    //                         );
-
-    //                         // Update the item
-    //                         item[index] = response.data[0];
-
-    //                         // Update the items
-    //                         this._items.next(item);
-    //                     }
-    //                     return response;
-    //                 })
-    //             )
-    //         )
-    //     );
-    // }
-
-    update(id: string, updatedData: ITeachers): Observable<any> {
+    update(id, data): Observable<ITeachers> {
         return this.items$.pipe(
             take(1),
             switchMap((existingItems) => {
-                const items = existingItems ?? [];
+                const items = [...(existingItems ?? [])];
 
                 // Find the item to update
                 const index = items.findIndex((item) => item.id === id);
@@ -126,33 +100,26 @@ export class TeachersService {
                     return throwError(() => new Error('Item not found'));
                 }
 
-                // Create updated item
-                const updatedItem: ITeachers = {
-                    ...items[index],
-                    ...updatedData,
-                };
+                return this._httpClient
+                    .put(this.apiUrl + '/' + id, { ...data })
+                    .pipe(
+                        map((response: any) => {
+                            if (response?.status === 200) {
+                                // Replace the old item with updated item
+                                const updatedList = [...items];
+                                updatedList[index] = response?.data;
 
-                // Simulate API delay and response
-                return of({
-                    status: true,
-                    data: updatedItem,
-                }).pipe(
-                    delay(300),
-                    map((response) => {
-                        if (response.status) {
-                            // Replace the old item with updated item
-                            const updatedList = [...items];
-                            updatedList[index] = updatedItem;
+                                // Emit new state
+                                this._items.next(updatedList);
 
-                            // Emit new state
-                            this._items.next(updatedList);
-
-                            return response;
-                        } else {
-                            return throwError(() => new Error('Update failed'));
-                        }
-                    })
-                );
+                                return response;
+                            } else {
+                                return throwError(
+                                    () => new Error('Update failed')
+                                );
+                            }
+                        })
+                    );
             })
         );
     }

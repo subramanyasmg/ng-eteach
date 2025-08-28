@@ -2,10 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { USER_TYPES } from 'app/constants/usertypes';
 import { UserService } from 'app/core/user/user.service';
+import { User } from 'app/core/user/user.types';
 import {
     BehaviorSubject,
     Observable,
-    delay,
     map,
     mergeMap,
     of,
@@ -16,7 +16,6 @@ import {
 } from 'rxjs';
 import { IGrades } from '../models/grades.types';
 import { SecureSessionStorageService } from './securestorage.service';
-import { User } from 'app/core/user/user.types';
 
 @Injectable({ providedIn: 'root' })
 export class GradesService {
@@ -64,17 +63,15 @@ export class GradesService {
                 throw new Error('Unsupported user type');
         }
 
-        return this._httpClient
-            .get(this.apiUrl)
-            .pipe(
-                tap((response: any) => {
-                    if (response?.status) {
-                        this._items.next(response.data.rows as IGrades[]);
-                    } else {
-                        this._items.next([]);
-                    }
-                })
-            );
+        return this._httpClient.get(this.apiUrl).pipe(
+            tap((response: any) => {
+                if (response?.status) {
+                    this._items.next(response.data.rows as IGrades[]);
+                } else {
+                    this._items.next([]);
+                }
+            })
+        );
     }
 
     create(curriculumId, request): Observable<any> {
@@ -128,7 +125,7 @@ export class GradesService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`api/superadmin/updateGrade`, {
+                    .put(`api/superadmin/grade`, {
                         name: data.grade_name,
                         curriculum_id: curriculumId,
                         id: Number(data.id),
@@ -165,7 +162,7 @@ export class GradesService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`api/superadmin/deleteGrade/${id}`)
+                    .delete(`api/superadmin/grade/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200 && index !== -1) {
