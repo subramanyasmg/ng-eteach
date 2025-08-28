@@ -15,18 +15,18 @@
                 class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow mb-4">
                 <div class="flex">
                     <div class="text-2xl font-bold leading-6 tracking-tight">
-                        {{ card.grade_name }} - {{ card.section_name }} - {{ card.subject_name }}
+                        {{ card.cardTitle }}
                     </div>
                 </div>
                 <div class="mt-5 flex flex-row items-center justify-between">
                     <div class="text-5xl font-extrabold leading-none tracking-tight">
-                        {{ card.completed }}/{{ card.total }} <br>
+                        {{ card.chaptersCompleted }}<br>
                         <div class="mt-2 truncate text-lg text-secondary font-medium">
                             {{ 'school_structure.chapters_completed_label' | transloco }}
                         </div>
                     </div>
                     <div class="progress-container">
-                        <app-circle-progress [progress]="card.progress"></app-circle-progress>
+                        <app-circle-progress [progress]="card.progressPercentage"></app-circle-progress>
                     </div>
                 </div>
             </div>

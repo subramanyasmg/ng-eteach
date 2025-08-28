@@ -192,14 +192,13 @@ export class GradeDetailsComponent implements OnInit, OnDestroy {
                         section.section_mappings?.length > 0
                             ? section.section_mappings.map((el) => ({
                                   ...el.subject,
-                                  teacher: {
-                                      id: el.teacher.id,
-                                      name:
-                                          el.teacher.first_name +
-                                          ' ' +
-                                          el.teacher.last_name,
-                                      edit: false,
-                                  },
+                                  teacher: el.teacher
+                                      ? {
+                                            id: el.teacher.id,
+                                            name: `${el.teacher.first_name} ${el.teacher.last_name}`,
+                                            edit: false,
+                                        }
+                                      : null,
                               }))
                             : [],
                     editMode: false,
@@ -315,6 +314,17 @@ export class GradeDetailsComponent implements OnInit, OnDestroy {
         const duplicates = this.subjectForSections.filter((el) =>
             existingSubjectIds.has(el.id)
         );
+
+        // Notify if there were duplicates
+        if (duplicates.length > 0) {
+            const duplicateNames = duplicates
+                .map((d) => d.subject_name)
+                .join(', ');
+            this._snackBar.showError(
+                `Subjects already added: ${duplicateNames}`
+            );
+        }
+
         const newSubjects = this.subjectForSections
             .filter((el) => !existingSubjectIds.has(el.id))
             .map((el) => ({
@@ -327,39 +337,34 @@ export class GradeDetailsComponent implements OnInit, OnDestroy {
 
         console.log(newSubjects);
 
-        const requestObj = {
-            subject_id: newSubjects.map((el) => el.id),
-            section_id: section.id,
-        };
+        if (newSubjects.length > 0) {
+            const requestObj = {
+                subject_id: newSubjects.map((el) => el.id),
+                section_id: section.id,
+            };
 
-        this._sectionService
-            .assignSubjects(requestObj)
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe(
-                (response) => {
-                    console.log(response);
-                    // Add new subjects to the section
-                    section.subjects = [...section.subjects, ...newSubjects];
+            this._sectionService
+                .assignSubjects(requestObj)
+                .pipe(takeUntil(this._unsubscribeAll))
+                .subscribe(
+                    (response) => {
+                        console.log(response);
+                        // Add new subjects to the section
+                        section.subjects = [
+                            ...section.subjects,
+                            ...newSubjects,
+                        ];
 
-                    // Clear selected subjects
-                    this.subjectForSections = [];
-
-                    // Notify if there were duplicates
-                    if (duplicates.length > 0) {
-                        const duplicateNames = duplicates
-                            .map((d) => d.subject_name)
-                            .join(', ');
+                        // Clear selected subjects
+                        this.subjectForSections = [];
+                    },
+                    (error) => {
                         this._snackBar.showError(
-                            `Subjects already added: ${duplicateNames}`
+                            `Error: ${error?.error?.message || 'Something went wrong.'}`
                         );
                     }
-                },
-                (error) => {
-                    this._snackBar.showError(
-                        `Error: ${error?.message || 'Something went wrong.'}`
-                    );
-                }
-            );
+                );
+        }
     }
 
     onTeacherAssign(event, subjectForSection, section) {
@@ -377,15 +382,28 @@ export class GradeDetailsComponent implements OnInit, OnDestroy {
                 .assignTeachers(requestObj)
                 .pipe(takeUntil(this._unsubscribeAll))
                 .subscribe(
-                    (response) => {
+                    (response: any) => {
                         console.log(response);
-                        // subjectForSection.teacher = JSON.parse(
-                        //     JSON.stringify(event.value)
-                        // )
+                        if (response.success && response.status === 200) {
+                            this._snackBar.showSuccess(
+                                this.translocoService.translate(
+                                    'school_structure.teacher_assigned_success'
+                                )
+                            );
+                            subjectForSection.teacher = JSON.parse(
+                                JSON.stringify(event.value)
+                            );
+                        } else {
+                            this._snackBar.showError(
+                                this.translocoService.translate(
+                                    'school_structure.teacher_assigned_error'
+                                )
+                            );
+                        }
                     },
                     (error) => {
                         this._snackBar.showError(
-                            `Error: ${error?.message || 'Something went wrong.'}`
+                            `Error: ${error?.error?.message || 'Something went wrong.'}`
                         );
                     }
                 );

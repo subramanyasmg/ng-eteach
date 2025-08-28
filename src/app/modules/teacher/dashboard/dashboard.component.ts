@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
-import { CircleProgressComponent } from '../circle-progress/circle-progress.component';
-import { DashboardService } from 'app/services/dashboard.service';
 import { SnackBarService } from 'app/core/general/snackbar.service';
+import { BreadcrumbService } from 'app/layout/common/breadcrumb/breadcrumb.service';
+import { ClassesService } from 'app/services/classes.service';
+import { DashboardService } from 'app/services/dashboard.service';
 import { Subject, takeUntil } from 'rxjs';
+import { CircleProgressComponent } from '../circle-progress/circle-progress.component';
 
 @Component({
     selector: 'app-dashboard',
@@ -66,6 +67,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private titleService: BreadcrumbService,
         private _router: Router,
         private _dashboardService: DashboardService,
+        private _classesService: ClassesService,
         private _snackBar: SnackBarService,
         private translocoService: TranslocoService
     ) {
@@ -88,32 +90,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-            this._dashboardService
-                .getTeacherDashboard()
-                .pipe(takeUntil(this._unsubscribeAll))
-                .subscribe(
-                    (response) => {
-                        console.log('response', response);
-                        if (response.success && response.data) {
-                            this.cardDataList = response.data.map((el) => ({
-                                ...el,
-                                progress: Math.round((el.completed / el.total) * 100)
-                            }))
-                        } else {
-                            this._snackBar.showError(
-                                this.translocoService.translate(
-                                    'teacher_dashboard.error_data_fetch'
-                                )
-                            );
-                        }
-                    },
-                    (error) => {
+        this._dashboardService
+            .getTeacherDashboard()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(
+                (response: any) => {
+                    console.log('response', response);
+                    if (response.success && response.data) {
+                        this.cardDataList = response.data;
+                    } else {
                         this._snackBar.showError(
                             this.translocoService.translate(
                                 'teacher_dashboard.error_data_fetch'
-                            ) + ' - ' + error?.message
+                            )
                         );
                     }
-                );
-        }
+                },
+                (error) => {
+                    this._snackBar.showError(
+                        this.translocoService.translate(
+                            'teacher_dashboard.error_data_fetch'
+                        ) +
+                            ' - ' +
+                            error?.message
+                    );
+                }
+            );
+    }
 }

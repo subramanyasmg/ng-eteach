@@ -5,5 +5,5 @@ export interface ITeachers {
     email: string;
     phone: string;
     subjectExpertise?: any[];
-    associatedClass: any[];
+    associatedClass?: any[];
 }

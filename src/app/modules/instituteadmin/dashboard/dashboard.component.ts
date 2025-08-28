@@ -31,83 +31,91 @@ export class DashboardComponent implements OnInit, OnDestroy {
         total_grades: 0,
         total_teachers: 0,
     };
+    // data: TreeNode[] = [
+    //     {
+    //         label: 'My School',
+    //         // styleClass: '!bg-blue-600 !text-white !text-2xl !font-bold',
+    //         type: 'root',
+    //         expanded: true,
+    //         children: [
+    //             {
+    //                 label: 'G1',
+    //                 // styleClass: '!bg-blue-100 !text-blue-900',
+    //                 expanded: false,
+    //                 children: [
+    //                     {
+    //                         label: 'Sec A',
+    //                         expanded: false,
+    //                         // styleClass: '!bg-purple-100 !text-purple-900',
+    //                         children: [
+    //                             {
+    //                                 label: 'Sub1 - Teacher - 14/18 - 40%',
+    //                                 // styleClass: '!bg-green-100 !text-green-900',
+    //                             },
+    //                             {
+    //                                 label: 'Sub2 - Teacher - 8/10 - 60%',
+    //                                 //  styleClass: '!bg-green-100 !text-green-900',
+    //                             },
+    //                         ],
+    //                     },
+    //                     {
+    //                         label: 'Sec B',
+    //                         expanded: false,
+    //                         //  styleClass: '!bg-purple-100 !text-purple-900',
+    //                         children: [
+    //                             {
+    //                                 label: 'Sub1 - Teacher - 10/12 - 80%',
+    //                                 //  styleClass: '!bg-green-100 !text-green-900',
+    //                             },
+    //                         ],
+    //                     },
+    //                 ],
+    //             },
+    //             {
+    //                 label: 'G2',
+    //                 expanded: false,
+    //                 // styleClass: '!bg-blue-100 !text-blue-900',
+    //                 children: [
+    //                     {
+    //                         label: 'Sec A',
+    //                         expanded: false,
+    //                         //  styleClass: '!bg-purple-100 !text-purple-900',
+    //                         children: [
+    //                             {
+    //                                 label: 'Sub1 - Teacher - 12/15 - 70%',
+    //                                 //   styleClass: '!bg-green-100 !text-green-900',
+    //                             },
+    //                         ],
+    //                     },
+    //                 ],
+    //             },
+    //             {
+    //                 label: 'G10',
+    //                 expanded: false,
+    //                 // styleClass: '!bg-blue-100 !text-blue-900',
+    //                 children: [
+    //                     {
+    //                         label: 'Sec A',
+    //                         expanded: false,
+    //                         //   styleClass: '!bg-purple-100 !text-purple-900',
+    //                         children: [
+    //                             {
+    //                                 label: 'Sub1 - Teacher - 5/10 - 50%',
+    //                                 //    styleClass: '!bg-green-100 !text-green-900',
+    //                             },
+    //                         ],
+    //                     },
+    //                 ],
+    //             },
+    //         ],
+    //     },
+    // ];
     data: TreeNode[] = [
         {
             label: 'My School',
-            // styleClass: '!bg-blue-600 !text-white !text-2xl !font-bold',
             type: 'root',
             expanded: true,
-            children: [
-                {
-                    label: 'G1',
-                    // styleClass: '!bg-blue-100 !text-blue-900',
-                    expanded: false,
-                    children: [
-                        {
-                            label: 'Sec A',
-                            expanded: false,
-                            // styleClass: '!bg-purple-100 !text-purple-900',
-                            children: [
-                                {
-                                    label: 'Sub1 - Teacher - 14/18 - 40%',
-                                    // styleClass: '!bg-green-100 !text-green-900',
-                                },
-                                {
-                                    label: 'Sub2 - Teacher - 8/10 - 60%',
-                                    //  styleClass: '!bg-green-100 !text-green-900',
-                                },
-                            ],
-                        },
-                        {
-                            label: 'Sec B',
-                            expanded: false,
-                            //  styleClass: '!bg-purple-100 !text-purple-900',
-                            children: [
-                                {
-                                    label: 'Sub1 - Teacher - 10/12 - 80%',
-                                    //  styleClass: '!bg-green-100 !text-green-900',
-                                },
-                            ],
-                        },
-                    ],
-                },
-                {
-                    label: 'G2',
-                    expanded: false,
-                    // styleClass: '!bg-blue-100 !text-blue-900',
-                    children: [
-                        {
-                            label: 'Sec A',
-                            expanded: false,
-                            //  styleClass: '!bg-purple-100 !text-purple-900',
-                            children: [
-                                {
-                                    label: 'Sub1 - Teacher - 12/15 - 70%',
-                                    //   styleClass: '!bg-green-100 !text-green-900',
-                                },
-                            ],
-                        },
-                    ],
-                },
-                {
-                    label: 'G10',
-                    expanded: false,
-                    // styleClass: '!bg-blue-100 !text-blue-900',
-                    children: [
-                        {
-                            label: 'Sec A',
-                            expanded: false,
-                            //   styleClass: '!bg-purple-100 !text-purple-900',
-                            children: [
-                                {
-                                    label: 'Sub1 - Teacher - 5/10 - 50%',
-                                    //    styleClass: '!bg-green-100 !text-green-900',
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
+            children: [],
         },
     ];
 
@@ -149,6 +157,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         this.count.total_grades = response.data.total_grades;
                         this.count.total_teachers =
                             response.data.total_teachers;
+                        this.data[0].children = response.data.tree;
                     } else {
                         this._snackBar.showError(
                             this.translocoService.translate(

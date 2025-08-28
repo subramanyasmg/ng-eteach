@@ -150,11 +150,14 @@ export class InstitutesComponent implements OnInit, AfterViewInit, OnDestroy {
                 [
                     Validators.required,
                     Validators.minLength(10),
-                    Validators.maxLength(15),
-                    Validators.pattern(/^\+?[0-9]{10,15}$/),
+                    Validators.maxLength(10),
+                    Validators.pattern(/^[0-9]{10}$/), // exactly 10 digits
                 ],
             ],
-            adminName: ['', [Validators.required]],
+            adminName: [
+                '',
+                [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)],
+            ],
             adminEmail: ['', [Validators.required, Validators.email]],
             subdomain: ['', [Validators.required]],
             expiresOn: ['', [Validators.required]],

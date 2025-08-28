@@ -122,7 +122,10 @@ export class PublishersListComponent
     ngOnInit(): void {
         this.entityForm = this._formBuilder.group({
             id: [''],
-            contact_name: ['', [Validators.required]],
+            contact_name: [
+                '',
+                [Validators.required, Validators.pattern(/^[A-Za-z]+$/)],
+            ],
             publication_name: ['', [Validators.required]],
             address: ['', [Validators.required, Validators.maxLength]],
             email: ['', [Validators.required, Validators.email]],
@@ -131,8 +134,8 @@ export class PublishersListComponent
                 [
                     Validators.required,
                     Validators.minLength(10),
-                    Validators.maxLength(15),
-                    Validators.pattern(/^\+?[0-9]{10,15}$/),
+                    Validators.maxLength(10),
+                    Validators.pattern(/^[0-9]{10}$/), // exactly 10 digits
                 ],
             ],
         });
@@ -183,7 +186,7 @@ export class PublishersListComponent
         }
         this.matDialogRef = this._matDialog.open(this.EntityDialog, {
             width: '500px',
-            disableClose: true
+            disableClose: true,
         });
 
         this.matDialogRef.afterClosed().subscribe((result) => {

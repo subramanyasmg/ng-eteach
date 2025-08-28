@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ISections } from 'app/models/sections.types';
 import {
     BehaviorSubject,
     Observable,
@@ -12,22 +13,21 @@ import {
     tap,
     throwError,
 } from 'rxjs';
-import { ISections } from 'app/models/sections.types';
 
 @Injectable({ providedIn: 'root' })
 export class SectionsService {
     private _items: BehaviorSubject<ISections[] | null> = new BehaviorSubject(
         null
     );
-    private _item: BehaviorSubject<ISections | null> = new BehaviorSubject(null);
+    private _item: BehaviorSubject<ISections | null> = new BehaviorSubject(
+        null
+    );
     private apiUrl = 'api/insadmin/';
 
     /**
      * Constructor
      */
-    constructor(
-        private _httpClient: HttpClient
-    ) {}
+    constructor(private _httpClient: HttpClient) {}
 
     /**
      * Getter for single item
@@ -44,17 +44,15 @@ export class SectionsService {
     }
 
     getAll(gradeId: string) {
-        return this._httpClient
-            .get(`${this.apiUrl}section/${gradeId}`)
-            .pipe(
-                tap((response: any) => {
-                    if (response?.status) {
-                        this._items.next(response.data.rows as ISections[]);
-                    } else {
-                        this._items.next([]);
-                    }
-                })
-            );
+        return this._httpClient.get(`${this.apiUrl}section/${gradeId}`).pipe(
+            tap((response: any) => {
+                if (response?.status) {
+                    this._items.next(response.data.rows as ISections[]);
+                } else {
+                    this._items.next([]);
+                }
+            })
+        );
     }
 
     create(gradeId, request): Observable<any> {
@@ -63,7 +61,7 @@ export class SectionsService {
             switchMap((existingItems) => {
                 const items = existingItems ?? [];
 
-                 return this._httpClient
+                return this._httpClient
                     .post(`${this.apiUrl}section`, {
                         ...request,
                         grade_id: gradeId,
@@ -110,7 +108,7 @@ export class SectionsService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateSection`, {
+                    .put(`${this.apiUrl}section`, {
                         name: data.section_name,
                         grade_id: data.grade_id,
                         id: Number(data.id),
@@ -148,7 +146,7 @@ export class SectionsService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deleteSection/${id}`)
+                    .delete(`${this.apiUrl}section/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200 && index !== -1) {
@@ -167,10 +165,16 @@ export class SectionsService {
     }
 
     assignSubjects(requestObj) {
-        return this._httpClient.post(`${this.apiUrl}subject-section-mapping`, requestObj);
+        return this._httpClient.post(
+            `${this.apiUrl}subject-section-mapping`,
+            requestObj
+        );
     }
 
     assignTeachers(requestObj) {
-        return this._httpClient.post(`${this.apiUrl}section-teacher-mapping`, requestObj)
+        return this._httpClient.post(
+            `${this.apiUrl}section-teacher-mapping`,
+            requestObj
+        );
     }
 }

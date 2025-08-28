@@ -49,6 +49,7 @@ export class ChaptersService {
         let user = this._secureStorageService.getItem<User>('user');
         switch (user?.type) {
             case USER_TYPES.INSTITUTE_ADMIN:
+            case USER_TYPES.TEACHER:
                 this.apiUrl = 'api/insadmin/';
                 break;
             case USER_TYPES.SUPER_ADMIN:
@@ -60,30 +61,39 @@ export class ChaptersService {
                 throw new Error('Unsupported user type');
         }
 
-        return this._httpClient
-            .get(`${this.apiUrl}chapter/${subjectId}`)
-            .pipe(
-                tap((response: any) => {
-                    if (response?.status) {
-                        this._items.next(response.data.rows as IChapters[]);
-                    } else {
-                        this._items.next([]);
-                    }
-                })
-            );
+        return this._httpClient.get(`${this.apiUrl}chapter/${subjectId}`).pipe(
+            tap((response: any) => {
+                if (response?.status) {
+                    this._items.next(response.data.rows as IChapters[]);
+                } else {
+                    this._items.next([]);
+                }
+            })
+        );
     }
 
     getChapterDetails(subjectId, chapterId) {
-        return this._httpClient.get(
-            `${this.apiUrl}get-chapter/${chapterId}`
-        );
+        let user = this._secureStorageService.getItem<User>('user');
+        switch (user?.type) {
+            case USER_TYPES.INSTITUTE_ADMIN:
+            case USER_TYPES.TEACHER:
+                this.apiUrl = 'api/insadmin/';
+                break;
+            case USER_TYPES.SUPER_ADMIN:
+            case USER_TYPES.PUBLISHER_ADMIN:
+            case USER_TYPES.PUBLISHER_USER:
+                this.apiUrl = 'api/superadmin/';
+                break;
+            default:
+                throw new Error('Unsupported user type');
+        }
+        return this._httpClient.get(`${this.apiUrl}get-chapter/${chapterId}`);
     }
 
     createLessonPlan(request) {
-        return this._httpClient.post<boolean>(
-            `${this.apiUrl}lesson-plan`,
-            { ...request }
-        );
+        return this._httpClient.post<boolean>(`${this.apiUrl}lesson-plan`, {
+            ...request,
+        });
     }
 
     getPhases() {
@@ -102,7 +112,6 @@ export class ChaptersService {
                 throw new Error('Unsupported user type');
         }
 
-    
         return this._httpClient.get(`${this.apiUrl}five-phases`).pipe(
             tap((response: any) => {
                 if (response.status) {
@@ -161,7 +170,10 @@ export class ChaptersService {
 
                 // Simulate API delay and response
                 return this._httpClient
-                    .put(`${this.apiUrl}updateChapter`, { ...data, subject_id: id })
+                    .put(`${this.apiUrl}chapter`, {
+                        ...data,
+                        subject_id: id,
+                    })
                     .pipe(
                         delay(300),
                         map((response: any) => {
@@ -195,7 +207,7 @@ export class ChaptersService {
                 const index = items.findIndex((item) => item.id === id);
 
                 return this._httpClient
-                    .delete(`${this.apiUrl}deleteChapter/${id}`)
+                    .delete(`${this.apiUrl}chapter/${id}`)
                     .pipe(
                         map((response: any) => {
                             if (response?.status === 200 && index !== -1) {
@@ -263,11 +275,16 @@ export class ChaptersService {
         formData.append('chapter_id', chapterId.toString());
 
         if (files.length > 1) {
-            return this._httpClient.post(`${this.apiUrl}referenceMaterials/upload-multiple`, formData);
+            return this._httpClient.post(
+                `${this.apiUrl}referenceMaterials/upload-multiple`,
+                formData
+            );
         } else {
-             return this._httpClient.post(`${this.apiUrl}referenceMaterials`, formData);
+            return this._httpClient.post(
+                `${this.apiUrl}referenceMaterials`,
+                formData
+            );
         }
-
     }
 
     deleteTextbook(id) {
@@ -275,6 +292,15 @@ export class ChaptersService {
     }
 
     deleteReferenceMaterial(id) {
-        return this._httpClient.delete(`${this.apiUrl}referenceMaterials/${id}`);
+        return this._httpClient.delete(
+            `${this.apiUrl}referenceMaterials/${id}`
+        );
+    }
+
+    updateChapterProgress(requestObj) {
+        return this._httpClient.put(
+            `${this.apiUrl}syllabus-progress`,
+            requestObj
+        );
     }
 }
